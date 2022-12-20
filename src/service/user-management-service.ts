@@ -14,11 +14,35 @@ import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
 import config from 'config';
 import HttpException from "../exceptions/http/http-base-exception";
+import { RoleDto } from "../model/dto/roles-dto";
+import { LoginDto } from "../model/dto/login-dto";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
+const authenticateUrl: string = config.get('url.authenticate');
 
 class UserManagementService implements IUserManagement {
+
+    async login(loginModel: LoginDto): Promise<any> {
+        try {
+            const result: Response = await fetch(authenticateUrl, {
+                method: 'post',
+                body: JSON.stringify(loginModel),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await result.json();
+
+            if (result.status != undefined && result.status != 200)
+                throw new Error(data);
+
+            return data;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error("Error registering the user");
+        }
+        return {};
+    }
 
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
@@ -40,6 +64,19 @@ class UserManagementService implements IUserManagement {
             throw new Error("Error registering the user");
         }
         return userProfile;
+    }
+
+    async getRoles(): Promise<RoleDto[]> {
+
+        const query = 'SELECT * FROM Roles';
+        return await dbClient.query(query)
+            .then(res => {
+                let roleList = res.rows.map(x => new RoleDto(x));
+                return roleList;
+            })
+            .catch(e => {
+                throw e;
+            });
     }
 
     async createStation(station: StationDto): Promise<StationDto> {
@@ -169,5 +206,5 @@ class UserManagementService implements IUserManagement {
 
 }
 
-const userManagementService = new UserManagementService();
+const userManagementService: IUserManagement = new UserManagementService();
 export default userManagementService;

@@ -11,6 +11,7 @@ import userManagementService from "../service/user-management-service";
 import { IController } from "./interface/IController";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
+import { LoginDto } from "../model/dto/login-dto";
 
 class UserManagementController implements IController {
     public path = '';
@@ -27,6 +28,40 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
         this.router.post(`${this.path}/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), validationMiddleware(RolesReqDto), this.assignPermissions);
         this.router.post(`${this.path}/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
+        this.router.get(`${this.path}/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
+        this.router.post(`${this.path}/login`, validationMiddleware(LoginDto), this.login);
+    }
+
+    public login = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+
+            //Call service to register the user
+            userManagementService.getRoles().then((roles) => {
+                Ok(response, { data: roles });
+            }).catch((error: any) => {
+                console.error('Error fetching the roles');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+
+            //Call service to register the user
+            userManagementService.getRoles().then((roles) => {
+                Ok(response, { data: roles });
+            }).catch((error: any) => {
+                console.error('Error fetching the roles');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 
     public registerUser = async (request: Request, response: express.Response, next: NextFunction) => {

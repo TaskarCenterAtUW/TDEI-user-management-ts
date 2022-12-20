@@ -2,6 +2,7 @@
     "url": {
         "register-user": "https://tdei-auth-n-z-prod.azurewebsites.net/api/v1/registerUser",
         "user-profile": "https://tdei-auth-n-z-prod.azurewebsites.net/api/v1/getUserByUsername",
-        "permission": "https://tdei-auth-n-z-prod.azurewebsites.net/api/v1/hasPermission"
+        "permission": "https://tdei-auth-n-z-prod.azurewebsites.net/api/v1/hasPermission",
+        "authenticate": "https://tdei-auth-n-z-prod.azurewebsites.net/api/v1/authenticate"
     }
 }
