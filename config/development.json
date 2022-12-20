@@ -1,0 +1,7 @@
+{
+    "url": {
+        "register-user": "https://tdei-auth-n-z-dev.azurewebsites.net/api/v1/registerUser",
+        "user-profile": "https://tdei-auth-n-z-dev.azurewebsites.net/api/v1/getUserByUsername",
+        "permission": "https://tdei-auth-n-z-dev.azurewebsites.net/api/v1/hasPermission"
+    }
+}
