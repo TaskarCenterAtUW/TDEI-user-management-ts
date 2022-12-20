@@ -13,6 +13,7 @@ import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
 import config from 'config';
+import HttpException from "../exceptions/http/http-base-exception";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
@@ -125,6 +126,9 @@ class UserManagementService implements IUserManagement {
                 if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
                 }
+                else if (e instanceof UniqueKeyDbException) {
+                    throw new HttpException(400, "User already assigned with the specific roles");
+                }
                 throw e;
             });
     }
@@ -155,6 +159,9 @@ class UserManagementService implements IUserManagement {
             .catch(e => {
                 if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
+                }
+                else if (e instanceof UniqueKeyDbException) {
+                    throw new HttpException(400, "User already assigned with the specific roles");
                 }
                 throw e;
             });
