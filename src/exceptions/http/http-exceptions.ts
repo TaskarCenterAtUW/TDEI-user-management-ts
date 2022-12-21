@@ -7,7 +7,7 @@ export class DuplicateException extends HttpException {
 }
 
 export class UnAuthenticated extends HttpException {
-    constructor(name: string) {
+    constructor() {
         super(401, `User not authenticated/authorized to perform this action.`);
     }
 }

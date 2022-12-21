@@ -10,11 +10,11 @@ import { LoginDto } from "../../model/dto/login-dto";
 
 export interface IUserManagement {
     registerUser(user: RegisterUserDto): Promise<UserProfile>;
-    createStation(station: StationDto): Promise<StationDto>;
-    createService(service: ServiceDto): Promise<ServiceDto>;
-    createOrganization(organization: OrganizationDto): Promise<OrganizationDto>;
+    createStation(station: StationDto): Promise<String>;
+    createService(service: ServiceDto): Promise<String>;
+    createOrganization(organization: OrganizationDto): Promise<String>;
     assignPocToOrg(pocReq: PocRequestDto): Promise<boolean>;
-    assignUserPermission(permissionReq: RolesReqDto): Promise<boolean>;
+    assignUserPermission(permissionReq: RolesReqDto, userId : string): Promise<boolean>;
     getRoles(): Promise<RoleDto[]>;
     login(loginModel: LoginDto): Promise<any>;
 }

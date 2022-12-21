@@ -22,14 +22,14 @@ class UserManagementController implements IController {
     }
 
     public intializeRoutes() {
-        this.router.post(`${this.path}/register`, validationMiddleware(RegisterUserDto), this.registerUser);
-        this.router.post(`${this.path}/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), validationMiddleware(StationDto), this.createStation);
-        this.router.post(`${this.path}/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), validationMiddleware(ServiceDto), this.createStation);
-        this.router.post(`${this.path}/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
-        this.router.post(`${this.path}/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), validationMiddleware(RolesReqDto), this.assignPermissions);
-        this.router.post(`${this.path}/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
-        this.router.get(`${this.path}/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
-        this.router.post(`${this.path}/login`, validationMiddleware(LoginDto), this.login);
+        this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
+        this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
+        this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
+        this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
+        this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
+        this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
+        this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
+        this.router.post(`${this.path}/api/v1/login`, validationMiddleware(LoginDto), this.login);
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -156,7 +156,7 @@ class UserManagementController implements IController {
             //Transform the body to DTO
             let permissonObj = new RolesReqDto(request.body);
             //Call service to register the user
-            userManagementService.assignUserPermission(permissonObj).catch((error: any) => {
+            userManagementService.assignUserPermission(permissonObj, request.userId).catch((error: any) => {
                 console.error('Error assigning the permission to the user');
                 console.error(error);
                 next(error);
