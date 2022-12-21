@@ -36,9 +36,8 @@ class UserManagementController implements IController {
         try {
 
             let loginBody = new LoginDto(request.body);
-            //Call service to register the user
-            userManagementService.login(loginBody).then((roles) => {
-                Ok(response, { data: roles });
+            userManagementService.login(loginBody).then((token) => {
+                Ok(response, { data: token });
             }).catch((error: any) => {
                 console.error('Error authenticating the user');
                 console.error(error);
