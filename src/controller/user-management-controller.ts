@@ -35,11 +35,12 @@ class UserManagementController implements IController {
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
 
+            let loginBody = new LoginDto(request.body);
             //Call service to register the user
-            userManagementService.getRoles().then((roles) => {
+            userManagementService.login(loginBody).then((roles) => {
                 Ok(response, { data: roles });
             }).catch((error: any) => {
-                console.error('Error fetching the roles');
+                console.error('Error authenticating the user');
                 console.error(error);
                 next(error);
             });

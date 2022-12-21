@@ -39,7 +39,7 @@ class UserManagementService implements IUserManagement {
             return data;
         } catch (error: any) {
             console.error(error);
-            throw new Error("Error registering the user");
+            throw new Error("Error authenticating the user");
         }
         return {};
     }
