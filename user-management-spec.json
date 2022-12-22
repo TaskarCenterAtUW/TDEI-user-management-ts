@@ -1,0 +1,514 @@
+{
+    "openapi": "3.0.1",
+    "info": {
+        "title": "TDEI User Management API",
+        "description": "User management API, describes admin activities required as part of TDEI system.",
+        "contact": {
+            "name": "TDEI Support",
+            "url": "https://placeholder.transequity.cs.washington.edu/support",
+            "email": "placeholder_support@transequity.cs.washington.edu"
+        },
+        "version": "v0.1"
+    },
+    "servers": [
+        {
+            "url": "http://localhost:3004",
+            "description": "Local server url"
+        },
+        {
+            "url": "https://tdei-usermanagement-ts-dev.azurewebsites.net",
+            "description": "Dev server url"
+        }
+    ],
+    "security": [
+        {
+            "AuthorizationToken": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "User Management",
+            "description": "User Management operations"
+        }
+    ],
+    "paths": {
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Registers the user to the TDEI system",
+                "description": "Registers the user to the TDEI system.  Returns new User object. ",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the newly created object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/User"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/station": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Creates a GTFS pathways station in the TDEI system",
+                "description": "Creates a GTFS flex service in the TDEI system.Returns the id for the newly created pathways station.",
+                "operationId": "createStation",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Station"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the id for the newly created pathways station.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/service": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Creates a GTFS flex service in the TDEI system",
+                "description": "Creates a GTFS flex service in the TDEI system.Returns the id for the newly created flex service.",
+                "operationId": "createService",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Service"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the id for the newly created flex service.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/poc": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Creates a point of contact in the TDEI system",
+                "description": "Creates a point of contact in the TDEI system. Returns the boolean flag true.",
+                "operationId": "createPOC",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/PointOfContact"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the boolean flag true.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/permission": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Associates a use with the organization and permissions in the TDEI system",
+                "description": "Associates a use with the organization and permissions in the TDEI system. Returns the boolean flag true.",
+                "operationId": "permission",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleDetails"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the boolean flag true.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/organization": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Creates an organization in the TDEI system ",
+                "description": "Creates an organization in the TDEI system.  Returns the id for the newly created organization.",
+                "operationId": "createOrganization",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Organization"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the id for the newly created organization.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ResponseDto"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthorized request."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "User Id name of the user."
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email address of the user for communication."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user for communication."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Register": {
+                "required": [
+                    "email"
+                ],
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email address of the user for communication."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user for communication."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Station": {
+                "required": [
+                    "org_id",
+                    "stop_lat",
+                    "stop_lon",
+                    "stop_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "org_id": {
+                        "type": "string",
+                        "description": "Organization id of the station."
+                    },
+                    "stop_name": {
+                        "type": "string",
+                        "description": "Name of the location. The stop_name should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
+                    },
+                    "stop_code": {
+                        "type": "string",
+                        "description": "\nShort text or a number that identifies the location for riders. These codes are often used in phone-based transit information systems or printed on signage to make it easier for riders to get information for a particular location. This field should be left empty for locations without a code presented to riders."
+                    },
+                    "stop_lat": {
+                        "type": "number",
+                        "description": "Latitude of the location."
+                    },
+                    "stop_lon": {
+                        "type": "number",
+                        "description": "Longitude of the location."
+                    }
+                },
+                "description": "Describes a gtfs pathways station."
+            },
+            "Service": {
+                "required": [
+                    "org_id, ",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "org_id": {
+                        "type": "string",
+                        "description": "Organization id of the service."
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the service."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the service."
+                    }
+                },
+                "description": "Describes a gtfs flex service."
+            },
+            "ResponseDto": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "string",
+                        "description": "Holds the response data"
+                    }
+                },
+                "description": "Holds the response data"
+            },
+            "PointOfContact": {
+                "required": [
+                    "poc_user_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "org_id": {
+                        "type": "string",
+                        "description": "Organization id to which point of contact to be associated."
+                    },
+                    "poc_user_name": {
+                        "type": "string",
+                        "description": "Point of contact username. Username represents user uniquely in the TDEI system. User should be already registered in the TDEI system using [POST] /user API."
+                    }
+                },
+                "description": "Describes a point of contact details."
+            },
+            "RoleDetails": {
+                "required": [
+                    "org_id",
+                    "roles",
+                    "user_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "org_id": {
+                        "type": "string",
+                        "description": "Organization id to which user to be associated."
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "Username represents user uniquely in the TDEI system.  User should be already registered in the TDEI system using [POST] /user API."
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "List of roles to be assigned to the user.",
+                        "items": {
+                            "type": "string",
+                            "description": "List of roles to be assigned to the user."
+                        }
+                    }
+                },
+                "description": "Describes a user permissions."
+            },
+            "Organization": {
+                "required": [
+                    "email",
+                    "name",
+                    "address"
+                ],
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the organization."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the organization for communication."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Url of the transit organization."
+                    },
+                    "address": {
+                        "type": "string",
+                        "description": "Address of the transit organization."
+                    }
+                },
+                "description": "Describes an Organization."
+            }
+        },
+        "securitySchemes": {
+            "AuthorizationToken": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}
