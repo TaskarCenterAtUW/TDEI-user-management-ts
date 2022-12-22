@@ -1,5 +1,6 @@
 
 import express from "express";
+import cors from "cors";
 import bodyParser from "body-parser";
 import { IController } from "./controller/interface/IController";
 import helmet from "helmet";
@@ -32,6 +33,7 @@ class App {
     private initializeMiddlewares() {
         this.app.use(helmet());
         this.app.use(bodyParser.json());
+        this.app.use(cors());
     }
 
     private initializeControllers(controllers: IController[]) {
@@ -48,4 +50,5 @@ class App {
 }
 
 export default App;
+
 

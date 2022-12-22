@@ -3,16 +3,17 @@ import HttpException from '../exceptions/http/http-base-exception';
 import fetch, { Response } from 'node-fetch';
 import config from 'config';
 import jwt_decode from 'jwt-decode';
+import { UnAuthenticated } from '../exceptions/http/http-exceptions';
 
 const permissionUrl: string = config.get('url.permission');
 
-function authorizationMiddleware(roles: string[], org_id?: string): RequestHandler {
+function authorizationMiddleware(roles: string[], validateOrg?: boolean): RequestHandler {
     return async (req, res, next) => {
 
         let authToken = extractToken(req);
 
         if (authToken == null) {
-            next(new HttpException(401, "Unauthorized access."));
+            next(new UnAuthenticated());
         }
         else {
             var decoded: any = jwt_decode(authToken);
@@ -20,7 +21,12 @@ function authorizationMiddleware(roles: string[], org_id?: string): RequestHandl
             var url = new URL(permissionUrl);
             let params = new URLSearchParams();
             params.append("userId", decoded.sub);
-            params.append("agencyId", org_id ?? "");
+            req.userId = decoded.sub;
+            if (validateOrg) {
+                let org_id = req.body.org_id;
+                params.append("agencyId", org_id);
+            }
+
             params.append("affirmative", "false");
             roles.forEach(x => params.append("roles", x));
             url.search = params.toString();
@@ -35,11 +41,11 @@ function authorizationMiddleware(roles: string[], org_id?: string): RequestHandl
                     if (satisfied)
                         next();
                     else
-                        next(new HttpException(401, "Unauthorized access."));
+                        next(new UnAuthenticated());
                 }
             } catch (error: any) {
                 console.error(error);
-                next(new HttpException(400, "Error authorizing the request."));
+                next(new HttpException(500, "Error authorizing the request."));
             }
         }
     };

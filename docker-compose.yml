@@ -7,10 +7,10 @@ services:
     env_file:
       - ./.env
     environment:
-      POSTGRES_USER: ${POSTGRES_USER:-admin}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-admin}
+      POSTGRES_USER: ${DATABASE_USER:-admin}
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-admin}
       PGDATA: /data/postgres
-      POSTGRES_DB: ${POSTGRES_DB:-postgres}
+      POSTGRES_DB: ${DATABASE_DB:-postgres}
     volumes:
       - postgres:/data/postgres
     ports:
@@ -30,7 +30,7 @@ services:
       - pgadmin:/var/lib/pgadmin
 
     ports:
-      - "${PGADMIN_PORT:-5050}:80"
+      - "${DATABASE_PORT:-5050}:80"
     networks:
       - postgres
     restart: unless-stopped

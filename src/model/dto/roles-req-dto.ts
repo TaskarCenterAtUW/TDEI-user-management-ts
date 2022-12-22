@@ -8,8 +8,7 @@ export class RolesReqDto extends BaseDto {
     user_name!: string;
     @IsNotEmpty({ each: true })
     @IsArray()
-    @IsNumber({}, { each: true })
-    roles!: number[];
+    roles!: string[];
 
     constructor(init?: Partial<RolesReqDto>) {
         super();
