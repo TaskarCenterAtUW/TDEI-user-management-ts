@@ -39,7 +39,7 @@
                 ],
                 "summary": "Gets the TDEI roles",
                 "description": "Gets the TDEI roles. ",
-                "operationId": "authenticate",
+                "operationId": "roles",
                 "responses": {
                     "200": {
                         "description": "Successful response - Returns the list of roles.",
