@@ -12,12 +12,12 @@
     },
     "servers": [
         {
-            "url": "http://localhost:3004",
-            "description": "Local server url"
-        },
-        {
             "url": "https://tdei-usermanagement-ts-dev.azurewebsites.net",
             "description": "Dev server url"
+        },
+        {
+            "url": "http://localhost:3004",
+            "description": "Local server url"
         }
     ],
     "security": [
@@ -32,14 +32,47 @@
         }
     ],
     "paths": {
-        "/api/v1/login": {
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the TDEI roles",
+                "description": "Gets the TDEI roles. ",
+                "operationId": "authenticate",
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the list of roles.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Roles"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/authenticate": {
             "post": {
                 "tags": [
                     "User Management"
                 ],
                 "summary": "Authenticates the user to the TDEI system",
                 "description": "Authenticates the user to the TDEI system.  Returns access token. ",
-                "operationId": "login",
+                "operationId": "authenticate",
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -440,6 +473,20 @@
                     "phone": {
                         "type": "string",
                         "description": "Phone of the user for communication."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Roles": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Role name."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Role description."
                     }
                 },
                 "description": "Describes a user registration details."

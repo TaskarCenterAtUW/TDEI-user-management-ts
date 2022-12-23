@@ -29,7 +29,7 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
         this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
-        this.router.post(`${this.path}/api/v1/login`, validationMiddleware(LoginDto), this.login);
+        this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
