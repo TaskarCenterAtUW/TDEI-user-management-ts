@@ -7,6 +7,7 @@ COPY tsconfig.json ./
 COPY src ./src
 COPY config ./config
 COPY types ./types
+COPY user-management-spec.json ./
 RUN ls -a
 RUN npm install
 RUN npm run build
