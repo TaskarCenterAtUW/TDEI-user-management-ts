@@ -70,7 +70,7 @@ class UserManagementService implements IUserManagement {
 
     async getRoles(): Promise<RoleDto[]> {
 
-        const query = 'SELECT * FROM Roles';
+        const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
                 let roleList = res.rows.map(x => new RoleDto(x));

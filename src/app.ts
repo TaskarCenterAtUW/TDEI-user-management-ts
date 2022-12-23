@@ -7,10 +7,13 @@ import helmet from "helmet";
 import { Core } from "nodets-ms-core";
 import { errorHandler } from "./middleware/error-handler-middleware";
 import { unhandledExceptionAndRejectionHandler } from "./middleware/unhandled-exception-rejection-handler";
+import swaggerUi from "swagger-ui-express";
+const swaggerDocument = require('../user-management-spec.json');
 
 class App {
     public app: express.Application;
     public port: number;
+    public router = express.Router();
 
     constructor(controllers: IController[], port: number) {
         this.port = port;
@@ -21,9 +24,17 @@ class App {
         this.initializeMiddlewares();
         this.initializeControllers(controllers);
         this.initializeLibraries();
-
+        this.initializeSwagger();
         //Last middleware to be registered: error handler. 
         this.app.use(errorHandler);
+    }
+
+    initializeSwagger() {
+        var options = {
+            explorer: false
+        };
+
+        this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options));
     }
 
     initializeLibraries() {
