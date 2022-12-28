@@ -473,6 +473,10 @@
                     "phone": {
                         "type": "string",
                         "description": "Phone of the user for communication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Credential for the user login."
                     }
                 },
                 "description": "Describes a user registration details."

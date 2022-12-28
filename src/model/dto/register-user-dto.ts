@@ -7,6 +7,8 @@ export class RegisterUserDto extends BaseDto {
     @IsNotEmpty()
     email!: string;
     phone!: string;
+    @IsNotEmpty()
+    password!: string;
 
     constructor(init?: Partial<RegisterUserDto>) {
         super();
