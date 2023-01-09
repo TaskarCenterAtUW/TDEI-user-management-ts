@@ -1,6 +1,16 @@
 
 export class Utility {
 
+    public static extractToken(req: any) {
+        if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {
+            return req.headers.authorization.split(' ')[1];
+        } else if (req.query && req.query.token) {
+            return req.query.token;
+        }
+        return null;
+    }
+
+
     public static dateIsValid(dateStr: any): boolean {
         const regex = /^\d{4}-\d{2}-\d{2}$/;
 

@@ -8,7 +8,6 @@ import { ServiceDto } from "../model/dto/service-dto";
 import { StationDto } from "../model/dto/station-dto";
 import { IUserManagement } from "./interface/user-management-interface";
 import { DuplicateException, ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
-import { RoleId } from "../constants/role-id-constants";
 import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
@@ -18,6 +17,7 @@ import { RoleDto } from "../model/dto/roles-dto";
 import { LoginDto } from "../model/dto/login-dto";
 import { Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
+import { OrgRoleDto } from "../model/dto/org-role-dto";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
@@ -73,7 +73,9 @@ class UserManagementService implements IUserManagement {
         const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
-                let roleList = res.rows.map(x => new RoleDto(x));
+                let roleList = res.rows.filter(f => !adminRestrictedRoles.includes(f.name)).map(x => {
+                    return new RoleDto(x);
+                });
                 return roleList;
             })
             .catch(e => {
@@ -204,6 +206,35 @@ class UserManagementService implements IUserManagement {
             .then(res => {
                 res.rows.forEach(x => roleMap.push(x.name));
                 return roleMap;
+            })
+            .catch(e => {
+                throw e;
+            });
+
+    }
+
+    async getUserOrgsWithRoles(userId: string, page_no: number, page_size: number): Promise<OrgRoleDto[]> {
+        let orgRoleList: OrgRoleDto[] = [];
+
+        //Set defaults if not provided
+        if (page_no == undefined) page_no = 1;
+        if (page_size == undefined) page_size = 10;
+        let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
+        let take = page_size > 50 ? 50 : page_size;
+
+        var sql = format('SELECT o.name as org, o.id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.id = ur.role_id INNER JOIN organization o on ur.org_id = o.id WHERE user_id = %L GROUP BY o.name,o.id LIMIT %L OFFSET %L', userId, take, skip);
+
+        return await dbClient.query(sql)
+            .then(res => {
+                res.rows.forEach(x => {
+                    let orgRole: OrgRoleDto = new OrgRoleDto();
+                    orgRole.orgName = x.org;
+                    orgRole.orgId = x.id;
+                    orgRole.roles = x.roles;
+
+                    orgRoleList.push(orgRole);
+                });
+                return orgRoleList;
             })
             .catch(e => {
                 throw e;

@@ -8,7 +8,13 @@ export class DuplicateException extends HttpException {
 
 export class UnAuthenticated extends HttpException {
     constructor() {
-        super(401, `User not authenticated/authorized to perform this action.`);
+        super(401, `Invalid/Expired token.`);
+    }
+}
+
+export class Forbidden extends HttpException {
+    constructor() {
+        super(403, `User not authenticated/authorized to perform this action.`);
     }
 }
 
