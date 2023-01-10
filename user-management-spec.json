@@ -138,10 +138,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Token"
-                                    }
+                                    "$ref": "#/components/schemas/Token"
                                 }
                             }
                         }
@@ -149,12 +146,7 @@
                     "500": {
                         "description": "Internal server error."
                     }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
+                }
             }
         },
         "/api/v1/authenticate": {
@@ -184,10 +176,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Token"
-                                    }
+                                    "$ref": "#/components/schemas/Token"
                                 }
                             }
                         }
@@ -195,12 +184,7 @@
                     "500": {
                         "description": "Internal server error."
                     }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
+                }
             }
         },
         "/api/v1/register": {
@@ -244,12 +228,7 @@
                     "403": {
                         "description": "User not authenticated/authorized to perform this action."
                     }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
+                }
             }
         },
         "/api/v1/station": {
