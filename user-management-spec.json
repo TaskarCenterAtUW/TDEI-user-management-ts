@@ -65,6 +65,51 @@
                 ]
             }
         },
+        "/api/v1/org-roles/{userId}": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the user associated organizations with roles.",
+                "description": "Gets the user associated organizations with roles.",
+                "operationId": "orgRoles",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User id for which oraganizations to be fetched",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the user oraganizations with roles.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrgRoles"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
+        },
         "/api/v1/authenticate": {
             "post": {
                 "tags": [
@@ -147,7 +192,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -184,7 +232,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ResponseDto"
+                                    "$ref": "#/components/schemas/Response"
                                 }
                             }
                         }
@@ -193,7 +241,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -230,7 +281,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ResponseDto"
+                                    "$ref": "#/components/schemas/Response"
                                 }
                             }
                         }
@@ -239,7 +290,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -273,7 +327,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ResponseDto"
+                                    "$ref": "#/components/schemas/Response"
                                 }
                             }
                         }
@@ -288,7 +342,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -322,7 +379,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ResponseDto"
+                                    "$ref": "#/components/schemas/Response"
                                 }
                             }
                         }
@@ -337,7 +394,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -371,7 +431,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/ResponseDto"
+                                    "$ref": "#/components/schemas/Response"
                                 }
                             }
                         }
@@ -383,7 +443,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Unauthorized request."
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
                     }
                 },
                 "security": [
@@ -425,6 +488,26 @@
                     }
                 },
                 "description": "Describes a user registration details."
+            },
+            "OrgRoles": {
+                "type": "object",
+                "properties": {
+                    "orgId": {
+                        "type": "string"
+                    },
+                    "orgName": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "List of roles associated with oraganization.",
+                        "items": {
+                            "type": "string",
+                            "description": "Role associated with oraganization."
+                        }
+                    }
+                },
+                "description": "User associated organizations and roles."
             },
             "User": {
                 "type": "object",
@@ -549,7 +632,7 @@
                 },
                 "description": "Describes a gtfs flex service."
             },
-            "ResponseDto": {
+            "Response": {
                 "type": "object",
                 "properties": {
                     "data": {

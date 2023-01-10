@@ -6,12 +6,15 @@ import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { ServiceDto } from "../model/dto/service-dto";
 import { StationDto } from "../model/dto/station-dto";
-import { Ok } from "../model/http/http-responses";
+import { BadRequest, Ok } from "../model/http/http-responses";
 import userManagementService from "../service/user-management-service";
 import { IController } from "./interface/IController";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import { LoginDto } from "../model/dto/login-dto";
+import HttpException from "../exceptions/http/http-base-exception";
+import { Utility } from "../utility/utility";
+import jwt_decode from 'jwt-decode';
 
 class UserManagementController implements IController {
     public path = '';
@@ -29,7 +32,32 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
         this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
+        this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
+    }
+
+    public orgRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            let authToken = Utility.extractToken(request);
+            var decoded: any = jwt_decode(authToken);
+
+            let userId = request.params.userId;
+
+            if (decoded.sub != userId) throw new HttpException(403, "Not authorized.");
+            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
+
+            userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+                response.send(result);
+            }).catch((error: any) => {
+                console.error('Error authenticating the user');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {

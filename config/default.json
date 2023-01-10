@@ -3,6 +3,7 @@
         "register-user": "http://localhost:8086/api/v1/registerUser",
         "user-profile": "http://localhost:8086/api/v1/getUserByUsername",
         "permission": "http://localhost:8086/api/v1/hasPermission",
-        "authenticate": "http://localhost:8086/api/v1/authenticate"
+        "authenticate": "http://localhost:8086/api/v1/authenticate",
+        "validate-access-token": "http://localhost:8086/api/v1/validateAccessToken"
     }
 }
