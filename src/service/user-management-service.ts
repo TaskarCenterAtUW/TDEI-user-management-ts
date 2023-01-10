@@ -18,12 +18,35 @@ import { LoginDto } from "../model/dto/login-dto";
 import { Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
 import { OrgRoleDto } from "../model/dto/org-role-dto";
+import { QueryConfig } from "pg";
+import { DynamicQueryObject, SqlORder } from "../database/query-object";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
 const authenticateUrl: string = config.get('url.authenticate');
+const refreshTokenUrl: string = config.get('url.refresh-token');
 
 class UserManagementService implements IUserManagement {
+
+    async refreshToken(refreshToken: string): Promise<any> {
+        try {
+            const result = await fetch(refreshTokenUrl, {
+                method: 'post',
+                body: JSON.stringify(refreshToken),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await result.json();
+
+            if (result.status != undefined && result.status != 200)
+                throw new Error(data);
+
+            return data;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error("Invalid/Expired refresh token. Please re-authenticate.");
+        }
+    }
 
     async login(loginModel: LoginDto): Promise<any> {
         try {
@@ -290,6 +313,40 @@ class UserManagementService implements IUserManagement {
             });
     }
 
+    async getOrganizations(searchText: string, page_no: number, page_size: number): Promise<OrganizationDto[]> {
+        let organizationList: OrganizationDto[] = [];
+        let queryObject: DynamicQueryObject = new DynamicQueryObject();
+        queryObject.buildSelect("organization", ["name", "id", "address", "url", "phone"]);
+        queryObject.buildPagination(page_no, page_size);
+        queryObject.buildOrder("name", SqlORder.ASC);
+        //Add conditions
+        if (searchText != undefined && searchText.length != 0) {
+            queryObject.condition(` name LIKE $${queryObject.paramCouter++} `, searchText + '%');
+        }
+
+        let queryObj = <QueryConfig>{
+            text: queryObject.getQuery(),
+            values: queryObject.getValues()
+        }
+
+        return await dbClient.query(queryObj)
+            .then(res => {
+                res.rows.forEach(x => {
+                    let org: OrganizationDto = new OrganizationDto();
+                    org.name = x.name;
+                    org.id = x.id;
+                    org.address = x.address;
+                    org.url = x.url;
+                    org.phone = x.phone;
+                    organizationList.push(org);
+                });
+                return organizationList;
+            })
+            .catch(e => {
+                throw e;
+            });
+
+    }
 }
 
 const userManagementService: IUserManagement = new UserManagementService();

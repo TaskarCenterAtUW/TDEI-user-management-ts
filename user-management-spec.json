@@ -110,6 +110,53 @@
                 }
             }
         },
+        "/api/v1/refresh-token": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Refresh the user token",
+                "description": "Refresh the user token",
+                "operationId": "refresh-token",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "header",
+                        "description": "Valid refresh token",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the access token object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Token"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
         "/api/v1/authenticate": {
             "post": {
                 "tags": [
@@ -454,6 +501,74 @@
                         "AuthorizationToken": []
                     }
                 ]
+            },
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the organizations in the TDEI system ",
+                "description": "Gets the organizations in the TDEI system .",
+                "operationId": "getOrganization",
+                "parameters": [
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Search by organization name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of organizations.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Organization"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
             }
         }
     },
@@ -694,6 +809,11 @@
                 ],
                 "type": "object",
                 "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Organization Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
                     "name": {
                         "type": "string",
                         "description": "Name of the organization."
