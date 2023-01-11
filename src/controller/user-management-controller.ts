@@ -29,11 +29,51 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
+        this.router.get(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), this.getOrganization);
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
         this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
+        this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
+    }
+
+    public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
+                BadRequest(response);
+
+            let token = request.headers.refresh_token?.toString();
+
+            userManagementService.refreshToken(token ?? "").then((token) => {
+                response.send(token)
+            }).catch((error: Error) => {
+                console.error(error.message);
+                next(error);
+            });
+        } catch (error) {
+            console.error('Error refreshing the user token');
+            next(error);
+        }
+    }
+
+    public getOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+
+            let searchText = request.query.searchText?.toString() ?? "";
+            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+
+            userManagementService.getOrganizations(searchText, page_no, page_size).then((result) => {
+                response.send(result);
+            }).catch((error: any) => {
+                console.error('Error fetching the organizations');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
+            next(error);
+        }
     }
 
     public orgRoles = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -51,7 +91,7 @@ class UserManagementController implements IController {
             userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
                 response.send(result);
             }).catch((error: any) => {
-                console.error('Error authenticating the user');
+                console.error('Error fetching the user org & roles');
                 console.error(error);
                 next(error);
             });
