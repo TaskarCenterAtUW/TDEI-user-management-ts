@@ -35,6 +35,11 @@ class App {
         };
 
         this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options));
+        this.app.get('/', function (req, res) {
+            // On getting the home route request,
+            // the user will be redirected to api docs
+            res.redirect('/api-docs');
+        });
     }
 
     initializeLibraries() {

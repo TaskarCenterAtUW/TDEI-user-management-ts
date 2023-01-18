@@ -675,9 +675,7 @@
             "Station": {
                 "required": [
                     "org_id",
-                    "stop_lat",
-                    "stop_lon",
-                    "stop_name"
+                    "name"
                 ],
                 "type": "object",
                 "properties": {
@@ -685,21 +683,32 @@
                         "type": "string",
                         "description": "Organization id of the station."
                     },
-                    "stop_name": {
+                    "name": {
                         "type": "string",
-                        "description": "Name of the location. The stop_name should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
+                        "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
                     },
-                    "stop_code": {
-                        "type": "string",
-                        "description": "\nShort text or a number that identifies the location for riders. These codes are often used in phone-based transit information systems or printed on signage to make it easier for riders to get information for a particular location. This field should be left empty for locations without a code presented to riders."
-                    },
-                    "stop_lat": {
-                        "type": "number",
-                        "description": "Latitude of the location."
-                    },
-                    "stop_lon": {
-                        "type": "number",
-                        "description": "Longitude of the location."
+                    "coordinates": {
+                        "type": "array",
+                        "minItems": 4,
+                        "description": "Polygon coordinates",
+                        "items": {
+                            "type": "object",
+                            "description": "Coordinate points",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "description": "Longitude"
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "description": "Latitude"
+                                }
+                            },
+                            "required": [
+                                "longitude",
+                                "latitude"
+                            ]
+                        }
                     }
                 },
                 "description": "Describes a gtfs pathways station."
@@ -719,9 +728,28 @@
                         "type": "string",
                         "description": "Name of the service."
                     },
-                    "description": {
-                        "type": "string",
-                        "description": "Description of the service."
+                    "coordinates": {
+                        "type": "array",
+                        "minItems": 4,
+                        "description": "Polygon coordinates",
+                        "items": {
+                            "type": "object",
+                            "description": "Coordinate points",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "description": "Longitude"
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "description": "Latitude"
+                                }
+                            },
+                            "required": [
+                                "longitude",
+                                "latitude"
+                            ]
+                        }
                     }
                 },
                 "description": "Describes a gtfs flex service."
@@ -808,6 +836,29 @@
                     "address": {
                         "type": "string",
                         "description": "Address of the transit organization."
+                    },
+                    "coordinates": {
+                        "type": "array",
+                        "minItems": 4,
+                        "description": "Polygon coordinates",
+                        "items": {
+                            "type": "object",
+                            "description": "Coordinate points",
+                            "properties": {
+                                "longitude": {
+                                    "type": "number",
+                                    "description": "Longitude"
+                                },
+                                "latitude": {
+                                    "type": "number",
+                                    "description": "Latitude"
+                                }
+                            },
+                            "required": [
+                                "longitude",
+                                "latitude"
+                            ]
+                        }
                     }
                 },
                 "description": "Describes an Organization."

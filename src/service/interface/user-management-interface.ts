@@ -15,6 +15,7 @@ export interface IUserManagement {
     createStation(station: StationDto): Promise<String>;
     createService(service: ServiceDto): Promise<String>;
     createOrganization(organization: OrganizationDto): Promise<String>;
+    updateOrganization(organization: OrganizationDto): Promise<String>;
     assignPocToOrg(pocReq: PocRequestDto): Promise<boolean>;
     assignUserPermission(permissionReq: RolesReqDto, userId: string): Promise<boolean>;
     getRoles(): Promise<RoleDto[]>;

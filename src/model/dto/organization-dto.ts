@@ -1,5 +1,8 @@
-import { IsNotEmpty } from "class-validator";
+import { IsNotEmpty, ValidateNested } from "class-validator";
+import { Coordinates, Polygon } from "../polygon-model";
+import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
+import { Type } from 'class-transformer';
 
 export class OrganizationDto extends BaseDto {
     id: string = "0";
@@ -10,6 +13,10 @@ export class OrganizationDto extends BaseDto {
     url!: string;
     @IsNotEmpty()
     address!: string;
+    @IsValidPolygon()
+    @ValidateNested({ each: true })
+    @Type(() => Coordinates)
+    coordinates!: Coordinates[];
 
     constructor(init?: Partial<OrganizationDto>) {
         super();

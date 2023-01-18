@@ -20,6 +20,7 @@ import { adminRestrictedRoles } from "../constants/admin-restricted-role-constan
 import { OrgRoleDto } from "../model/dto/org-role-dto";
 import { QueryConfig } from "pg";
 import { DynamicQueryObject, SqlORder } from "../database/query-object";
+import { Polygon } from "../model/polygon-model";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
@@ -107,18 +108,22 @@ class UserManagementService implements IUserManagement {
     }
 
     async createStation(station: StationDto): Promise<String> {
+        let polygonExists = station.coordinates ? true : false;
 
         const query = {
-            text: 'INSERT INTO station(org_id, stop_name, stop_code, stop_lat, stop_lon) VALUES($1, $2, $3, $4, $5)   RETURNING station.id',
-            values: [station.org_id, station.stop_name, station.stop_code, station.stop_lat, station.stop_lon],
+            text: `INSERT INTO station(owner_org, name ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})   RETURNING station.station_id`,
+            values: [station.org_id, station.name],
+        }
+        if (polygonExists) {
+            query.values.push(JSON.stringify(new Polygon(station.coordinates)));
         }
         return await dbClient.query(query)
             .then(res => {
-                return res.rows[0].id;
+                return res.rows[0].station_id;
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(station.stop_name);
+                    throw new DuplicateException(station.name);
                 }
                 else if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
@@ -128,13 +133,17 @@ class UserManagementService implements IUserManagement {
     }
 
     async createService(service: ServiceDto): Promise<String> {
+        let polygonExists = service.coordinates ? true : false;
         const query = {
-            text: 'INSERT INTO service(name, description, org_id) VALUES($1, $2, $3)  RETURNING service.id',
-            values: [service.name, service.description, service.org_id],
+            text: `INSERT INTO service(name, owner_org ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})  RETURNING service.service_id`,
+            values: [service.name, service.org_id],
+        }
+        if (polygonExists) {
+            query.values.push(JSON.stringify(new Polygon(service.coordinates)));
         }
         return await dbClient.query(query)
             .then(res => {
-                return res.rows[0].id;
+                return res.rows[0].service_id;
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
@@ -148,9 +157,30 @@ class UserManagementService implements IUserManagement {
     }
 
     async createOrganization(organization: OrganizationDto): Promise<String> {
+        let polygonExists = organization.coordinates ? true : false;
         const query = {
-            text: 'INSERT INTO organization(name, phone, url, address) VALUES($1, $2, $3, $4) RETURNING organization.id',
+            text: `INSERT INTO organization(name, phone, url, address ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2, $3, $4 ${polygonExists ? ', ST_GeomFromGeoJSON($5) ' : ''}) RETURNING organization.org_id`,
             values: [organization.name, organization.phone, organization.url, organization.address],
+        }
+        if (polygonExists) {
+            query.values.push(JSON.stringify(new Polygon(organization.coordinates)));
+        }
+        return await dbClient.query(query)
+            .then(res => {
+                return res.rows[0].org_id;
+            })
+            .catch(e => {
+                if (e instanceof UniqueKeyDbException) {
+                    throw new DuplicateException(organization.name);
+                }
+                throw e;
+            });
+    }
+
+    async updateOrganization(organization: OrganizationDto): Promise<String> {
+        const query = {
+            text: 'UPDATE organization set name = $1, phone = $2, url = $3, address = $4 WHERE org_id = $5',
+            values: [organization.name, organization.phone, organization.url, organization.address, organization.id],
         }
         return await dbClient.query(query)
             .then(res => {
@@ -316,7 +346,7 @@ class UserManagementService implements IUserManagement {
     async getOrganizations(searchText: string, page_no: number, page_size: number): Promise<OrganizationDto[]> {
         let organizationList: OrganizationDto[] = [];
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("organization", ["name", "id", "address", "url", "phone"]);
+        queryObject.buildSelect("organization", ["name", "org_id", "address", "url", "phone"]);
         queryObject.buildPagination(page_no, page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
@@ -334,7 +364,7 @@ class UserManagementService implements IUserManagement {
                 res.rows.forEach(x => {
                     let org: OrganizationDto = new OrganizationDto();
                     org.name = x.name;
-                    org.id = x.id;
+                    org.id = x.org_id;
                     org.address = x.address;
                     org.url = x.url;
                     org.phone = x.phone;

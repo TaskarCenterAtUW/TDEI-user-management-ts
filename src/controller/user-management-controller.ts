@@ -28,14 +28,16 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
         this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
-        this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
-        this.router.get(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), this.getOrganization);
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
         this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
+        //Organization
+        this.router.put(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.updateOrganization);
+        this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
+        this.router.get(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), this.getOrganization);
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -189,6 +191,28 @@ class UserManagementController implements IController {
             //Model validation happens at the middleware.
             //Transform the body to DTO
             let organization = new OrganizationDto(request.body);
+            //Call service to register the user
+            userManagementService.createOrganization(organization).then((user) => {
+                Ok(response, { data: user });
+            }).catch((error: any) => {
+                console.error('Error creating the organization');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public updateOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            //Model validation happens at the middleware.
+            //Transform the body to DTO
+            let organization = new OrganizationDto(request.body);
+
+            //Check for Organization Id for update
+            if (organization.id || organization.id == "0")
+                BadRequest(response, "Organization Id not provided.")
             //Call service to register the user
             userManagementService.createOrganization(organization).then((user) => {
                 Ok(response, { data: user });

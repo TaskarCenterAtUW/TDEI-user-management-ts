@@ -1,4 +1,7 @@
-import { IsNotEmpty, IsNumber } from "class-validator";
+import { Type } from "class-transformer";
+import { IsNotEmpty, ValidateNested } from "class-validator";
+import { Coordinates } from "../polygon-model";
+import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
 export class ServiceDto extends BaseDto {
@@ -6,7 +9,10 @@ export class ServiceDto extends BaseDto {
     org_id!: string;
     @IsNotEmpty()
     name!: string;
-    description!: string;
+    @IsValidPolygon()
+    @ValidateNested({ each: true })
+    @Type(() => Coordinates)
+    coordinates!: Coordinates[];
 
     constructor(init?: Partial<ServiceDto>) {
         super();
