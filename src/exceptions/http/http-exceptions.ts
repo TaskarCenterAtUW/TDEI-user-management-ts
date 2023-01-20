@@ -14,7 +14,7 @@ export class UnAuthenticated extends HttpException {
 
 export class Forbidden extends HttpException {
     constructor() {
-        super(403, `User not authenticated/authorized to perform this action.`);
+        super(403, `User not authorized to perform this action.`);
     }
 }
 

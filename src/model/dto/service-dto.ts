@@ -5,6 +5,7 @@ import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
 export class ServiceDto extends BaseDto {
+    service_id: string = "0";
     @IsNotEmpty()
     org_id!: string;
     @IsNotEmpty()

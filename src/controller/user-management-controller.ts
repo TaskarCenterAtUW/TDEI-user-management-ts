@@ -1,14 +1,11 @@
 import express, { NextFunction, Request } from "express";
 import validationMiddleware from "../middleware/dto-validation-middleware";
-import { OrganizationDto } from "../model/dto/organization-dto";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
-import { ServiceDto } from "../model/dto/service-dto";
-import { StationDto } from "../model/dto/station-dto";
 import { BadRequest, Ok } from "../model/http/http-responses";
 import userManagementService from "../service/user-management-service";
-import { IController } from "./interface/IController";
+import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import { LoginDto } from "../model/dto/login-dto";
@@ -26,18 +23,13 @@ class UserManagementController implements IController {
 
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
-        this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
-        this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
+        this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
         this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
-        //Organization
-        this.router.put(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.updateOrganization);
-        this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
-        this.router.get(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), this.getOrganization);
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -55,25 +47,6 @@ class UserManagementController implements IController {
             });
         } catch (error) {
             console.error('Error refreshing the user token');
-            next(error);
-        }
-    }
-
-    public getOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-
-            let searchText = request.query.searchText?.toString() ?? "";
-            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
-
-            userManagementService.getOrganizations(searchText, page_no, page_size).then((result) => {
-                response.send(result);
-            }).catch((error: any) => {
-                console.error('Error fetching the organizations');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
             next(error);
         }
     }
@@ -151,81 +124,6 @@ class UserManagementController implements IController {
         }
     }
 
-    public createStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let station = new StationDto(request.body);
-            //Call service to register the user
-            userManagementService.createStation(station).then((user) => {
-                Ok(response, { data: user });
-            }).catch((error: any) => {
-                console.error('Error creating the station');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public createService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let service = new ServiceDto(request.body);
-            //Call service to register the user
-            userManagementService.createService(service)
-                .then((service) => {
-                    Ok(response, { data: service });
-                }).catch((error: any) => {
-                    console.error('Error creating the service');
-                    console.error(error);
-                    next(error);
-                });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public createOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Model validation happens at the middleware.
-            //Transform the body to DTO
-            let organization = new OrganizationDto(request.body);
-            //Call service to register the user
-            userManagementService.createOrganization(organization).then((user) => {
-                Ok(response, { data: user });
-            }).catch((error: any) => {
-                console.error('Error creating the organization');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public updateOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Model validation happens at the middleware.
-            //Transform the body to DTO
-            let organization = new OrganizationDto(request.body);
-
-            //Check for Organization Id for update
-            if (organization.id || organization.id == "0")
-                BadRequest(response, "Organization Id not provided.")
-            //Call service to register the user
-            userManagementService.createOrganization(organization).then((user) => {
-                Ok(response, { data: user });
-            }).catch((error: any) => {
-                console.error('Error creating the organization');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
     public assignPOC = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
@@ -247,9 +145,24 @@ class UserManagementController implements IController {
         try {
             //Transform the body to DTO
             let permissonObj = new RolesReqDto(request.body);
-            //Call service to register the user
-            userManagementService.assignUserPermission(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error assigning the permission to the user');
+            userManagementService.assignUserPermissions(permissonObj, request.userId).catch((error: any) => {
+                console.error('Error assigning the permissions to the user');
+                console.error(error);
+                next(error);
+            }).then((flag) => {
+                Ok(response, { data: "Successful!" });
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            //Transform the body to DTO
+            let permissonObj = new RolesReqDto(request.body);
+            userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
+                console.error('Error revoking the permissions of the user');
                 console.error(error);
                 next(error);
             }).then((flag) => {

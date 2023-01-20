@@ -1,5 +1,5 @@
 import express, { Request } from "express";
-import { IController } from "./interface/IController";
+import { IController } from "./interface/controller-interface";
 
 class HealthController implements IController {
     public path = '/health';

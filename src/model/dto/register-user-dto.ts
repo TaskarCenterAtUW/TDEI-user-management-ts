@@ -1,10 +1,11 @@
-import { IsNotEmpty } from "class-validator";
+import { IsEmail, IsNotEmpty } from "class-validator";
 import { BaseDto } from "./base-dto";
 
 export class RegisterUserDto extends BaseDto {
     firstName!: string;
     lastName!: string;
     @IsNotEmpty()
+    @IsEmail()
     email!: string;
     phone!: string;
     @IsNotEmpty()

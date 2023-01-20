@@ -12,9 +12,11 @@ const gjv = require("geojson-validation");
 export class isPolygon implements ValidatorConstraintInterface {
     message = "Not a valid polygon coordinates.";
     validate(cords: Coordinates[], args: ValidationArguments) {
-        let valid = gjv.isPolygon(new Polygon(cords));
+        let polygon = new Polygon();
+        polygon.setGeoCords(cords);
+        let valid = gjv.isPolygon(polygon);
         if (!valid) {
-            this.message = gjv.isPolygon(new Polygon(cords), true);
+            this.message = gjv.isPolygon(polygon, true);
         }
         return valid;
     }

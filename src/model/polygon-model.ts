@@ -1,4 +1,5 @@
-import { IsLatitude, IsNotEmpty, isNumber } from "class-validator";
+import { IsLatitude, IsNotEmpty } from "class-validator";
+import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 
 export class Coordinates {
     @IsNotEmpty()
@@ -10,16 +11,25 @@ export class Coordinates {
 }
 
 export class Polygon {
+    @Prop()
     type: string = "Polygon";
+    @Prop()
     coordinates: number[][][] = [];
 
-    constructor(cords: Coordinates[]) {
-        if (cords)
-            this.setGeoCords(cords);
+    constructor(init?: Partial<Polygon>) {
+        Object.assign(this, init);
     }
 
-    private setGeoCords(params: Coordinates[]) {
+    setGeoCords(params: Coordinates[]) {
         let points = params.map(x => [x.longitude, x.latitude]);
         this.coordinates.push(points);
+    }
+
+    getCoordinatePoints(): Coordinates[] {
+        let coordinates: Coordinates[] = [];
+        this.coordinates.pop()?.forEach(x => {
+            coordinates.push(<Coordinates>{ longitude: x[0], latitude: x[1] });
+        });
+        return coordinates;
     }
 }

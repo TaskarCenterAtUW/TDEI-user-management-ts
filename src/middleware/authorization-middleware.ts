@@ -3,7 +3,7 @@ import HttpException from '../exceptions/http/http-base-exception';
 import fetch, { Response } from 'node-fetch';
 import config from 'config';
 import jwt_decode from 'jwt-decode';
-import { UnAuthenticated } from '../exceptions/http/http-exceptions';
+import { Forbidden, UnAuthenticated } from '../exceptions/http/http-exceptions';
 import { UserProfile } from '../model/dto/user-profile-dto';
 import { Utility } from '../utility/utility';
 
@@ -54,7 +54,7 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean): Reques
                             return;
                         }
                         else
-                            next(new UnAuthenticated());
+                            next(new Forbidden());
                     }
                 }
                 next();

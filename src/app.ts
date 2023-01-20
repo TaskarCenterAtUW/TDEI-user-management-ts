@@ -2,7 +2,7 @@
 import express from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
-import { IController } from "./controller/interface/IController";
+import { IController } from "./controller/interface/controller-interface";
 import helmet from "helmet";
 import { Core } from "nodets-ms-core";
 import { errorHandler } from "./middleware/error-handler-middleware";
@@ -34,6 +34,7 @@ class App {
             explorer: false
         };
 
+        this.app.get("/api-docs/swagger.json", (req, res) => res.json(swaggerDocument));
         this.app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument, options));
         this.app.get('/', function (req, res) {
             // On getting the home route request,

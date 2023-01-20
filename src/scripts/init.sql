@@ -11,8 +11,9 @@
         url character varying(500) COLLATE pg_catalog."default",
         address character varying(500) COLLATE pg_catalog."default" NOT NULL,
 		polygon geometry(Polygon,4326),
+        is_active boolean NOT NULL DEFAULT true,
         CONSTRAINT org_pkey PRIMARY KEY (org_id),
-        CONSTRAINT unq_org UNIQUE (name)
+        CONSTRAINT unq_org UNIQUE (name),
     )
 
 
@@ -83,6 +84,7 @@
         name character varying(100) COLLATE pg_catalog."default" NOT NULL,
         polygon geometry(Polygon,4326),
         owner_org character varying(100) NOT NULL,
+        is_active boolean NOT NULL DEFAULT true,
         CONSTRAINT service_pkey PRIMARY KEY (service_id),
         CONSTRAINT unq_service UNIQUE (name),
         CONSTRAINT fk_org_id FOREIGN KEY (owner_org)
@@ -100,12 +102,13 @@
 
     -- DROP TABLE IF EXISTS public.station;
 
-    CREATE TABLE IF NOT EXISTS public.station
+CREATE TABLE IF NOT EXISTS public.station
 (
     station_id character varying(100) COLLATE pg_catalog."default" NOT NULL DEFAULT gen_random_uuid(),
     name character varying(100) COLLATE pg_catalog."default" NOT NULL,
 	polygon geometry(Polygon,4326),
     owner_org character varying(100) COLLATE pg_catalog."default" NOT NULL,
+    is_active boolean NOT NULL DEFAULT true,
     CONSTRAINT station_pkey PRIMARY KEY (station_id),
     CONSTRAINT unq_station UNIQUE (name),
     CONSTRAINT fk_org_id FOREIGN KEY (owner_org)
