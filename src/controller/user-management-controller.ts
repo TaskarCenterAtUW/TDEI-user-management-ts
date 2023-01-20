@@ -77,7 +77,6 @@ class UserManagementController implements IController {
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
-
             let loginBody = new LoginDto(request.body);
             userManagementService.login(loginBody).then((token) => {
                 response.send(token)
@@ -93,8 +92,6 @@ class UserManagementController implements IController {
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
-
-            //Call service to register the user
             userManagementService.getRoles().then((roles) => {
                 Ok(response, { data: roles });
             }).catch((error: any) => {
@@ -128,7 +125,6 @@ class UserManagementController implements IController {
         try {
             //Transform the body to DTO
             let pocReqObj = new PocRequestDto(request.body);
-            //Call service to register the user
             userManagementService.assignPocToOrg(pocReqObj).catch((error: any) => {
                 console.error('Error assigning the POC to the Org');
                 console.error(error);

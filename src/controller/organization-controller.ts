@@ -65,7 +65,6 @@ class OrganizationController implements IController {
             //Model validation happens at the middleware.
             //Transform the body to DTO
             let organization = new OrganizationDto(request.body);
-            //Call service to register the user
             organizationService.createOrganization(organization).then((org) => {
                 Ok(response, { data: org });
             }).catch((error: any) => {
@@ -87,7 +86,6 @@ class OrganizationController implements IController {
             //Check for Organization Id for update
             if (!organization.org_id || organization.org_id == "0")
                 BadRequest(response, "Organization Id not provided.")
-            //Call service to register the user
             organizationService.updateOrganization(organization).then((org) => {
                 Ok(response);
             }).catch((error: any) => {

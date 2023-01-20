@@ -44,7 +44,6 @@ class PathwaysStationController implements IController {
         try {
             //Transform the body to DTO
             let station = new StationDto(request.body);
-            //Call service to register the user
             pathwaysStationService.createStation(station).then((user) => {
                 Ok(response, { data: user });
             }).catch((error: any) => {
@@ -64,7 +63,6 @@ class PathwaysStationController implements IController {
             //Check for station Id for update
             if (!station.station_id || station.station_id == "0")
                 BadRequest(response, "Station Id not provided.")
-            //Call service to register the user
             pathwaysStationService.updateStation(station).then((result) => {
                 Ok(response);
             }).catch((error: any) => {

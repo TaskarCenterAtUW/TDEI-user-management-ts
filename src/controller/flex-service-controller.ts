@@ -44,7 +44,6 @@ class FlexServiceController implements IController {
         try {
             //Transform the body to DTO
             let service = new ServiceDto(request.body);
-            //Call service to register the user
             flexService.createService(service)
                 .then((service) => {
                     Ok(response, { data: service });
@@ -65,7 +64,6 @@ class FlexServiceController implements IController {
             //Check for station Id for update
             if (!station.service_id || station.service_id == "0")
                 BadRequest(response, "Service Id not provided.")
-            //Call service to register the user
             flexService.updateService(station).then((result) => {
                 Ok(response);
             }).catch((error: any) => {
