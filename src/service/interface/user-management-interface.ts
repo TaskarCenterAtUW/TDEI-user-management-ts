@@ -1,24 +1,53 @@
-import { OrganizationDto } from "../../model/dto/organization-dto";
 import { RolesReqDto } from "../../model/dto/roles-req-dto";
 import { PocRequestDto } from "../../model/dto/poc-req";
 import { RegisterUserDto } from "../../model/dto/register-user-dto";
-import { ServiceDto } from "../../model/dto/service-dto";
-import { StationDto } from "../../model/dto/station-dto";
 import { UserProfile } from "../../model/dto/user-profile-dto";
 import { RoleDto } from "../../model/dto/roles-dto";
 import { LoginDto } from "../../model/dto/login-dto";
 import { OrgRoleDto } from "../../model/dto/org-role-dto";
 
 export interface IUserManagement {
+    /**
+     * Reissues the new access token in the case of valid refresh token input
+     * @param refreshToken refresh token
+     */
     refreshToken(refreshToken: string): Promise<any>;
+    /**
+     * Creates new user in TDEI system
+     * @param user user details model
+     */
     registerUser(user: RegisterUserDto): Promise<UserProfile>;
-    createStation(station: StationDto): Promise<String>;
-    createService(service: ServiceDto): Promise<String>;
-    createOrganization(organization: OrganizationDto): Promise<String>;
     assignPocToOrg(pocReq: PocRequestDto): Promise<boolean>;
-    assignUserPermission(permissionReq: RolesReqDto, userId: string): Promise<boolean>;
+    /**
+    * Assigns the user permissions
+    * @param rolesReq roles to be assigned
+    * @param requestingUserId userd id for which roles to be assigned
+    * @returns boolean flag
+    */
+    assignUserPermissions(permissionReq: RolesReqDto, userId: string): Promise<boolean>;
+    /**
+     * Gets the TDEI system roles.
+     */
     getRoles(): Promise<RoleDto[]>;
+    /**
+     * Authenticates the user
+     * @param loginModel User credentials
+     * @returns Access token
+     */
     login(loginModel: LoginDto): Promise<any>;
+    /**
+     * Get user associated organizations and roles.
+     * @param userId user id 
+     * @param page_no page number
+     * @param page_size page size
+     * @returns List of User organizations with roles
+     */
     getUserOrgsWithRoles(userId: string, page_no: number, page_size: number): Promise<OrgRoleDto[]>;
-    getOrganizations(searchText: string, page_no: number, page_size: number): Promise<OrganizationDto[]>;
+    /**
+     * Revokes the user permissions
+     * @param rolesReq roles to be revoked
+     * @param requestingUserId userd id for which roles to be revoked
+     * @returns boolean flag
+     */
+    revokeUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean>;
 }

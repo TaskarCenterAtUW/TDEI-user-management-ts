@@ -1,13 +1,10 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
-import { OrganizationDto } from "../model/dto/organization-dto";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
-import { ServiceDto } from "../model/dto/service-dto";
-import { StationDto } from "../model/dto/station-dto";
 import { IUserManagement } from "./interface/user-management-interface";
-import { DuplicateException, ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
+import { ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
 import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
@@ -18,8 +15,6 @@ import { LoginDto } from "../model/dto/login-dto";
 import { Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
 import { OrgRoleDto } from "../model/dto/org-role-dto";
-import { QueryConfig } from "pg";
-import { DynamicQueryObject, SqlORder } from "../database/query-object";
 
 const registerUrl: string = config.get('url.register-user');
 const userProfileUrl: string = config.get('url.user-profile');
@@ -27,7 +22,10 @@ const authenticateUrl: string = config.get('url.authenticate');
 const refreshTokenUrl: string = config.get('url.refresh-token');
 
 class UserManagementService implements IUserManagement {
-
+    /**
+    * Reissues the new access token in the case of valid refresh token input
+    * @param refreshToken refresh token
+    */
     async refreshToken(refreshToken: string): Promise<any> {
         try {
             const result = await fetch(refreshTokenUrl, {
@@ -47,7 +45,11 @@ class UserManagementService implements IUserManagement {
             throw new Error("Invalid/Expired refresh token. Please re-authenticate.");
         }
     }
-
+    /**
+     * Authenticates the user
+     * @param loginModel User credentials
+     * @returns Access token
+     */
     async login(loginModel: LoginDto): Promise<any> {
         try {
             const result: Response = await fetch(authenticateUrl, {
@@ -68,7 +70,10 @@ class UserManagementService implements IUserManagement {
         }
         return {};
     }
-
+    /**
+     * Creates new user in TDEI system
+     * @param user user details model
+     */
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
         try {
@@ -90,13 +95,15 @@ class UserManagementService implements IUserManagement {
         }
         return userProfile;
     }
-
+    /**
+     * Gets the TDEI system roles.
+     */
     async getRoles(): Promise<RoleDto[]> {
 
         const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
-                let roleList = res.rows.filter(f => !adminRestrictedRoles.includes(f.name)).map(x => {
+                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString()].includes(f.name)).map(x => {
                     return new RoleDto(x);
                 });
                 return roleList;
@@ -106,71 +113,13 @@ class UserManagementService implements IUserManagement {
             });
     }
 
-    async createStation(station: StationDto): Promise<String> {
-
-        const query = {
-            text: 'INSERT INTO station(org_id, stop_name, stop_code, stop_lat, stop_lon) VALUES($1, $2, $3, $4, $5)   RETURNING station.id',
-            values: [station.org_id, station.stop_name, station.stop_code, station.stop_lat, station.stop_lon],
-        }
-        return await dbClient.query(query)
-            .then(res => {
-                return res.rows[0].id;
-            })
-            .catch(e => {
-                if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(station.stop_name);
-                }
-                else if (e instanceof ForeignKeyDbException) {
-                    throw new ForeignKeyException((e as ForeignKeyDbException).message);
-                }
-                throw e;
-            });
-    }
-
-    async createService(service: ServiceDto): Promise<String> {
-        const query = {
-            text: 'INSERT INTO service(name, description, org_id) VALUES($1, $2, $3)  RETURNING service.id',
-            values: [service.name, service.description, service.org_id],
-        }
-        return await dbClient.query(query)
-            .then(res => {
-                return res.rows[0].id;
-            })
-            .catch(e => {
-                if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(service.name);
-                }
-                else if (e instanceof ForeignKeyDbException) {
-                    throw new ForeignKeyException((e as ForeignKeyDbException).message);
-                }
-                throw e;
-            });
-    }
-
-    async createOrganization(organization: OrganizationDto): Promise<String> {
-        const query = {
-            text: 'INSERT INTO organization(name, phone, url, address) VALUES($1, $2, $3, $4) RETURNING organization.id',
-            values: [organization.name, organization.phone, organization.url, organization.address],
-        }
-        return await dbClient.query(query)
-            .then(res => {
-                return res.rows[0].id;
-            })
-            .catch(e => {
-                if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(organization.name);
-                }
-                throw e;
-            });
-    }
-
     private async getRolesByNames(roles: string[]): Promise<Map<string, string>> {
         let roleMap = new Map<string, string>();
-        var sql = format('SELECT id, name FROM roles WHERE name IN (%L)', roles);
+        var sql = format('SELECT role_id, name FROM roles WHERE name IN (%L)', roles);
 
         return await dbClient.query(sql)
             .then(res => {
-                res.rows.forEach(x => roleMap.set(x.name, x.id));
+                res.rows.forEach(x => roleMap.set(x.name, x.role_id));
                 return roleMap;
             })
             .catch(e => {
@@ -223,7 +172,7 @@ class UserManagementService implements IUserManagement {
 
     private async getUserRoles(userId: string): Promise<string[]> {
         let roleMap: string[] = [];
-        var sql = format('SELECT name FROM user_roles ur INNER JOIN roles r on r.id = ur.role_id WHERE user_id = %L', userId);
+        var sql = format('SELECT name FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id WHERE user_id = %L', userId);
 
         return await dbClient.query(sql)
             .then(res => {
@@ -236,6 +185,13 @@ class UserManagementService implements IUserManagement {
 
     }
 
+    /**
+     * Get user associated organizations and roles.
+     * @param userId user id 
+     * @param page_no page number
+     * @param page_size page size
+     * @returns List of User organizations with roles
+     */
     async getUserOrgsWithRoles(userId: string, page_no: number, page_size: number): Promise<OrgRoleDto[]> {
         let orgRoleList: OrgRoleDto[] = [];
 
@@ -245,14 +201,14 @@ class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
-        var sql = format('SELECT o.name as org, o.id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.id = ur.role_id INNER JOIN organization o on ur.org_id = o.id WHERE user_id = %L GROUP BY o.name,o.id LIMIT %L OFFSET %L', userId, take, skip);
+        var sql = format('SELECT o.name as org, o.org_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN organization o on ur.org_id = o.org_id WHERE user_id = %L GROUP BY o.name,o.org_id LIMIT %L OFFSET %L', userId, take, skip);
 
         return await dbClient.query(sql)
             .then(res => {
                 res.rows.forEach(x => {
                     let orgRole: OrgRoleDto = new OrgRoleDto();
                     orgRole.orgName = x.org;
-                    orgRole.orgId = x.id;
+                    orgRole.orgId = x.org_id;
                     orgRole.roles = x.roles;
 
                     orgRoleList.push(orgRole);
@@ -265,9 +221,16 @@ class UserManagementService implements IUserManagement {
 
     }
 
-    async assignUserPermission(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
+    /**
+     * Assigns the user permissions
+     * @param rolesReq roles to be assigned
+     * @param requestingUserId userd id for which roles to be assigned
+     * @returns boolean flag
+     */
+    async assignUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
         let userProfile = new UserProfile();
-        //Fetch user profile from keycloak
+
+        //Fetch permissioned user profile from keycloak
         try {
             const data: any = await (await fetch(`${userProfileUrl}?userName=${rolesReq.user_name}`)).json();
             if (data.status != undefined && data.status == 404)
@@ -297,7 +260,6 @@ class UserManagementService implements IUserManagement {
             return [userId, rolesReq.org_id, rolemap.get(role)];
         });
         let queryStr = format('INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', valueArr);
-        console.log(queryStr);
         return await dbClient.query(queryStr)
             .then(res => {
                 return true;
@@ -313,39 +275,56 @@ class UserManagementService implements IUserManagement {
             });
     }
 
-    async getOrganizations(searchText: string, page_no: number, page_size: number): Promise<OrganizationDto[]> {
-        let organizationList: OrganizationDto[] = [];
-        let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("organization", ["name", "id", "address", "url", "phone"]);
-        queryObject.buildPagination(page_no, page_size);
-        queryObject.buildOrder("name", SqlORder.ASC);
-        //Add conditions
-        if (searchText != undefined && searchText.length != 0) {
-            queryObject.condition(` name LIKE $${queryObject.paramCouter++} `, searchText + '%');
+    /**
+     * Revokes the user permissions
+     * @param rolesReq roles to be revoked
+     * @param requestingUserId userd id for which roles to be revoked
+     * @returns boolean flag
+     */
+    async revokeUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
+        let userProfile = new UserProfile();
+
+        //Fetch permissioned user profile from keycloak
+        try {
+            const data: any = await (await fetch(`${userProfileUrl}?userName=${rolesReq.user_name}`)).json();
+            if (data.status != undefined && data.status == 404)
+                throw new Error();
+            else userProfile = new UserProfile(data);
+        } catch (error: any) {
+            console.error(error);
+            throw new UserNotFoundException(rolesReq.user_name);
         }
 
-        let queryObj = <QueryConfig>{
-            text: queryObject.getQuery(),
-            values: queryObject.getValues()
+        //Check requesting user roles
+        let userRoles = await this.getUserRoles(requestingUserId);
+        let isAdmin = userRoles.findIndex(x => x == Role.TDEI_ADMIN) != -1;
+
+        if (!isAdmin) {
+            //Check POC role if exists, as it is restricted to Admin only
+            if (rolesReq.roles.findIndex(x => adminRestrictedRoles.indexOf(x.toLocaleLowerCase()) != -1) != -1)
+                throw new HttpException(400, "Admin restricted roles cannot be revoked.");
         }
 
-        return await dbClient.query(queryObj)
-            .then(res => {
-                res.rows.forEach(x => {
-                    let org: OrganizationDto = new OrganizationDto();
-                    org.name = x.name;
-                    org.id = x.id;
-                    org.address = x.address;
-                    org.url = x.url;
-                    org.phone = x.phone;
-                    organizationList.push(org);
+        //Get the role ids for role name provided
+        let rolemap = await this.getRolesByNames(rolesReq.roles);
+
+        //Get the user_id from user_entity table
+        let userId = userProfile.id;
+        rolesReq.roles.forEach(async role => {
+            const query = {
+                text: 'DELETE FROM user_roles WHERE user_id = $1 AND org_id = $2 AND role_id = $3 ',
+                values: [userId, rolesReq.org_id, rolemap.get(role)],
+            }
+            await dbClient.query(query)
+                .catch(e => {
+                    if (e instanceof ForeignKeyDbException) {
+                        throw new ForeignKeyException((e as ForeignKeyDbException).message);
+                    }
+                    throw e;
                 });
-                return organizationList;
-            })
-            .catch(e => {
-                throw e;
-            });
+        });
 
+        return true;
     }
 }
 

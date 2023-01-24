@@ -14,8 +14,8 @@ export function Ok(response: Response, body?: AppHttpResponse): Response {
  * @param response The http-response to be modified.
  * @param body An optional body that will be sent within the response' body.
  */
-export function BadRequest(response: Response, body?: AppHttpResponse): Response {
-  return body ? response.status(400).send(body) : response.status(400).send();
+export function BadRequest(response: Response, message?: string): Response {
+  return message ? response.status(400).send(message) : response.status(400).send();
 }
 
 
