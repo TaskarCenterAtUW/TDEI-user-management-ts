@@ -1,4 +1,4 @@
-import { IsNotEmpty, ValidateNested } from "class-validator";
+import { IsNotEmpty, IsOptional, ValidateNested } from "class-validator";
 import { Coordinates, Polygon } from "../polygon-model";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
@@ -13,6 +13,7 @@ export class OrganizationDto extends BaseDto {
     url!: string;
     @IsNotEmpty()
     address!: string;
+    @IsOptional()
     @IsValidPolygon()
     @ValidateNested({ each: true })
     @Type(() => Coordinates)
