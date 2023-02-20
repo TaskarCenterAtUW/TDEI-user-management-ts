@@ -2,10 +2,11 @@ import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { ServiceDto } from "../model/dto/service-dto";
 import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
-import { Polygon } from "../model/polygon-model";
+import { Polygon, PolygonDto } from "../model/polygon-model";
 import { IFlexService } from "./interface/flex-service-interface";
 import { DynamicQueryObject, SqlORder } from "../database/query-object";
 import { QueryConfig } from "pg";
+import { ServiceQueryParams } from "../model/params/service-get-query-params";
 
 class FlexService implements IFlexService {
 
@@ -24,17 +25,8 @@ class FlexService implements IFlexService {
     }
 
     async createService(service: ServiceDto): Promise<String> {
-        let polygonExists = service.coordinates ? true : false;
-        const query = {
-            text: `INSERT INTO service(name, owner_org ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})  RETURNING service.service_id`,
-            values: [service.name, service.org_id],
-        }
-        if (polygonExists) {
-            let polygon = new Polygon();
-            polygon.setGeoCords(service.coordinates);
-            query.values.push(JSON.stringify(polygon));
-        }
-        return await dbClient.query(query)
+
+        return await dbClient.query(service.getInsertQuery())
             .then(res => {
                 return res.rows[0].service_id;
             })
@@ -50,17 +42,8 @@ class FlexService implements IFlexService {
     }
 
     async updateService(service: ServiceDto): Promise<boolean> {
-        let polygonExists = service.coordinates ? true : false;
-        const query = {
-            text: `UPDATE service set name = $1 ${polygonExists ? ', polygon = $3 ' : ''} WHERE service_id = $2`,
-            values: [service.name, service.service_id],
-        }
-        if (polygonExists) {
-            let polygon = new Polygon();
-            polygon.setGeoCords(service.coordinates);
-            query.values.push(JSON.stringify(polygon));
-        }
-        return await dbClient.query(query)
+
+        return await dbClient.query(service.getUpdateQuery())
             .then(res => {
                 return true;
             })
@@ -72,37 +55,24 @@ class FlexService implements IFlexService {
             });
     }
 
-    async getService(serviceId: string, searchText: string, page_no: number, page_size: number): Promise<ServiceDto[]> {
-        let serviceList: ServiceDto[] = [];
-        let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("service", ["service_id", "name", "owner_org", "ST_AsGeoJSON(polygon) as polygon"]);
-        queryObject.buildPagination(page_no, page_size);
-        queryObject.buildOrder("name", SqlORder.ASC);
-        //Add conditions
-        if (searchText != undefined && searchText.length != 0) {
-            queryObject.condition(` name LIKE $${queryObject.paramCouter++} `, searchText + '%');
-        }
-        if (serviceId != undefined && serviceId.length != 0) {
-            queryObject.condition(` service_id = $${queryObject.paramCouter++} `, serviceId);
-        }
-        queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
+    async getService(params: ServiceQueryParams): Promise<ServiceDto[]> {
+        let queryObject = params.getQueryObject();
 
         let queryObj = <QueryConfig>{
             text: queryObject.getQuery(),
             values: queryObject.getValues()
         }
 
+        let list: ServiceDto[] = [];
         return await dbClient.query(queryObj)
             .then(res => {
                 res.rows.forEach(x => {
-                    let service: ServiceDto = new ServiceDto();
-                    service.name = x.name;
-                    service.org_id = x.owner_org;
-                    service.service_id = x.service_id;
-                    service.coordinates = x.polygon != null ? (new Polygon(JSON.parse(x.polygon))).getCoordinatePoints() : [];
-                    serviceList.push(service);
+                    let service = ServiceDto.from(x);
+                    if (service.polygon)
+                        service.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
+                    list.push(service);
                 });
-                return serviceList;
+                return list;
             })
             .catch(e => {
                 throw e;

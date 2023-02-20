@@ -5,7 +5,7 @@ import { AppHttpResponse } from './app-http-response.model';
  * @param response The http-response to be modified.
  * @param body An optional body that will be sent within the response' body.
  */
-export function Ok(response: Response, body?: AppHttpResponse): Response {
+export function Ok(response: Response, body?: AppHttpResponse | any): Response {
   return body ? response.send(body) : response.send();
 }
 

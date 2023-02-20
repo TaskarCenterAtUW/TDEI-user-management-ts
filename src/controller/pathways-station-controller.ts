@@ -6,6 +6,7 @@ import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import pathwaysStationService from "../service/pathways-station-service";
+import { StationQueryParams } from "../model/params/station-get-query-params";
 
 class PathwaysStationController implements IController {
     public path = '';
@@ -43,7 +44,7 @@ class PathwaysStationController implements IController {
     public createStation = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let station = new StationDto(request.body);
+            let station = StationDto.from(request.body);
             pathwaysStationService.createStation(station).then((user) => {
                 Ok(response, { data: user });
             }).catch((error: any) => {
@@ -59,7 +60,7 @@ class PathwaysStationController implements IController {
     public updateStation = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let station = new StationDto(request.body);
+            let station = StationDto.from(request.body);
             //Check for station Id for update
             if (!station.station_id || station.station_id == "0")
                 BadRequest(response, "Station Id not provided.")
@@ -78,12 +79,12 @@ class PathwaysStationController implements IController {
     public getStation = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
 
-            let searchText = request.query.searchText?.toString() ?? "";
-            let stationId = request.query.station_id?.toString() ?? "";
-            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            var params = StationQueryParams.from(request.query);
 
-            pathwaysStationService.getStation(stationId, searchText, page_no, page_size).then((result) => {
+            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+
+            pathwaysStationService.getStation(params).then((result) => {
                 response.send(result);
             }).catch((error: any) => {
                 console.error('Error fetching the gtfs pathways stations');

@@ -6,6 +6,7 @@ import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import organizationService from "../service/organization-service";
+import { OrgQueryParams } from "../model/params/organization-get-query-params";
 
 class OrganizationController implements IController {
     public path = '';
@@ -29,7 +30,7 @@ class OrganizationController implements IController {
 
             organizationService.setOrganizationStatus(orgId, status)
                 .then((success) => {
-                    Ok(response);
+                    Ok(response, success);
                 }).catch((error: any) => {
                     console.error('Error updating the organization.');
                     console.error(error);
@@ -42,13 +43,12 @@ class OrganizationController implements IController {
 
     public getOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
+            var params = OrgQueryParams.from(request.query);
 
-            let searchText = request.query.searchText?.toString() ?? "";
-            let orgId = request.query.org_id?.toString() ?? "";
-            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            organizationService.getOrganizations(orgId, searchText, page_no, page_size).then((result) => {
+            organizationService.getOrganizations(params).then((result) => {
                 response.send(result);
             }).catch((error: any) => {
                 console.error('Error fetching the organizations');
@@ -64,7 +64,7 @@ class OrganizationController implements IController {
         try {
             //Model validation happens at the middleware.
             //Transform the body to DTO
-            let organization = new OrganizationDto(request.body);
+            let organization = OrganizationDto.from(request.body);
             organizationService.createOrganization(organization).then((org) => {
                 Ok(response, { data: org });
             }).catch((error: any) => {
@@ -81,7 +81,7 @@ class OrganizationController implements IController {
         try {
             //Model validation happens at the middleware.
             //Transform the body to DTO
-            let organization = new OrganizationDto(request.body);
+            let organization = OrganizationDto.from(request.body);
 
             //Check for Organization Id for update
             if (!organization.org_id || organization.org_id == "0")

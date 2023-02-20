@@ -77,7 +77,7 @@ class UserManagementController implements IController {
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
-            let loginBody = new LoginDto(request.body);
+            let loginBody = LoginDto.from(request.body);
             userManagementService.login(loginBody).then((token) => {
                 response.send(token)
             }).catch((error: any) => {
