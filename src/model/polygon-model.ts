@@ -1,35 +1,24 @@
-import { IsLatitude, IsNotEmpty } from "class-validator";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 
-export class Coordinates {
-    @IsNotEmpty()
-    @IsLatitude()
-    longitude!: number;
-    @IsNotEmpty()
-    @IsLatitude()
-    latitude!: number;
-}
 
-export class Polygon {
+export class Polygon extends AbstractDomainEntity {
     @Prop()
     type: string = "Polygon";
     @Prop()
-    coordinates: number[][][] = [];
+    coordinates: Array<Array<number[]>> = [];
 
     constructor(init?: Partial<Polygon>) {
+        super();
         Object.assign(this, init);
     }
+}
 
-    setGeoCords(params: Coordinates[]) {
-        let points = params.map(x => [x.longitude, x.latitude]);
-        this.coordinates.push(points);
-    }
+export class PolygonDto extends AbstractDomainEntity {
+    @Prop()
+    coordinates: Array<Array<number[]>> = [];
 
-    getCoordinatePoints(): Coordinates[] {
-        let coordinates: Coordinates[] = [];
-        this.coordinates.pop()?.forEach(x => {
-            coordinates.push(<Coordinates>{ longitude: x[0], latitude: x[1] });
-        });
-        return coordinates;
+    constructor(init?: Partial<PolygonDto>) {
+        super();
+        Object.assign(this, init);
     }
 }

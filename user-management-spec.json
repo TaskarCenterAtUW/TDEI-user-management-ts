@@ -279,6 +279,21 @@
                         }
                     },
                     {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
+                        "required": false,
+                        "schema": {
+                            "maxItems": 4,
+                            "minItems": 4,
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            }
+                        }
+                    },
+                    {
                         "name": "page_no",
                         "in": "query",
                         "description": "Page number to fetch",
@@ -481,6 +496,21 @@
                         "required": false,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
+                        "required": false,
+                        "schema": {
+                            "maxItems": 4,
+                            "minItems": 4,
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            }
                         }
                     },
                     {
@@ -851,6 +881,21 @@
                         }
                     },
                     {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
+                        "required": false,
+                        "schema": {
+                            "maxItems": 4,
+                            "minItems": 4,
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            }
+                        }
+                    },
+                    {
                         "name": "page_no",
                         "in": "query",
                         "description": "Page number to fetch",
@@ -1176,28 +1221,8 @@
                         "type": "string",
                         "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
                     },
-                    "coordinates": {
-                        "type": "array",
-                        "minItems": 4,
-                        "description": "Polygon coordinates",
-                        "items": {
-                            "type": "object",
-                            "description": "Coordinate points",
-                            "properties": {
-                                "longitude": {
-                                    "type": "number",
-                                    "description": "Longitude"
-                                },
-                                "latitude": {
-                                    "type": "number",
-                                    "description": "Latitude"
-                                }
-                            },
-                            "required": [
-                                "longitude",
-                                "latitude"
-                            ]
-                        }
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
                     }
                 },
                 "description": "Describes a gtfs pathways station."
@@ -1222,28 +1247,8 @@
                         "type": "string",
                         "description": "Name of the service."
                     },
-                    "coordinates": {
-                        "type": "array",
-                        "minItems": 4,
-                        "description": "Polygon coordinates",
-                        "items": {
-                            "type": "object",
-                            "description": "Coordinate points",
-                            "properties": {
-                                "longitude": {
-                                    "type": "number",
-                                    "description": "Longitude"
-                                },
-                                "latitude": {
-                                    "type": "number",
-                                    "description": "Latitude"
-                                }
-                            },
-                            "required": [
-                                "longitude",
-                                "latitude"
-                            ]
-                        }
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
                     }
                 },
                 "description": "Describes a gtfs flex service."
@@ -1331,31 +1336,29 @@
                         "type": "string",
                         "description": "Address of the transit organization."
                     },
-                    "coordinates": {
-                        "type": "array",
-                        "minItems": 4,
-                        "description": "Polygon coordinates",
-                        "items": {
-                            "type": "object",
-                            "description": "Coordinate points",
-                            "properties": {
-                                "longitude": {
-                                    "type": "number",
-                                    "description": "Longitude"
-                                },
-                                "latitude": {
-                                    "type": "number",
-                                    "description": "Latitude"
-                                }
-                            },
-                            "required": [
-                                "longitude",
-                                "latitude"
-                            ]
-                        }
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
                     }
                 },
                 "description": "Describes an Organization."
+            },
+            "Polygon": {
+                "type": "object",
+                "properties": {
+                    "coordinates": {
+                        "type": "array",
+                        "items": {
+                            "type": "array",
+                            "items": {
+                                "type": "array",
+                                "items": {
+                                    "type": "number",
+                                    "format": "double"
+                                }
+                            }
+                        }
+                    }
+                }
             }
         },
         "securitySchemes": {

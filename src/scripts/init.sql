@@ -1,4 +1,5 @@
-
+CREATE EXTENSION IF NOT EXISTS postgis;
+    
     -- Table: public.organization
 
     -- DROP TABLE IF EXISTS public.organization;
@@ -142,6 +143,16 @@ CREATE TABLE IF NOT EXISTS public.station
 
     TABLESPACE pg_default;
 
+
+CREATE INDEX IF NOT EXISTS org_geom_idx
+  ON organization
+  USING GIST (polygon);
+CREATE INDEX IF NOT EXISTS service_geom_idx
+    ON public.service USING gist
+    (polygon);
+CREATE INDEX IF NOT EXISTS station_geom_idx
+    ON public.station USING gist
+    (polygon);
 
 
 

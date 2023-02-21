@@ -6,6 +6,7 @@ import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import flexService from "../service/flex-service";
+import { ServiceQueryParams } from "../model/params/service-get-query-params";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -43,7 +44,7 @@ class FlexServiceController implements IController {
     public createService = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let service = new ServiceDto(request.body);
+            let service = ServiceDto.from(request.body);
             flexService.createService(service)
                 .then((service) => {
                     Ok(response, { data: service });
@@ -60,7 +61,7 @@ class FlexServiceController implements IController {
     public updateService = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let station = new ServiceDto(request.body);
+            let station = ServiceDto.from(request.body);
             //Check for station Id for update
             if (!station.service_id || station.service_id == "0")
                 BadRequest(response, "Service Id not provided.")
@@ -79,12 +80,12 @@ class FlexServiceController implements IController {
     public getService = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
 
-            let searchText = request.query.searchText?.toString() ?? "";
-            let serviceId = request.query.service_id?.toString() ?? "";
-            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            var params = ServiceQueryParams.from(request.query);
 
-            flexService.getService(serviceId, searchText, page_no, page_size).then((result) => {
+            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+
+            flexService.getService(params).then((result) => {
                 response.send(result);
             }).catch((error: any) => {
                 console.error('Error fetching the gtfs flex service');
