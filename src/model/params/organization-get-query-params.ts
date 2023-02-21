@@ -33,7 +33,11 @@ export class OrgQueryParams extends AbstractDomainEntity {
      */
     getQueryObject() {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("organization", ["name", "org_id", "address", "url", "phone", "ST_AsGeoJSON(polygon) as polygon"]);
+        queryObject.buildSelectRaw(`Select o.*, ue.email, ue.first_name, ue.last_name, ue.username 
+        from organization o 
+        inner join user_roles ur on o.org_id = ur.org_id
+        inner join roles r on ur.role_id = r.role_id AND r.name='poc'
+        inner join keycloak.user_entity ue on ur.user_id = ue.id`.replace(/\n/g, ""));
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
