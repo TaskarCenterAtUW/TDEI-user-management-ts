@@ -6,6 +6,7 @@ import { QueryConfig } from "pg";
 import { IOrganizationService } from "./interface/organization-interface";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
 import { PolygonDto } from "../model/polygon-model";
+import { OrganizationPOCDto } from "../model/dto/organization-poc-dto";
 
 
 class OrganizationService implements IOrganizationService {
@@ -62,10 +63,11 @@ class OrganizationService implements IOrganizationService {
         return await dbClient.query(queryObj)
             .then(res => {
                 res.rows.forEach(x => {
-                    let flex = OrganizationDto.from(x);
-                    if (flex.polygon)
-                        flex.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
-                    list.push(flex);
+                    let org = OrganizationDto.from(x);
+                    if (org.polygon)
+                        org.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
+                    org.poc = OrganizationPOCDto.from(x);
+                    list.push(org);
                 });
                 return list;
             })

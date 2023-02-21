@@ -29,6 +29,9 @@ export class DynamicQueryObject {
     buildSelect(tableName: string, columns: string[]) {
         this._select = `SELECT ${columns.join(',')} FROM ${tableName}`;
     }
+    buildSelectRaw(query: string) {
+        this._select = query;
+    }
     private buildWhere() {
         if (this.conditions.length == 0) return "";
         return ` WHERE ${this.conditions.join(" AND ")}`;
