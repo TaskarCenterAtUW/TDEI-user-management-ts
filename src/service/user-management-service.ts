@@ -259,7 +259,7 @@ class UserManagementService implements IUserManagement {
         let valueArr = rolesReq.roles.map(role => {
             return [userId, rolesReq.org_id, rolemap.get(role)];
         });
-        let queryStr = format('INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', valueArr);
+        let queryStr = format('DELETE FROM user_roles WHERE user_id = %L AND org_id = %L; INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', userId, rolesReq.org_id, valueArr);
         return await dbClient.query(queryStr)
             .then(res => {
                 return true;
