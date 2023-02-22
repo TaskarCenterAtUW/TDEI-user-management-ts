@@ -4,6 +4,7 @@ export enum SqlORder {
 
 export class DynamicQueryObject {
     private _select!: string;
+    private _group!: string;
     private _limit: string = "";
     private _offset: string = "";
     private _order: string = "";
@@ -32,6 +33,9 @@ export class DynamicQueryObject {
     buildSelectRaw(query: string) {
         this._select = query;
     }
+    buildGroupRaw(query: string) {
+        this._group = query;
+    }
     private buildWhere() {
         if (this.conditions.length == 0) return "";
         return ` WHERE ${this.conditions.join(" AND ")}`;
@@ -55,7 +59,7 @@ export class DynamicQueryObject {
     }
 
     getQuery() {
-        return this._select.concat(this.buildWhere()).concat(this._order).concat(this._limit).concat(this._offset);
+        return this._select.concat(this.buildWhere()).concat(this._group).concat(this._order).concat(this._limit).concat(this._offset);
     }
 
     getValues() {

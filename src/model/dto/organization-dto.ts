@@ -26,7 +26,7 @@ export class OrganizationDto extends BaseDto {
     @Prop()
     polygon!: PolygonDto;
     @Prop()
-    poc!: OrganizationPOCDto;
+    poc!: OrganizationPOCDto[];
 
     constructor(init?: Partial<OrganizationDto>) {
         super();
