@@ -66,7 +66,14 @@ class OrganizationService implements IOrganizationService {
                     let org = OrganizationDto.from(x);
                     if (org.polygon)
                         org.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
-                    org.poc = OrganizationPOCDto.from(x);
+
+                    if (x.userdetails.length > 0) {
+                        org.poc = [];
+                        x.userdetails.forEach((u: any) => {
+                            org.poc.push(OrganizationPOCDto.from(u));
+                        });
+                    }
+
                     list.push(org);
                 });
                 return list;
