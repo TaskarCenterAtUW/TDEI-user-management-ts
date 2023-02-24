@@ -1034,6 +1034,85 @@
                 ]
             }
         },
+        "/api/v1/organization/{orgId}/users": {
+            "get": {
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "Gets the organization users in the TDEI system ",
+                "description": "Gets the organization users in the TDEI system .",
+                "operationId": "getOrganizationUsers",
+                "parameters": [
+                    {
+                        "name": "orgId",
+                        "in": "path",
+                        "description": "Organization id for which users to be fetched",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Search by organization name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of organization users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/OrgUser"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
         "/api/v1/organization/{organizationId}/active/{status}": {
             "delete": {
                 "tags": [
@@ -1338,9 +1417,40 @@
                     },
                     "polygon": {
                         "$ref": "#/components/schemas/Polygon"
+                    },
+                    "poc": {
+                        "type": "array",
+                        "description": "Organization POC details",
+                        "items": {
+                            "$ref": "#/components/schemas/POC",
+                            "description": "POC details"
+                        }
                     }
                 },
                 "description": "Describes an Organization."
+            },
+            "POC": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "username",
+                    "email"
+                ]
             },
             "Polygon": {
                 "type": "object",
@@ -1359,6 +1469,44 @@
                         }
                     }
                 }
+            },
+            "OrgUser": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "null"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "user_id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "username",
+                    "phone",
+                    "roles"
+                ]
             }
         },
         "securitySchemes": {

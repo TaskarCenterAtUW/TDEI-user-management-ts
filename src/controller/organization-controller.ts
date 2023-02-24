@@ -7,6 +7,7 @@ import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import organizationService from "../service/organization-service";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
+import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
 
 class OrganizationController implements IController {
     public path = '';
@@ -20,6 +21,7 @@ class OrganizationController implements IController {
         this.router.put(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.updateOrganization);
         this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
         this.router.get(`${this.path}/api/v1/organization`, authorizationMiddleware([]), this.getOrganization);
+        this.router.get(`${this.path}/api/v1/organization/:orgId/users`, authorizationMiddleware([]), this.getOrganizationUsers);
         this.router.delete(`${this.path}/api/v1/organization/:orgId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteService);
     }
 
@@ -36,6 +38,26 @@ class OrganizationController implements IController {
                     console.error(error);
                     next(error);
                 });
+        } catch (error) {
+            next(error);
+        }
+    }
+
+    public getOrganizationUsers = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            var params = OrgUserQueryParams.from(request.query);
+            params.orgId = request.params.orgId;
+
+            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+
+            organizationService.getOrganizationUsers(params).then((result) => {
+                response.send(result);
+            }).catch((error: any) => {
+                console.error('Error fetching the organization users');
+                console.error(error);
+                next(error);
+            });
         } catch (error) {
             next(error);
         }
