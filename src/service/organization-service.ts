@@ -7,6 +7,8 @@ import { IOrganizationService } from "./interface/organization-interface";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
 import { PolygonDto } from "../model/polygon-model";
 import { OrganizationPOCDto } from "../model/dto/organization-poc-dto";
+import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
+import { OrgUserDto } from "../model/dto/org-user-dto";
 
 
 class OrganizationService implements IOrganizationService {
@@ -82,6 +84,33 @@ class OrganizationService implements IOrganizationService {
                 throw e;
             });
     }
+
+    async getOrganizationUsers(params: OrgUserQueryParams): Promise<OrgUserDto[]> {
+        let queryObject = params.getQueryObject();
+        let queryObj = <QueryConfig>{
+            text: queryObject.getQuery(),
+            values: queryObject.getValues()
+        }
+        let list: OrgUserDto[] = [];
+        return await dbClient.query(queryObj)
+            .then(res => {
+                res.rows.forEach(x => {
+                    let user = OrgUserDto.from(x);
+                    if (x.attributes && x.attributes.length > 0) {
+                        let phoneObj = x.attributes.find((a: any) => a.name = "phone");
+                        if (phoneObj) {
+                            user.phone = phoneObj.value;
+                        }
+                    }
+                    list.push(user);
+                });
+                return list;
+            })
+            .catch(e => {
+                throw e;
+            });
+    }
+
 }
 
 const organizationService: IOrganizationService = new OrganizationService();
