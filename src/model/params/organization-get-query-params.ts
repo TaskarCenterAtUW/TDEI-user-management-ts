@@ -35,7 +35,7 @@ export class OrgQueryParams extends AbstractDomainEntity {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
         queryObject.buildSelectRaw(`Select o.org_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.email, 
         COALESCE(json_agg(json_build_object('email', ue.email, 'username', ue.username, 'first_name', 
-                                   ue.first_name,'last_name', ue.first_name,'enabled', ue.enabled) 
+                                   ue.first_name,'last_name', ue.last_name,'enabled', ue.enabled) 
                 ) FILTER (WHERE ue.username IS NOT NULL), '[]')
          as userDetails 
         from organization o         
