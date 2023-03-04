@@ -7,6 +7,7 @@ import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import pathwaysStationService from "../service/pathways-station-service";
 import { StationQueryParams } from "../model/params/station-get-query-params";
+import { StationUpdateDto } from "../model/dto/station-update-dto";
 
 class PathwaysStationController implements IController {
     public path = '';
@@ -18,7 +19,7 @@ class PathwaysStationController implements IController {
 
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
-        this.router.put(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.updateStation);
+        this.router.put(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationUpdateDto), this.updateStation);
         this.router.get(`${this.path}/api/v1/station`, authorizationMiddleware([], true), this.getStation);
         this.router.delete(`${this.path}/api/v1/station/:stationId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteStation);
     }
@@ -60,10 +61,12 @@ class PathwaysStationController implements IController {
     public updateStation = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let station = StationDto.from(request.body);
-            //Check for station Id for update
-            if (!station.station_id || station.station_id == "0")
-                BadRequest(response, "Station Id not provided.")
+            let station = StationUpdateDto.from(request.body);
+            //Verify input
+            let verifyResult = station.verifyInput();
+            if (!verifyResult.valid)
+                return BadRequest(response, verifyResult.message);
+
             pathwaysStationService.updateStation(station).then((result) => {
                 Ok(response);
             }).catch((error: any) => {

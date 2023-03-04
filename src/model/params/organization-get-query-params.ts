@@ -8,7 +8,7 @@ export class OrgQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsOptional()
     @Prop()
-    orgId: string | undefined;
+    org_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
@@ -47,10 +47,10 @@ export class OrgQueryParams extends AbstractDomainEntity {
         queryObject.buildOrder("o.name", SqlORder.ASC);
         //Add conditions
         if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` o.name LIKE $${queryObject.paramCouter++} `, this.searchText + '%');
+            queryObject.condition(` o.name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
-        if (this.orgId != undefined && this.orgId.length != 0) {
-            queryObject.condition(` ur.org_id = $${queryObject.paramCouter++} `, this.orgId);
+        if (this.org_id != undefined && this.org_id.length != 0) {
+            queryObject.condition(` ur.org_id = $${queryObject.paramCouter++} `, this.org_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(` o.polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

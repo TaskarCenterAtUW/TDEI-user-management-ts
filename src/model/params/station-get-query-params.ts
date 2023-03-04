@@ -8,7 +8,7 @@ export class StationQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsOptional()
     @Prop()
-    stationId: string | undefined;
+    station_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
@@ -38,10 +38,10 @@ export class StationQueryParams extends AbstractDomainEntity {
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
         if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` name LIKE $${queryObject.paramCouter++} `, this.searchText + '%');
+            queryObject.condition(` name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
-        if (this.stationId != undefined && this.stationId.length != 0) {
-            queryObject.condition(` station_id = $${queryObject.paramCouter++} `, this.stationId);
+        if (this.station_id != undefined && this.station_id.length != 0) {
+            queryObject.condition(` station_id = $${queryObject.paramCouter++} `, this.station_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(`polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

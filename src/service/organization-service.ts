@@ -6,9 +6,10 @@ import { QueryConfig } from "pg";
 import { IOrganizationService } from "./interface/organization-interface";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
 import { PolygonDto } from "../model/polygon-model";
-import { OrganizationPOCDto } from "../model/dto/organization-poc-dto";
 import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
 import { OrgUserDto } from "../model/dto/org-user-dto";
+import { OrganizationListResponse, PocDetails } from "../model/dto/poc-details-dto";
+import { PocRequestDto } from "../model/dto/poc-req";
 
 
 class OrganizationService implements IOrganizationService {
@@ -55,24 +56,24 @@ class OrganizationService implements IOrganizationService {
             });
     }
 
-    async getOrganizations(params: OrgQueryParams): Promise<OrganizationDto[]> {
+    async getOrganizations(params: OrgQueryParams): Promise<OrganizationListResponse[]> {
         let queryObject = params.getQueryObject();
         let queryObj = <QueryConfig>{
             text: queryObject.getQuery(),
             values: queryObject.getValues()
         }
-        let list: OrganizationDto[] = [];
+        let list: OrganizationListResponse[] = [];
         return await dbClient.query(queryObj)
             .then(res => {
                 res.rows.forEach(x => {
-                    let org = OrganizationDto.from(x);
+                    let org = OrganizationListResponse.from(x);
                     if (org.polygon)
                         org.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
 
                     org.poc = [];
                     if (x.userdetails.length > 0) {
                         x.userdetails.forEach((u: any) => {
-                            org.poc.push(OrganizationPOCDto.from(u));
+                            org.poc.push(PocDetails.from(u));
                         });
                     }
 

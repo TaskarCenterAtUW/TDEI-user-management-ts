@@ -7,6 +7,7 @@ import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import flexService from "../service/flex-service";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
+import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -18,7 +19,7 @@ class FlexServiceController implements IController {
 
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
-        this.router.put(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.updateService);
+        this.router.put(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceUpdateDto), this.updateService);
         this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true), this.getService);
         this.router.delete(`${this.path}/api/v1/service/:serviceId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteService);
     }
@@ -61,10 +62,12 @@ class FlexServiceController implements IController {
     public updateService = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
-            let station = ServiceDto.from(request.body);
-            //Check for station Id for update
-            if (!station.service_id || station.service_id == "0")
-                BadRequest(response, "Service Id not provided.")
+            let station = ServiceUpdateDto.from(request.body);
+            //Verify input
+            let verifyResult = station.verifyInput();
+            if (!verifyResult.valid)
+                return BadRequest(response, verifyResult.message);
+
             flexService.updateService(station).then((result) => {
                 Ok(response);
             }).catch((error: any) => {

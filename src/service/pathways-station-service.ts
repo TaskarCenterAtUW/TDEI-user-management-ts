@@ -1,11 +1,12 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { StationDto } from "../model/dto/station-dto";
-import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
+import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
 import { PolygonDto } from "../model/polygon-model";
 import { IPathwaysStationService } from "./interface/pathways-station-interface";
 import { QueryConfig } from "pg";
 import { StationQueryParams } from "../model/params/station-get-query-params";
+import { StationUpdateDto } from "../model/dto/station-update-dto";
 
 class PathwaysStationService implements IPathwaysStationService {
 
@@ -25,7 +26,7 @@ class PathwaysStationService implements IPathwaysStationService {
 
     async createStation(station: StationDto): Promise<String> {
 
-        return await dbClient.query(station.getUpdateQuery())
+        return await dbClient.query(station.getInsertQuery())
             .then(res => {
                 return res.rows[0].station_id;
             })
@@ -40,10 +41,12 @@ class PathwaysStationService implements IPathwaysStationService {
             });
     }
 
-    async updateStation(station: StationDto): Promise<boolean> {
+    async updateStation(station: StationUpdateDto): Promise<boolean> {
 
-        return await dbClient.query(station.getInsertQuery())
+        return await dbClient.query(station.getUpdateQuery())
             .then(res => {
+                if (res.rowCount == 0)
+                    throw new NoDataUpdatedException();
                 return true;
             })
             .catch(e => {
