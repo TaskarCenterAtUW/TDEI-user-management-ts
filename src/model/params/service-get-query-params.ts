@@ -8,7 +8,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsOptional()
     @Prop()
-    serviceId: string | undefined;
+    service_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
@@ -38,10 +38,10 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
         if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` name LIKE $${queryObject.paramCouter++} `, this.searchText + '%');
+            queryObject.condition(` name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
-        if (this.serviceId != undefined && this.serviceId.length != 0) {
-            queryObject.condition(` service_id = $${queryObject.paramCouter++} `, this.serviceId);
+        if (this.service_id != undefined && this.service_id.length != 0) {
+            queryObject.condition(` service_id = $${queryObject.paramCouter++} `, this.service_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(`polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

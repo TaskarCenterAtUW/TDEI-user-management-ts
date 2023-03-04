@@ -397,7 +397,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Station"
+                                "$ref": "#/components/schemas/StationUpdate"
                             }
                         }
                     },
@@ -622,7 +622,7 @@
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Service"
+                                "$ref": "#/components/schemas/ServiceUpdate"
                             }
                         }
                     },
@@ -922,7 +922,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Organization"
+                                    "$ref": "#/components/schemas/OrganizationList"
                                 }
                             }
                         }
@@ -1282,17 +1282,17 @@
             },
             "Station": {
                 "required": [
-                    "org_id",
+                    "owner_org",
                     "name"
                 ],
                 "type": "object",
                 "properties": {
-                    "service_id": {
+                    "station_id": {
                         "type": "string",
                         "description": "Station Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "org_id": {
+                    "owner_org": {
                         "type": "string",
                         "description": "Organization id of the station."
                     },
@@ -1306,19 +1306,41 @@
                 },
                 "description": "Describes a gtfs pathways station."
             },
-            "Service": {
+            "StationUpdate": {
                 "required": [
-                    "org_id, ",
+                    "station_id",
                     "name"
                 ],
                 "type": "object",
                 "properties": {
                     "station_id": {
                         "type": "string",
+                        "description": "Station Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes a gtfs pathways station update model."
+            },
+            "Service": {
+                "required": [
+                    "owner_org, ",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "service_id": {
+                        "type": "string",
                         "description": "Service Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "org_id": {
+                    "owner_org": {
                         "type": "string",
                         "description": "Organization id of the service."
                     },
@@ -1331,6 +1353,28 @@
                     }
                 },
                 "description": "Describes a gtfs flex service."
+            },
+            "ServiceUpdate": {
+                "required": [
+                    "service_id",
+                    "name"
+                ],
+                "type": "object",
+                "properties": {
+                    "service_id": {
+                        "type": "string",
+                        "description": "Service Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the service."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes a gtfs flex service update model."
             },
             "Response": {
                 "type": "object",
@@ -1392,6 +1436,36 @@
                     "name",
                     "address"
                 ],
+                "type": "object",
+                "properties": {
+                    "org_id": {
+                        "type": "string",
+                        "description": "Organization Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the organization."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the organization for communication."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Url of the transit organization."
+                    },
+                    "address": {
+                        "type": "string",
+                        "description": "Address of the transit organization."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes an Organization."
+            },
+            "OrganizationList": {
                 "type": "object",
                 "properties": {
                     "org_id": {

@@ -5,12 +5,10 @@ import { Polygon, PolygonDto } from "../polygon-model";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
-export class StationDto extends BaseDto {
-    @Prop()
-    station_id: string = "0";
+export class StationUpdateDto extends BaseDto {
     @IsNotEmpty()
     @Prop()
-    owner_org!: string;
+    station_id: string = "0";
     @IsNotEmpty()
     @Prop()
     name!: string;
@@ -19,22 +17,34 @@ export class StationDto extends BaseDto {
     @Prop()
     polygon!: PolygonDto;
 
-    constructor(init?: Partial<StationDto>) {
+    constructor(init?: Partial<StationUpdateDto>) {
         super();
         Object.assign(this, init);
+    }
+
+    /**
+     * Verifying inputs
+     * @returns verify result
+     */
+    verifyInput(): { valid: boolean, message: string } {
+        if (!this.station_id || this.station_id == "0")
+            return { valid: false, message: "Station Id not provided." };
+
+        //default true
+        return { valid: true, message: "" };
     }
 
     /**
    * Builds the insert QueryConfig object
    * @returns QueryConfig object
    */
-    getInsertQuery(): QueryConfig {
-        let polygonExists = this.polygon ? true : false;
+    getUpdateQuery(): QueryConfig {
         const queryObject = {
-            text: `INSERT INTO station(owner_org, name ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})   RETURNING station.station_id`,
-            values: [this.owner_org, this.name],
+            text: `UPDATE station set name = $2  ${this.polygon ? ', polygon = $3 ' : ''} WHERE station_id = $1`,
+            values: [this.station_id, this.name],
         }
-        if (polygonExists) {
+        //3rd param
+        if (this.polygon) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
         }
         return queryObject;

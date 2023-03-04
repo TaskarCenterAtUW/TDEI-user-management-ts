@@ -37,13 +37,13 @@ export class OrgUserQueryParams extends AbstractDomainEntity {
         queryObject.buildOrder("ue.first_name", SqlORder.ASC);
         //Add conditions
         if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` fullname LIKE $${queryObject.paramCouter++} `, this.searchText + '%');
+            queryObject.condition(` fullname ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
         if (this.orgId != undefined && this.orgId.length != 0) {
             queryObject.condition(` ur.org_id = $${queryObject.paramCouter++} `, this.orgId);
         }
 
-        queryObject.buildGroupRaw("group by ue.id, ue.first_name, ue.last_name, ue.email, ue.username, ur.org_id ");
+        queryObject.buildGroupRaw(" group by ue.id, ue.first_name, ue.last_name, ue.email, ue.username, ur.org_id ");
 
         return queryObject;
     }

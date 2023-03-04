@@ -59,7 +59,7 @@ export class DynamicQueryObject {
     }
 
     getQuery() {
-        return this._select.concat(this.buildWhere()).concat(this._group).concat(this._order).concat(this._limit).concat(this._offset);
+        return this._select.concat(this.buildWhere()).concat(this._group ?? "").concat(this._order).concat(this._limit).concat(this._offset);
     }
 
     getValues() {

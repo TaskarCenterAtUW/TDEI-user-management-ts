@@ -1,12 +1,12 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { ServiceDto } from "../model/dto/service-dto";
-import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
-import { Polygon, PolygonDto } from "../model/polygon-model";
+import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
+import { PolygonDto } from "../model/polygon-model";
 import { IFlexService } from "./interface/flex-service-interface";
-import { DynamicQueryObject, SqlORder } from "../database/query-object";
 import { QueryConfig } from "pg";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
+import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 
 class FlexService implements IFlexService {
 
@@ -41,10 +41,12 @@ class FlexService implements IFlexService {
             });
     }
 
-    async updateService(service: ServiceDto): Promise<boolean> {
+    async updateService(service: ServiceUpdateDto): Promise<boolean> {
 
         return await dbClient.query(service.getUpdateQuery())
             .then(res => {
+                if (res.rowCount == 0)
+                    throw new NoDataUpdatedException();
                 return true;
             })
             .catch(e => {

@@ -5,7 +5,6 @@ import { BaseDto } from "./base-dto";
 import { Prop } from "nodets-ms-core/lib/models";
 import { PolygonDto } from "../polygon-model";
 import { QueryConfig } from "pg";
-import { OrganizationPOCDto } from "./organization-poc-dto";
 
 export class OrganizationDto extends BaseDto {
     @Prop()
@@ -25,8 +24,6 @@ export class OrganizationDto extends BaseDto {
     @IsValidPolygon()
     @Prop()
     polygon!: PolygonDto;
-    @Prop()
-    poc!: OrganizationPOCDto[];
 
     constructor(init?: Partial<OrganizationDto>) {
         super();

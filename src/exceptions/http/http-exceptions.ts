@@ -30,6 +30,12 @@ export class UserNotFoundException extends HttpException {
     }
 }
 
+export class NoDataUpdatedException extends HttpException {
+    constructor() {
+        super(400, `Data not updated, may be input prams not valid.`);
+    }
+}
+
 
 
 
