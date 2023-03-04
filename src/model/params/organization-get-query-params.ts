@@ -39,8 +39,7 @@ export class OrgQueryParams extends AbstractDomainEntity {
                 ) FILTER (WHERE ue.username IS NOT NULL), '[]')
          as userDetails 
         from organization o         
-        left join user_roles ur on o.org_id = ur.org_id        
-        left join roles r on ur.role_id = r.role_id AND r.name='poc'        
+        left join user_roles ur on o.org_id = ur.org_id and ur.role_id = (select role_id from roles where name='poc' limit 1)       
         left join keycloak.user_entity ue on ur.user_id = ue.id         
         `.replace(/\n/g, ""));
         queryObject.buildPagination(this.page_no, this.page_size);
