@@ -10,6 +10,9 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     @Prop()
     service_id: string | undefined;
     @IsOptional()
+    @Prop()
+    owner_org: string | undefined;
+    @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
     @ArrayMaxSize(4)
@@ -42,6 +45,9 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         }
         if (this.service_id != undefined && this.service_id.length != 0) {
             queryObject.condition(` service_id = $${queryObject.paramCouter++} `, this.service_id);
+        }
+        if (this.owner_org != undefined && this.owner_org.length != 0) {
+            queryObject.condition(` owner_org = $${queryObject.paramCouter++} `, this.owner_org);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(`polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

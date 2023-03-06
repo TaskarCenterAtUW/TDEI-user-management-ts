@@ -279,6 +279,15 @@
                         }
                     },
                     {
+                        "name": "owner_org",
+                        "in": "query",
+                        "description": "Organization owner id.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
                         "name": "bbox",
                         "in": "query",
                         "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
@@ -493,6 +502,15 @@
                         "name": "searchText",
                         "in": "query",
                         "description": "Search by service name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "owner_org",
+                        "in": "query",
+                        "description": "Organization owner id.",
                         "required": false,
                         "schema": {
                             "type": "string"
