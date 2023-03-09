@@ -83,14 +83,18 @@ class UserManagementService implements IUserManagement {
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            const data = await result.json();
+            if (result.status != undefined && result.status != 200)
+                throw new HttpException(409, "User already exists with email " + user.email);
 
             if (result.status != undefined && result.status != 200)
-                throw new Error(data);
+                throw new Error();
 
+            const data = await result.json();
             userProfile = new UserProfile(data);
         } catch (error: any) {
             console.error(error);
+            if (error instanceof HttpException)
+                throw error;
             throw new Error("Error registering the user");
         }
         return userProfile;
