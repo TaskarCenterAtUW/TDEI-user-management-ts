@@ -20,7 +20,7 @@ class FlexServiceController implements IController {
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.put(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceUpdateDto), this.updateService);
-        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true), this.getService);
+        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true, true), this.getService);
         this.router.delete(`${this.path}/api/v1/service/:serviceId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteService);
     }
 

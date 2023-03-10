@@ -1,3 +1,6 @@
+import fetch from "node-fetch";
+import { environment } from "../environment/environment";
+import HttpException from "../exceptions/http/http-base-exception";
 
 export class Utility {
 
@@ -6,6 +9,13 @@ export class Utility {
             return req.headers.authorization.split(' ')[1];
         } else if (req.query && req.query.token) {
             return req.query.token;
+        }
+        return null;
+    }
+
+    public static extractSecret(req: any) {
+        if (req.headers['x-secret']) {
+            return req.headers['x-secret'];
         }
         return null;
     }
@@ -37,5 +47,27 @@ export class Utility {
         }
         );
         return target;
+    }
+
+    public static async verifySecret(secretToken: string): Promise<boolean> {
+        let secret = null;
+        try {
+            const result = await fetch(environment.secretVerifyUrl as string, {
+                method: 'put',
+                body: JSON.stringify(secretToken),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            if (result.status != undefined && result.status != 200)
+                throw new Error(await result.json());
+
+            const data = await result.json();
+
+            secret = data;
+        } catch (error: any) {
+            console.error(error);
+            throw new HttpException(400, "Failed to verify secret token");
+        }
+        return secret;
     }
 }
