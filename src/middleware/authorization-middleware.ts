@@ -10,13 +10,26 @@ import { Utility } from '../utility/utility';
 const permissionUrl: string = config.get('url.permission');
 const validateAccessTokenUrl: string = config.get('url.validate-access-token');
 
-function authorizationMiddleware(roles: string[], validateOrg?: boolean): RequestHandler {
+function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowInraCom?: boolean): RequestHandler {
     return async (req, res, next) => {
 
         let authToken = Utility.extractToken(req);
 
         if (authToken == null) {
+
+            if (allowInraCom) {
+                //Check if intranet communication
+                let secretToken = Utility.extractSecret(req);
+                if (secretToken != null) {
+                    let isValidated = await Utility.verifySecret(secretToken);
+                    if (isValidated) {
+                        next(); return;
+                    }
+                }
+            }
+
             next(new UnAuthenticated());
+            return;
         }
         else {
 
@@ -34,7 +47,7 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean): Reques
                     //Set request context
                     req.userId = decoded.sub;
                     if (validateOrg) {
-                        let org_id = req.body.org_id;
+                        let org_id = req.body.org_id ? req.body.org_id : req.body.owner_org;
                         params.append("agencyId", org_id);
                     }
 

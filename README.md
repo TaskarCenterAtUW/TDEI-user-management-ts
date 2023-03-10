@@ -12,14 +12,20 @@ The project is built on top of NodeJS framework. All the regular nuances for a N
 
 ### Local setup
 Step 1: Create .env file in root folder with below variables and specify values as required
-# Application configuration
-APPLICATION_PORT=8080
-# Databse configuration
-DATABASE_USER=
-DATABASE_HOST=localhost
-DATABASE_PASSWORD=
-DATABASE_DB=
-DATABASE_PORT=5433 
+
+|Name| Description |  
+|--|--|  
+| PROVIDER | Provider for cloud service or local |
+|QUEUECONNECTION | Queue connection string |
+|STORAGECONNECTION | Storage connection string|
+|APPLICATION_PORT |Port on which application will run|
+|DATABASE_USER | Keycloak secret from portal |  
+|DATABASE_HOST | Queue connection string |  
+|DATABASE_PASSWORD | Storage connection string|  
+|DATABASE_DB |Port on which application will run|  
+|DATABASE_PORT | Upload topic subscription name|  
+|AUTH_SECRET_TOKEN_GENERATE_URL | Secret token generate url|
+|AUTH_SECRET_TOKEN_VERIFY_URL | Secret token verify url|
 
 Step 2: Spin up Postgres server and PgAdmin dashboard for visualization. Docker need to be install on the system first before proceeding.
 ```docker compose up from root directory```
