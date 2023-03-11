@@ -21,7 +21,7 @@ class PathwaysStationController implements IController {
         this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
         this.router.put(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationUpdateDto), this.updateStation);
         this.router.get(`${this.path}/api/v1/station`, authorizationMiddleware([], true, true), this.getStation);
-        this.router.delete(`${this.path}/api/v1/station/:stationId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteStation);
+        this.router.delete(`${this.path}/api/v1/station/:stationId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.deleteStation);
     }
 
     public deleteStation = async (request: Request, response: express.Response, next: NextFunction) => {
