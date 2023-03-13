@@ -33,14 +33,14 @@ export class OrgQueryParams extends AbstractDomainEntity {
      */
     getQueryObject() {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelectRaw(`Select o.org_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.email, 
+        queryObject.buildSelectRaw(`Select o.org_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled, 
         COALESCE(json_agg(json_build_object('email', ue.email, 'username', ue.username, 'first_name', 
                                    ue.first_name,'last_name', ue.last_name,'enabled', ue.enabled) 
                 ) FILTER (WHERE ue.username IS NOT NULL), '[]')
          as userDetails 
         from organization o         
         left join user_roles ur on o.org_id = ur.org_id and ur.role_id = (select role_id from roles where name='poc' limit 1)       
-        left join keycloak.user_entity ue on ur.user_id = ue.id         
+        left join keycloak.user_entity ue on ur.user_id = ue.id AND ue.enabled = true         
         `.replace(/\n/g, ""));
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("o.name", SqlORder.ASC);
@@ -60,7 +60,7 @@ export class OrgQueryParams extends AbstractDomainEntity {
         }
         //Always pull active organization
         queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
-        queryObject.buildGroupRaw("group by o.org_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.email ");
+        queryObject.buildGroupRaw("group by o.org_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
 
         return queryObject;
     }
