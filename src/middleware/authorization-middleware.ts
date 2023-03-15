@@ -27,6 +27,16 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowIn
                     }
                 }
             }
+            if (Utility.extractApiKey(req) != null) {
+                //Check if intranet communication
+                let apiKey = Utility.extractApiKey(req);
+                if (apiKey != null) {
+                    let isValidated = await Utility.verifyApiKey(apiKey);
+                    if (isValidated) {
+                        next(); return;
+                    }
+                }
+            }
 
             next(new UnAuthenticated());
             return;
@@ -47,7 +57,7 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowIn
                     //Set request context
                     req.userId = decoded.sub;
                     if (validateOrg) {
-                        let org_id = req.body.org_id ? req.body.org_id : req.body.owner_org;
+                        let org_id = req.params.orgId ? req.params.orgId : req.body.tdei_org_id;
                         params.append("agencyId", org_id);
                     }
 

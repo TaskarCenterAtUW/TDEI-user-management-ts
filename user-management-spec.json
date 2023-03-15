@@ -261,7 +261,7 @@
                 "operationId": "getStation",
                 "parameters": [
                     {
-                        "name": "station_id",
+                        "name": "tdei_station_id",
                         "in": "query",
                         "description": "Search by station Id.",
                         "required": false,
@@ -279,9 +279,9 @@
                         }
                     },
                     {
-                        "name": "owner_org",
+                        "name": "tdei_org_id",
                         "in": "query",
-                        "description": "Organization owner id.",
+                        "description": "Owner organization id.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -394,7 +394,9 @@
                         "AuthorizationToken": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/v1/station/{orgId}": {
             "put": {
                 "tags": [
                     "GTFS Pathways Station"
@@ -402,6 +404,17 @@
                 "summary": "Updates a GTFS Pathways station in the TDEI system",
                 "description": "Updates a GTFS Pathways station in the TDEI system.",
                 "operationId": "updateStation",
+                "parameters": [
+                    {
+                        "name": "orgId",
+                        "in": "path",
+                        "description": "Owner organization id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -436,7 +449,7 @@
                 ]
             }
         },
-        "/api/v1/station/{stationId}/active/{status}": {
+        "/api/v1/station/{orgId}/{stationId}/active/{status}": {
             "delete": {
                 "tags": [
                     "GTFS Pathways Station"
@@ -445,6 +458,15 @@
                 "description": "Activates/Deactives the station.",
                 "operationId": "setServiceStatus",
                 "parameters": [
+                    {
+                        "name": "orgId",
+                        "in": "path",
+                        "description": "Owner organization id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "stationId",
                         "in": "path",
@@ -490,7 +512,7 @@
                 "operationId": "getService",
                 "parameters": [
                     {
-                        "name": "service_id",
+                        "name": "tdei_service_id",
                         "in": "query",
                         "description": "Search by service Id.",
                         "required": false,
@@ -508,9 +530,9 @@
                         }
                     },
                     {
-                        "name": "owner_org",
+                        "name": "tdei_org_id",
                         "in": "query",
-                        "description": "Organization owner id.",
+                        "description": "Owner organization id.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -628,7 +650,9 @@
                         "AuthorizationToken": []
                     }
                 ]
-            },
+            }
+        },
+        "/api/v1/service/{orgId}": {
             "put": {
                 "tags": [
                     "GTFS Flex Service"
@@ -636,6 +660,17 @@
                 "summary": "Updates a GTFS flex service in the TDEI system",
                 "description": "Updates a GTFS flex service in the TDEI system.",
                 "operationId": "updateService",
+                "parameters": [
+                    {
+                        "name": "orgId",
+                        "in": "path",
+                        "description": "Owner organization id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
@@ -670,7 +705,7 @@
                 ]
             }
         },
-        "/api/v1/service/{serviceId}/active/{status}": {
+        "/api/v1/service/{orgId}/{serviceId}/active/{status}": {
             "delete": {
                 "tags": [
                     "GTFS Flex Service"
@@ -679,6 +714,15 @@
                 "description": "Activates/Deactives the service.",
                 "operationId": "setServiceStatus",
                 "parameters": [
+                    {
+                        "name": "orgId",
+                        "in": "path",
+                        "description": "Owner organization id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
                     {
                         "name": "serviceId",
                         "in": "path",
@@ -712,59 +756,6 @@
                         "description": "An server error occurred."
                     }
                 }
-            }
-        },
-        "/api/v1/poc": {
-            "post": {
-                "tags": [
-                    "User Management"
-                ],
-                "deprecated": true,
-                "summary": "Creates a point of contact in the TDEI system. This API will be deprecated, please use /permission API to assign POC",
-                "description": "Creates a point of contact in the TDEI system. Returns the boolean flag true. This API will be deprecated, please use /permission API to assign POC",
-                "operationId": "createPOC",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/PointOfContact"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "200": {
-                        "description": "Successful response - Returns the boolean flag true.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Response"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request."
-                    },
-                    "404": {
-                        "description": "User not found."
-                    },
-                    "500": {
-                        "description": "Internal server error."
-                    },
-                    "401": {
-                        "description": "Expired/Invalid token."
-                    },
-                    "403": {
-                        "description": "User not authenticated/authorized to perform this action."
-                    }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
             }
         },
         "/api/v1/permission": {
@@ -881,7 +872,7 @@
                 "operationId": "getOrganization",
                 "parameters": [
                     {
-                        "name": "org_id",
+                        "name": "tdei_org_id",
                         "in": "query",
                         "description": "Search by organization Id.",
                         "required": false,
@@ -1131,7 +1122,7 @@
                 ]
             }
         },
-        "/api/v1/organization/{organizationId}/active/{status}": {
+        "/api/v1/organization/{orgId}/active/{status}": {
             "delete": {
                 "tags": [
                     "Organization"
@@ -1141,7 +1132,7 @@
                 "operationId": "setServiceStatus",
                 "parameters": [
                     {
-                        "name": "organizationId",
+                        "name": "orgId",
                         "in": "path",
                         "description": "Organization Id of the organization to be Activated/Deactivated.",
                         "required": true,
@@ -1300,21 +1291,21 @@
             },
             "Station": {
                 "required": [
-                    "owner_org",
-                    "name"
+                    "tdei_org_id",
+                    "station_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "station_id": {
+                    "tdei_station_id": {
                         "type": "string",
                         "description": "Station Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "owner_org": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization id of the station."
                     },
-                    "name": {
+                    "station_name": {
                         "type": "string",
                         "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
                     },
@@ -1326,17 +1317,17 @@
             },
             "StationUpdate": {
                 "required": [
-                    "station_id",
-                    "name"
+                    "tdei_station_id",
+                    "station_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "station_id": {
+                    "tdei_station_id": {
                         "type": "string",
                         "description": "Station Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "name": {
+                    "station_name": {
                         "type": "string",
                         "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
                     },
@@ -1348,21 +1339,21 @@
             },
             "Service": {
                 "required": [
-                    "owner_org, ",
-                    "name"
+                    "tdei_org_id, ",
+                    "service_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "service_id": {
+                    "tdei_service_id": {
                         "type": "string",
                         "description": "Service Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "owner_org": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization id of the service."
                     },
-                    "name": {
+                    "service_name": {
                         "type": "string",
                         "description": "Name of the service."
                     },
@@ -1374,17 +1365,17 @@
             },
             "ServiceUpdate": {
                 "required": [
-                    "service_id",
-                    "name"
+                    "tdei_service_id",
+                    "service_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "service_id": {
+                    "tdei_service_id": {
                         "type": "string",
                         "description": "Service Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "name": {
+                    "service_name": {
                         "type": "string",
                         "description": "Name of the service."
                     },
@@ -1410,7 +1401,7 @@
                 ],
                 "type": "object",
                 "properties": {
-                    "org_id": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization id to which point of contact to be associated."
                     },
@@ -1423,13 +1414,13 @@
             },
             "RoleDetails": {
                 "required": [
-                    "org_id",
+                    "tdei_org_id",
                     "roles",
                     "user_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "org_id": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization id to which user to be associated."
                     },
@@ -1456,7 +1447,7 @@
                 ],
                 "type": "object",
                 "properties": {
-                    "org_id": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
@@ -1486,7 +1477,7 @@
             "OrganizationList": {
                 "type": "object",
                 "properties": {
-                    "org_id": {
+                    "tdei_org_id": {
                         "type": "string",
                         "description": "Organization Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"

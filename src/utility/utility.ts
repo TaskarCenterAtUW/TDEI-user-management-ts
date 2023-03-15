@@ -20,6 +20,12 @@ export class Utility {
         return null;
     }
 
+    public static extractApiKey(req: any) {
+        if (req.headers['x-api-key']) {
+            return req.headers['x-api-key'];
+        }
+        return null;
+    }
 
     public static dateIsValid(dateStr: any): boolean {
         const regex = /^\d{4}-\d{2}-\d{2}$/;
@@ -67,6 +73,28 @@ export class Utility {
         } catch (error: any) {
             console.error(error);
             throw new HttpException(400, "Failed to verify secret token");
+        }
+        return secret;
+    }
+
+    public static async verifyApiKey(apiKey: string): Promise<boolean> {
+        let secret = null;
+        try {
+            const result = await fetch(environment.apiKeyVerifyUrl as string, {
+                method: 'post',
+                body: JSON.stringify(apiKey),
+                headers: { 'Content-Type': 'text/plain' }
+            });
+
+            if (result.status != undefined && result.status != 200)
+                throw new Error(await result.json());
+
+            const data = await result.json();
+
+            secret = data;
+        } catch (error: any) {
+            console.error(error);
+            throw new HttpException(400, "Failed to verify api key");
         }
         return secret;
     }

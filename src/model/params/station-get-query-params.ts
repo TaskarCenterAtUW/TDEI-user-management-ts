@@ -7,11 +7,11 @@ export class StationQueryParams extends AbstractDomainEntity {
     @Prop()
     searchText: string | undefined;
     @IsOptional()
-    @Prop()
-    station_id: string | undefined;
+    @Prop("tdei_station_id")
+    tdei_station_id: string | undefined;
     @IsOptional()
     @Prop()
-    owner_org: string | undefined;
+    tdei_org_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
@@ -43,11 +43,11 @@ export class StationQueryParams extends AbstractDomainEntity {
         if (this.searchText != undefined && this.searchText.length != 0) {
             queryObject.condition(` name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
-        if (this.station_id != undefined && this.station_id.length != 0) {
-            queryObject.condition(` station_id = $${queryObject.paramCouter++} `, this.station_id);
+        if (this.tdei_station_id != undefined && this.tdei_station_id.length != 0) {
+            queryObject.condition(` station_id = $${queryObject.paramCouter++} `, this.tdei_station_id);
         }
-        if (this.owner_org != undefined && this.owner_org.length != 0) {
-            queryObject.condition(` owner_org = $${queryObject.paramCouter++} `, this.owner_org);
+        if (this.tdei_org_id != undefined && this.tdei_org_id.length != 0) {
+            queryObject.condition(` owner_org = $${queryObject.paramCouter++} `, this.tdei_org_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(`polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

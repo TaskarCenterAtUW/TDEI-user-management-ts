@@ -8,10 +8,10 @@ import { QueryConfig } from "pg";
 
 export class OrganizationDto extends BaseDto {
     @Prop()
-    org_id: string = "0";
+    tdei_org_id: string = "0";
     @IsNotEmpty()
     @Prop()
-    name!: string;
+    org_name!: string;
     @Prop()
     @IsNotEmpty()
     phone!: string;
@@ -38,7 +38,7 @@ export class OrganizationDto extends BaseDto {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
             text: `INSERT INTO organization(name, phone, url, address ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2, $3, $4 ${polygonExists ? ', ST_GeomFromGeoJSON($5) ' : ''}) RETURNING organization.org_id`,
-            values: [this.name, this.phone, this.url, this.address],
+            values: [this.org_name, this.phone, this.url, this.address],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
@@ -54,7 +54,7 @@ export class OrganizationDto extends BaseDto {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
             text: `UPDATE organization set name = $1, phone = $2, url = $3, address = $4 ${polygonExists ? ', polygon = $6 ' : ''} WHERE org_id = $5`,
-            values: [this.name, this.phone, this.url, this.address, this.org_id],
+            values: [this.org_name, this.phone, this.url, this.address, this.tdei_org_id],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
