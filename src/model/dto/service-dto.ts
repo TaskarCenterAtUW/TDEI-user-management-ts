@@ -6,14 +6,14 @@ import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
 export class ServiceDto extends BaseDto {
-    @Prop()
-    service_id: string = "0";
+    @Prop("tdei_service_id")
+    tdei_service_id: string = "0";
     @IsNotEmpty()
     @Prop()
-    owner_org!: string;
+    tdei_org_id!: string;
     @IsNotEmpty()
-    @Prop()
-    name!: string;
+    @Prop("service_name")
+    service_name!: string;
     @IsOptional()
     @IsValidPolygon()
     @Prop()
@@ -32,7 +32,7 @@ export class ServiceDto extends BaseDto {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
             text: `INSERT INTO service(name, owner_org ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})  RETURNING service.service_id`,
-            values: [this.name, this.owner_org],
+            values: [this.service_name, this.tdei_org_id],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
@@ -48,7 +48,7 @@ export class ServiceDto extends BaseDto {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
             text: `UPDATE service set name = $1 ${polygonExists ? ', polygon = $3 ' : ''} WHERE service_id = $2`,
-            values: [this.name, this.service_id],
+            values: [this.service_name, this.tdei_service_id],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));

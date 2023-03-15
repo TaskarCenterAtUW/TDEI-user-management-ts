@@ -1,1 +1,1 @@
-export const adminRestrictedRoles: string[] = ["poc", "tdei_admin"];
+export const adminRestrictedRoles: string[] = ["tdei_admin"];

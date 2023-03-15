@@ -6,12 +6,12 @@ import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
 export class ServiceUpdateDto extends BaseDto {
-    @IsNotEmpty()
+    @Prop("tdei_service_id")
     @Prop()
     service_id: string = "0";
     @IsNotEmpty()
-    @Prop()
-    name!: string;
+    @Prop("service_name")
+    service_name!: string;
     @IsOptional()
     @IsValidPolygon()
     @Prop()
@@ -41,7 +41,7 @@ export class ServiceUpdateDto extends BaseDto {
     getUpdateQuery(): QueryConfig {
         const queryObject = {
             text: `UPDATE service set name = $2 ${this.polygon ? ', polygon = $3 ' : ''} WHERE service_id = $1`,
-            values: [this.service_id, this.name],
+            values: [this.service_id, this.service_name],
         }
 
         //3rd param

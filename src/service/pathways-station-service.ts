@@ -32,7 +32,7 @@ class PathwaysStationService implements IPathwaysStationService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(station.name);
+                    throw new DuplicateException(station.station_name);
                 }
                 else if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
@@ -51,7 +51,7 @@ class PathwaysStationService implements IPathwaysStationService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(station.name);
+                    throw new DuplicateException(station.station_name);
                 }
                 throw e;
             });
@@ -70,6 +70,9 @@ class PathwaysStationService implements IPathwaysStationService {
             .then(res => {
                 res.rows.forEach(x => {
                     let station = StationDto.from(x);
+                    station.station_name = x.name;
+                    station.tdei_station_id = x.station_id;
+                    station.tdei_org_id = x.owner_org;
                     if (station.polygon)
                         station.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
                     list.push(station);

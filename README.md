@@ -26,6 +26,7 @@ Step 1: Create .env file in root folder with below variables and specify values 
 |DATABASE_PORT | Upload topic subscription name|  
 |AUTH_SECRET_TOKEN_GENERATE_URL | Secret token generate url|
 |AUTH_SECRET_TOKEN_VERIFY_URL | Secret token verify url|
+|AUTH_API_KEY_VERIFY_URL | API key verify url|
 
 Step 2: Spin up Postgres server and PgAdmin dashboard for visualization. Docker need to be install on the system first before proceeding.
 ```docker compose up from root directory```

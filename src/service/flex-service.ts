@@ -32,7 +32,7 @@ class FlexService implements IFlexService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(service.name);
+                    throw new DuplicateException(service.service_name);
                 }
                 else if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
@@ -51,7 +51,7 @@ class FlexService implements IFlexService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(service.name);
+                    throw new DuplicateException(service.service_name);
                 }
                 throw e;
             });
@@ -70,6 +70,9 @@ class FlexService implements IFlexService {
             .then(res => {
                 res.rows.forEach(x => {
                     let service = ServiceDto.from(x);
+                    service.service_name = x.name;
+                    service.tdei_service_id = x.service_id;
+                    service.tdei_org_id = x.owner_org;
                     if (service.polygon)
                         service.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
                     list.push(service);

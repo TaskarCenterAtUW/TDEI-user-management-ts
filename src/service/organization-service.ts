@@ -9,7 +9,6 @@ import { PolygonDto } from "../model/polygon-model";
 import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
 import { OrgUserDto } from "../model/dto/org-user-dto";
 import { OrganizationListResponse, PocDetails } from "../model/dto/poc-details-dto";
-import { PocRequestDto } from "../model/dto/poc-req";
 
 
 class OrganizationService implements IOrganizationService {
@@ -36,7 +35,7 @@ class OrganizationService implements IOrganizationService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(organization.name);
+                    throw new DuplicateException(organization.org_name);
                 }
                 throw e;
             });
@@ -50,7 +49,7 @@ class OrganizationService implements IOrganizationService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(organization.name);
+                    throw new DuplicateException(organization.org_name);
                 }
                 throw e;
             });
@@ -67,6 +66,8 @@ class OrganizationService implements IOrganizationService {
             .then(res => {
                 res.rows.forEach(x => {
                     let org = OrganizationListResponse.from(x);
+                    org.tdei_org_id = x.org_id;
+                    org.org_name = x.name;
                     if (org.polygon)
                         org.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
 

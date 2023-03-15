@@ -106,7 +106,7 @@ class OrganizationController implements IController {
             let organization = OrganizationDto.from(request.body);
 
             //Check for Organization Id for update
-            if (!organization.org_id || organization.org_id == "0")
+            if (!organization.tdei_org_id || organization.tdei_org_id == "0")
                 BadRequest(response, "Organization Id not provided.")
             organizationService.updateOrganization(organization).then((org) => {
                 Ok(response);

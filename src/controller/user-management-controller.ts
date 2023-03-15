@@ -1,7 +1,6 @@
 import express, { NextFunction, Request } from "express";
 import validationMiddleware from "../middleware/dto-validation-middleware";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
-import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { BadRequest, Ok } from "../model/http/http-responses";
 import userManagementService from "../service/user-management-service";
@@ -23,9 +22,8 @@ class UserManagementController implements IController {
 
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
-        this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
+        this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
         this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
-        this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
@@ -121,27 +119,11 @@ class UserManagementController implements IController {
         }
     }
 
-    public assignPOC = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let pocReqObj = new PocRequestDto(request.body);
-            userManagementService.assignPocToOrg(pocReqObj).catch((error: any) => {
-                console.error('Error assigning the POC to the Org');
-                console.error(error);
-                next(error);
-            }).then((user) => {
-                Ok(response, { data: user });
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public assignPermissions = async (request: Request, response: express.Response, next: NextFunction) => {
+    public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             //Transform the body to DTO
             let permissonObj = new RolesReqDto(request.body);
-            userManagementService.assignUserPermissions(permissonObj, request.userId).catch((error: any) => {
+            userManagementService.updatePermissions(permissonObj, request.userId).catch((error: any) => {
                 console.error('Error assigning the permissions to the user');
                 console.error(error);
                 next(error);

@@ -1,7 +1,6 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
-import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { IUserManagement } from "./interface/user-management-interface";
 import { ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
@@ -107,7 +106,7 @@ class UserManagementService implements IUserManagement {
         const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
-                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString()].includes(f.name)).map(x => {
+                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString(), Role.TDEI_USER.toString()].includes(f.name)).map(x => {
                     return new RoleDto(x);
                 });
                 return roleList;
@@ -127,49 +126,6 @@ class UserManagementService implements IUserManagement {
                 return roleMap;
             })
             .catch(e => {
-                throw e;
-            });
-    }
-
-    async assignPocToOrg(pocReq: PocRequestDto): Promise<boolean> {
-        //Get the user profile details from keycloak 
-        let userProfile = new UserProfile();
-        try {
-            const data: any = await (await fetch(`${userProfileUrl}?userName=${pocReq.poc_user_name}`)).json();
-            if (data.status != undefined && data.status == 404)
-                throw new Error();
-            else userProfile = new UserProfile(data);
-        } catch (error: any) {
-            console.error(error);
-            throw new UserNotFoundException(pocReq.poc_user_name);
-        }
-
-        //Get the role ids for role name provided
-        let rolemap = await this.getRolesByNames([Role.POC]);
-
-        //Check POC exists for the organization, as there can be one and only one POC for the organization
-        var pocCheckSql = format('SELECT COUNT(*) FROM user_roles WHERE role_id = %L and org_id= %L', rolemap.get(Role.POC), pocReq.org_id);
-        var pocExistsRes = (await dbClient.query(pocCheckSql));
-        if (pocExistsRes.rows[0].count > 0)
-            throw new HttpException(400, "POC already exists for the organization. Please remove exiting POC before proceeding.")
-
-        //Get the user_id from user_entity table
-        let userId = userProfile.id;
-        const query = {
-            text: 'INSERT INTO public.user_roles(user_id, role_id, org_id)	VALUES ($1, $2, $3)',
-            values: [userId, rolemap.get(Role.POC), pocReq.org_id],
-        }
-        return await dbClient.query(query)
-            .then(res => {
-                return true;
-            })
-            .catch(e => {
-                if (e instanceof ForeignKeyDbException) {
-                    throw new ForeignKeyException((e as ForeignKeyDbException).message);
-                }
-                else if (e instanceof UniqueKeyDbException) {
-                    throw new HttpException(400, "User already assigned with the specific roles");
-                }
                 throw e;
             });
     }
@@ -211,8 +167,8 @@ class UserManagementService implements IUserManagement {
             .then(res => {
                 res.rows.forEach(x => {
                     let orgRole: OrgRoleDto = new OrgRoleDto();
-                    orgRole.orgName = x.org;
-                    orgRole.orgId = x.org_id;
+                    orgRole.org_name = x.org;
+                    orgRole.tdei_org_id = x.org_id;
                     orgRole.roles = x.roles;
 
                     orgRoleList.push(orgRole);
@@ -231,7 +187,7 @@ class UserManagementService implements IUserManagement {
      * @param requestingUserId userd id for which roles to be assigned
      * @returns boolean flag
      */
-    async assignUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
+    async updatePermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
         let userProfile = new UserProfile();
 
         //Fetch permissioned user profile from keycloak
@@ -244,6 +200,13 @@ class UserManagementService implements IUserManagement {
             console.error(error);
             throw new UserNotFoundException(rolesReq.user_name);
         }
+
+
+        //Get the user_id from user_entity table
+        let userId = userProfile.id;
+        if (userId == requestingUserId)
+            throw new HttpException(400, "Own account permissions management not allowed.");
+
 
         //Check requesting user roles
         let userRoles = await this.getUserRoles(requestingUserId);
@@ -258,12 +221,10 @@ class UserManagementService implements IUserManagement {
         //Get the role ids for role name provided
         let rolemap = await this.getRolesByNames(rolesReq.roles);
 
-        //Get the user_id from user_entity table
-        let userId = userProfile.id;
         let valueArr = rolesReq.roles.map(role => {
-            return [userId, rolesReq.org_id, rolemap.get(role)];
+            return [userId, rolesReq.tdei_org_id, rolemap.get(role)];
         });
-        let queryStr = format('DELETE FROM user_roles WHERE user_id = %L AND org_id = %L; INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', userId, rolesReq.org_id, valueArr);
+        let queryStr = format('DELETE FROM user_roles WHERE user_id = %L AND org_id = %L; INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', userId, rolesReq.tdei_org_id, valueArr);
         return await dbClient.query(queryStr)
             .then(res => {
                 return true;
@@ -292,12 +253,17 @@ class UserManagementService implements IUserManagement {
         try {
             const data: any = await (await fetch(`${userProfileUrl}?userName=${rolesReq.user_name}`)).json();
             if (data.status != undefined && data.status == 404)
-                throw new Error();
+                throw new Error("User not found or does not exist.");
             else userProfile = new UserProfile(data);
         } catch (error: any) {
             console.error(error);
             throw new UserNotFoundException(rolesReq.user_name);
         }
+        //Get the user_id from user_entity table
+        let userId = userProfile.id;
+
+        if (userId == requestingUserId)
+            throw new HttpException(400, "Own account permissions management not allowed.");
 
         //Check requesting user roles
         let userRoles = await this.getUserRoles(requestingUserId);
@@ -309,26 +275,39 @@ class UserManagementService implements IUserManagement {
                 throw new HttpException(400, "Admin restricted roles cannot be revoked.");
         }
 
+        if (rolesReq.roles.length > 0)
+            await this.removeRoles(rolesReq, userId);
+        else
+            await this.removeUserFromOrg(rolesReq.tdei_org_id, userId);
+        return true;
+    }
+
+    private async removeUserFromOrg(org_id: string, userId: string) {
+        const query = {
+            text: 'DELETE FROM user_roles WHERE user_id = $1 AND org_id = $2',
+            values: [userId, org_id],
+        };
+        await dbClient.query(query)
+            .catch(e => {
+                throw e;
+            });
+    }
+
+    private async removeRoles(rolesReq: RolesReqDto, userId: string) {
         //Get the role ids for role name provided
         let rolemap = await this.getRolesByNames(rolesReq.roles);
 
-        //Get the user_id from user_entity table
-        let userId = userProfile.id;
-        rolesReq.roles.forEach(async role => {
+
+        rolesReq.roles.forEach(async (role) => {
             const query = {
                 text: 'DELETE FROM user_roles WHERE user_id = $1 AND org_id = $2 AND role_id = $3 ',
-                values: [userId, rolesReq.org_id, rolemap.get(role)],
-            }
+                values: [userId, rolesReq.tdei_org_id, rolemap.get(role)],
+            };
             await dbClient.query(query)
                 .catch(e => {
-                    if (e instanceof ForeignKeyDbException) {
-                        throw new ForeignKeyException((e as ForeignKeyDbException).message);
-                    }
                     throw e;
                 });
         });
-
-        return true;
     }
 }
 

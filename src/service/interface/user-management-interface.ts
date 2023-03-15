@@ -1,5 +1,4 @@
 import { RolesReqDto } from "../../model/dto/roles-req-dto";
-import { PocRequestDto } from "../../model/dto/poc-req";
 import { RegisterUserDto } from "../../model/dto/register-user-dto";
 import { UserProfile } from "../../model/dto/user-profile-dto";
 import { RoleDto } from "../../model/dto/roles-dto";
@@ -17,14 +16,13 @@ export interface IUserManagement {
      * @param user user details model
      */
     registerUser(user: RegisterUserDto): Promise<UserProfile>;
-    assignPocToOrg(pocReq: PocRequestDto): Promise<boolean>;
     /**
     * Assigns the user permissions
     * @param rolesReq roles to be assigned
     * @param requestingUserId userd id for which roles to be assigned
     * @returns boolean flag
     */
-    assignUserPermissions(permissionReq: RolesReqDto, userId: string): Promise<boolean>;
+    updatePermissions(permissionReq: RolesReqDto, userId: string): Promise<boolean>;
     /**
      * Gets the TDEI system roles.
      */

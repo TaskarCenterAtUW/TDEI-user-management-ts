@@ -5,7 +5,7 @@ import { BaseDto } from "./base-dto";
 export class RolesReqDto extends BaseDto {
     @IsNotEmpty()
     @Prop()
-    org_id!: string;
+    tdei_org_id!: string;
     @IsNotEmpty()
     @Prop()
     user_name!: string;

@@ -7,11 +7,11 @@ import { BaseDto } from "./base-dto";
 
 export class StationUpdateDto extends BaseDto {
     @IsNotEmpty()
-    @Prop()
-    station_id: string = "0";
+    @Prop("tdei_station_id")
+    tdei_station_id: string = "0";
     @IsNotEmpty()
-    @Prop()
-    name!: string;
+    @Prop("station_name")
+    station_name!: string;
     @IsOptional()
     @IsValidPolygon()
     @Prop()
@@ -27,7 +27,7 @@ export class StationUpdateDto extends BaseDto {
      * @returns verify result
      */
     verifyInput(): { valid: boolean, message: string } {
-        if (!this.station_id || this.station_id == "0")
+        if (!this.tdei_station_id || this.tdei_station_id == "0")
             return { valid: false, message: "Station Id not provided." };
 
         //default true
@@ -41,7 +41,7 @@ export class StationUpdateDto extends BaseDto {
     getUpdateQuery(): QueryConfig {
         const queryObject = {
             text: `UPDATE station set name = $2  ${this.polygon ? ', polygon = $3 ' : ''} WHERE station_id = $1`,
-            values: [this.station_id, this.name],
+            values: [this.tdei_station_id, this.station_name],
         }
         //3rd param
         if (this.polygon) {

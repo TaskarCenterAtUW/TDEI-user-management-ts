@@ -6,14 +6,14 @@ import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
 export class StationDto extends BaseDto {
-    @Prop()
-    station_id: string = "0";
+    @Prop("tdei_station_id")
+    tdei_station_id: string = "0";
     @IsNotEmpty()
     @Prop()
-    owner_org!: string;
+    tdei_org_id!: string;
     @IsNotEmpty()
-    @Prop()
-    name!: string;
+    @Prop("station_name")
+    station_name!: string;
     @IsOptional()
     @IsValidPolygon()
     @Prop()
@@ -32,7 +32,7 @@ export class StationDto extends BaseDto {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
             text: `INSERT INTO station(owner_org, name ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})   RETURNING station.station_id`,
-            values: [this.owner_org, this.name],
+            values: [this.tdei_org_id, this.station_name],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));

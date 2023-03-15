@@ -87,7 +87,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
         owner_org character varying(100) NOT NULL,
         is_active boolean NOT NULL DEFAULT true,
         CONSTRAINT service_pkey PRIMARY KEY (service_id),
-        CONSTRAINT unq_service UNIQUE (name),
+        CONSTRAINT unq_service_org UNIQUE (name, owner_org),
         CONSTRAINT fk_org_id FOREIGN KEY (owner_org)
             REFERENCES public.organization (org_id) MATCH SIMPLE
             ON UPDATE NO ACTION
@@ -111,7 +111,7 @@ CREATE TABLE IF NOT EXISTS public.station
     owner_org character varying(100) COLLATE pg_catalog."default" NOT NULL,
     is_active boolean NOT NULL DEFAULT true,
     CONSTRAINT station_pkey PRIMARY KEY (station_id),
-    CONSTRAINT unq_station UNIQUE (name),
+    CONSTRAINT unq_station_org UNIQUE (name, owner_org),
     CONSTRAINT fk_org_id FOREIGN KEY (owner_org)
         REFERENCES public.organization (org_id) MATCH SIMPLE
         ON UPDATE NO ACTION
