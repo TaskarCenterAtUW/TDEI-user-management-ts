@@ -1442,7 +1442,7 @@
             "Organization": {
                 "required": [
                     "email",
-                    "name",
+                    "org_name",
                     "address"
                 ],
                 "type": "object",
@@ -1452,7 +1452,7 @@
                         "description": "Organization Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "name": {
+                    "org_name": {
                         "type": "string",
                         "description": "Name of the organization."
                     },
