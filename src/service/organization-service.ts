@@ -5,10 +5,10 @@ import { DuplicateException } from "../exceptions/http/http-exceptions";
 import { QueryConfig } from "pg";
 import { IOrganizationService } from "./interface/organization-interface";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
-import { PolygonDto } from "../model/polygon-model";
 import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
 import { OrgUserDto } from "../model/dto/org-user-dto";
 import { OrganizationListResponse, PocDetails } from "../model/dto/poc-details-dto";
+import { Geometry, Feature } from "geojson";
 
 
 class OrganizationService implements IOrganizationService {
@@ -68,9 +68,19 @@ class OrganizationService implements IOrganizationService {
                     let org = OrganizationListResponse.from(x);
                     org.tdei_org_id = x.org_id;
                     org.org_name = x.name;
-                    if (org.polygon)
-                        org.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
-
+                    if (org.polygon) {
+                        var polygon = JSON.parse(x.polygon) as Geometry;
+                        org.polygon = {
+                            type: "FeatureCollection",
+                            features: [
+                                {
+                                    type: "Feature",
+                                    geometry: polygon,
+                                    properties: {}
+                                } as Feature
+                            ]
+                        }
+                    }
                     org.poc = [];
                     if (x.userdetails.length > 0) {
                         x.userdetails.forEach((u: any) => {

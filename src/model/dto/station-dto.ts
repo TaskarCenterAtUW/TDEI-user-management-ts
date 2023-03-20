@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional } from "class-validator";
+import { FeatureCollection } from "geojson";
 import { Prop } from "nodets-ms-core/lib/models";
 import { QueryConfig } from "pg";
-import { Polygon, PolygonDto } from "../polygon-model";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
@@ -17,7 +17,7 @@ export class StationDto extends BaseDto {
     @IsOptional()
     @IsValidPolygon()
     @Prop()
-    polygon!: PolygonDto;
+    polygon!: FeatureCollection;
 
     constructor(init?: Partial<StationDto>) {
         super();
@@ -35,7 +35,7 @@ export class StationDto extends BaseDto {
             values: [this.tdei_org_id, this.station_name],
         }
         if (polygonExists) {
-            queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
+            queryObject.values.push(JSON.stringify(this.polygon.features[0].geometry));
         }
         return queryObject;
     }

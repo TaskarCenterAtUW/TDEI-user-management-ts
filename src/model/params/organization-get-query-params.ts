@@ -49,7 +49,7 @@ export class OrgQueryParams extends AbstractDomainEntity {
             queryObject.condition(` o.name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
         if (this.tdei_org_id != undefined && this.tdei_org_id.length != 0) {
-            queryObject.condition(` ur.org_id = $${queryObject.paramCouter++} `, this.tdei_org_id);
+            queryObject.condition(` o.org_id = $${queryObject.paramCouter++} `, this.tdei_org_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(` o.polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,

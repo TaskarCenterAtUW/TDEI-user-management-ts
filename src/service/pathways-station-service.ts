@@ -2,11 +2,11 @@ import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { StationDto } from "../model/dto/station-dto";
 import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
-import { PolygonDto } from "../model/polygon-model";
 import { IPathwaysStationService } from "./interface/pathways-station-interface";
 import { QueryConfig } from "pg";
 import { StationQueryParams } from "../model/params/station-get-query-params";
 import { StationUpdateDto } from "../model/dto/station-update-dto";
+import { Geometry, Feature } from "geojson";
 
 class PathwaysStationService implements IPathwaysStationService {
 
@@ -73,8 +73,19 @@ class PathwaysStationService implements IPathwaysStationService {
                     station.station_name = x.name;
                     station.tdei_station_id = x.station_id;
                     station.tdei_org_id = x.owner_org;
-                    if (station.polygon)
-                        station.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
+                    if (station.polygon) {
+                        var polygon = JSON.parse(x.polygon) as Geometry;
+                        station.polygon = {
+                            type: "FeatureCollection",
+                            features: [
+                                {
+                                    type: "Feature",
+                                    geometry: polygon,
+                                    properties: {}
+                                } as Feature
+                            ]
+                        }
+                    }
                     list.push(station);
                 });
                 return list;

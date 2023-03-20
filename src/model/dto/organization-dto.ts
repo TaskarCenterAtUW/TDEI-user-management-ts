@@ -1,10 +1,9 @@
 import { IsNotEmpty, IsOptional } from "class-validator";
-import { Polygon } from "../polygon-model";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 import { Prop } from "nodets-ms-core/lib/models";
-import { PolygonDto } from "../polygon-model";
 import { QueryConfig } from "pg";
+import { FeatureCollection } from "geojson";
 
 export class OrganizationDto extends BaseDto {
     @Prop()
@@ -23,7 +22,7 @@ export class OrganizationDto extends BaseDto {
     @IsOptional()
     @IsValidPolygon()
     @Prop()
-    polygon!: PolygonDto;
+    polygon!: FeatureCollection;
 
     constructor(init?: Partial<OrganizationDto>) {
         super();
@@ -41,7 +40,7 @@ export class OrganizationDto extends BaseDto {
             values: [this.org_name, this.phone, this.url, this.address],
         }
         if (polygonExists) {
-            queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
+            queryObject.values.push(JSON.stringify(this.polygon.features[0].geometry));
         }
         return queryObject;
     }
@@ -53,11 +52,11 @@ export class OrganizationDto extends BaseDto {
     getUpdateQuery(): QueryConfig {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
-            text: `UPDATE organization set name = $1, phone = $2, url = $3, address = $4 ${polygonExists ? ', polygon = $6 ' : ''} WHERE org_id = $5`,
+            text: `UPDATE organization set name = $1, phone = $2, url = $3, address = $4 ${polygonExists ? ', polygon = ST_GeomFromGeoJSON($6) ' : ''} WHERE org_id = $5`,
             values: [this.org_name, this.phone, this.url, this.address, this.tdei_org_id],
         }
         if (polygonExists) {
-            queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
+            queryObject.values.push(JSON.stringify(this.polygon.features[0].geometry));
         }
         return queryObject;
     }
