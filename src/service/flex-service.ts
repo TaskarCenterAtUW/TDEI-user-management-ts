@@ -2,11 +2,11 @@ import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { ServiceDto } from "../model/dto/service-dto";
 import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
-import { PolygonDto } from "../model/polygon-model";
 import { IFlexService } from "./interface/flex-service-interface";
 import { QueryConfig } from "pg";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
+import { Feature, Geometry } from "geojson";
 
 class FlexService implements IFlexService {
 
@@ -73,8 +73,19 @@ class FlexService implements IFlexService {
                     service.service_name = x.name;
                     service.tdei_service_id = x.service_id;
                     service.tdei_org_id = x.owner_org;
-                    if (service.polygon)
-                        service.polygon = new PolygonDto({ coordinates: JSON.parse(x.polygon).coordinates });
+                    if (service.polygon) {
+                        var polygon = JSON.parse(x.polygon) as Geometry;
+                        service.polygon = {
+                            type: "FeatureCollection",
+                            features: [
+                                {
+                                    type: "Feature",
+                                    geometry: polygon,
+                                    properties: {}
+                                } as Feature
+                            ]
+                        }
+                    }
                     list.push(service);
                 });
                 return list;

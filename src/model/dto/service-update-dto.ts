@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsOptional } from "class-validator";
+import { FeatureCollection } from "geojson";
 import { Prop } from "nodets-ms-core/lib/models";
 import { QueryConfig } from "pg";
-import { Polygon, PolygonDto } from "../polygon-model";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 
@@ -15,7 +15,7 @@ export class ServiceUpdateDto extends BaseDto {
     @IsOptional()
     @IsValidPolygon()
     @Prop()
-    polygon!: PolygonDto;
+    polygon!: FeatureCollection;
 
     constructor(init?: Partial<ServiceUpdateDto>) {
         super();
@@ -40,13 +40,13 @@ export class ServiceUpdateDto extends BaseDto {
    */
     getUpdateQuery(): QueryConfig {
         const queryObject = {
-            text: `UPDATE service set name = $2 ${this.polygon ? ', polygon = $3 ' : ''} WHERE service_id = $1`,
+            text: `UPDATE service set name = $2 ${this.polygon ? ', polygon = ST_GeomFromGeoJSON($3) ' : ''} WHERE service_id = $1`,
             values: [this.service_id, this.service_name],
         }
 
         //3rd param
         if (this.polygon) {
-            queryObject.values.push(JSON.stringify(new Polygon({ coordinates: this.polygon.coordinates })));
+            queryObject.values.push(JSON.stringify(this.polygon.features[0].geometry));
         }
         return queryObject;
     }

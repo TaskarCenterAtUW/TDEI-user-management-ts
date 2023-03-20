@@ -161,7 +161,7 @@ class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
-        var sql = format('SELECT o.name as org, o.org_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN organization o on ur.org_id = o.org_id WHERE user_id = %L GROUP BY o.name,o.org_id LIMIT %L OFFSET %L', userId, take, skip);
+        var sql = format('SELECT o.name as org, o.org_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN organization o on ur.org_id = o.org_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.org_id LIMIT %L OFFSET %L', userId, take, skip);
 
         return await dbClient.query(sql)
             .then(res => {
@@ -213,7 +213,7 @@ class UserManagementService implements IUserManagement {
         let isAdmin = userRoles.findIndex(x => x == Role.TDEI_ADMIN) != -1;
 
         if (!isAdmin) {
-            //Check POC role if exists, as it is restricted to Admin only
+            //Check admin role if exists, as it is restricted to Admin only
             if (rolesReq.roles.findIndex(x => adminRestrictedRoles.indexOf(x.toLocaleLowerCase()) != -1) != -1)
                 throw new HttpException(400, "Admin restricted roles cannot be assigned");
         }
