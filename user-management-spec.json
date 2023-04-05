@@ -90,6 +90,56 @@
                 }
             }
         },
+        "/api/v1/user-profile": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Gets the user profile",
+                "description": "Gets the user profile.",
+                "operationId": "getUserProfile",
+                "parameters": [
+                    {
+                        "name": "user_name",
+                        "in": "query",
+                        "description": "User name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the user profile details.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfile"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Expired/Invalid token."
+                    },
+                    "403": {
+                        "description": "User not authenticated/authorized to perform this action."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
         "/api/v1/refresh-token": {
             "post": {
                 "tags": [
@@ -1438,6 +1488,37 @@
                     }
                 },
                 "description": "Describes a user permissions."
+            },
+            "UserProfile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email of the user."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user."
+                    },
+                    "apiKey": {
+                        "type": "string",
+                        "description": "Api key of the user."
+                    }
+                },
+                "description": "Describes a gtfs pathways station."
             },
             "Organization": {
                 "required": [

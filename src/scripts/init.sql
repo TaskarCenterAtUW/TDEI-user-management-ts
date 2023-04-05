@@ -14,7 +14,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 		polygon geometry(Polygon,4326),
         is_active boolean NOT NULL DEFAULT true,
         CONSTRAINT org_pkey PRIMARY KEY (org_id),
-        CONSTRAINT unq_org UNIQUE (name),
+        CONSTRAINT unq_org UNIQUE (name)
     )
 
 

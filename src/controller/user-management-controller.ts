@@ -28,6 +28,7 @@ class UserManagementController implements IController {
         this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
+        this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -45,6 +46,24 @@ class UserManagementController implements IController {
             });
         } catch (error) {
             console.error('Error refreshing the user token');
+            next(error);
+        }
+    }
+
+    public getUserProfile = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+
+            let user_name = request.query.user_name;
+            if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
+
+            userManagementService.getUserProfile(user_name as string).then((result) => {
+                response.send(result);
+            }).catch((error: any) => {
+                console.error('Error fetching the user profile');
+                console.error(error);
+                next(error);
+            });
+        } catch (error) {
             next(error);
         }
     }
