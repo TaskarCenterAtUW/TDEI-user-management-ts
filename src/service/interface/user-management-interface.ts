@@ -48,4 +48,11 @@ export interface IUserManagement {
      * @returns boolean flag
      */
     revokeUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean>;
+
+    /**
+     * Fetch user profile details
+     * @param userName user name
+     * @returns 
+     */
+    getUserProfile(userName: string): Promise<UserProfile>;
 }

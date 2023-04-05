@@ -1,14 +1,11 @@
 import { RequestHandler } from 'express';
 import HttpException from '../exceptions/http/http-base-exception';
 import fetch, { Response } from 'node-fetch';
-import config from 'config';
 import jwt_decode from 'jwt-decode';
 import { Forbidden, UnAuthenticated } from '../exceptions/http/http-exceptions';
 import { UserProfile } from '../model/dto/user-profile-dto';
 import { Utility } from '../utility/utility';
-
-const permissionUrl: string = config.get('url.permission');
-const validateAccessTokenUrl: string = config.get('url.validate-access-token');
+import { environment } from '../environment/environment';
 
 function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowInraCom?: boolean): RequestHandler {
     return async (req, res, next) => {
@@ -51,7 +48,7 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowIn
                 if (roles.length > 0) {
                     var decoded: any = jwt_decode(authToken);
 
-                    var url = new URL(permissionUrl);
+                    var url = new URL(environment.permissionUrl as string);
                     let params = new URLSearchParams();
                     params.append("userId", decoded.sub);
                     //Set request context
@@ -98,7 +95,7 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowIn
 async function validateAccessToken(token: String): Promise<UserProfile> {
     let userProfile = new UserProfile();
     try {
-        const result = await fetch(validateAccessTokenUrl, {
+        const result = await fetch(environment.validateAccessTokenUrl as string, {
             method: 'post',
             body: JSON.stringify(token),
             headers: { 'Content-Type': 'text/plain' }
