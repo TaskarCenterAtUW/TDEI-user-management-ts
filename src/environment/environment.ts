@@ -18,5 +18,12 @@ export const environment = {
     appPort: parseInt(process.env.APPLICATION_PORT ?? "8080"),
     secretGenerateUrl: process.env.AUTH_SECRET_TOKEN_GENERATE_URL,
     secretVerifyUrl: process.env.AUTH_SECRET_TOKEN_VERIFY_URL,
-    apiKeyVerifyUrl: process.env.AUTH_API_KEY_VERIFY_URL
+    apiKeyVerifyUrl: process.env.AUTH_API_KEY_VERIFY_URL,
+    registerUserUrl: process.env.REGISTER_USER_URL,
+    userProfileUrl: process.env.USER_PROFILE_URL,
+    permissionUrl: process.env.PERMISSION_URL,
+    authenticateUrl: process.env.AUTHENTICATE_URL,
+    validateAccessTokenUrl: process.env.VALIDATE_ACCESS_TOKEN_URL,
+    refreshUrl: process.env.REFRESH_TOKEN_URL
+
 }

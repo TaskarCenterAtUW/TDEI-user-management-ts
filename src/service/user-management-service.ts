@@ -7,18 +7,14 @@ import { ForeignKeyException, UserNotFoundException } from "../exceptions/http/h
 import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
-import config from 'config';
 import HttpException from "../exceptions/http/http-base-exception";
 import { RoleDto } from "../model/dto/roles-dto";
 import { LoginDto } from "../model/dto/login-dto";
 import { Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
 import { OrgRoleDto } from "../model/dto/org-role-dto";
+import { environment } from "../environment/environment";
 
-const registerUrl: string = config.get('url.register-user');
-const userProfileUrl: string = config.get('url.user-profile');
-const authenticateUrl: string = config.get('url.authenticate');
-const refreshTokenUrl: string = config.get('url.refresh-token');
 
 class UserManagementService implements IUserManagement {
     /**
@@ -27,7 +23,7 @@ class UserManagementService implements IUserManagement {
     */
     async refreshToken(refreshToken: string): Promise<any> {
         try {
-            const result = await fetch(refreshTokenUrl, {
+            const result = await fetch(environment.refreshUrl as string, {
                 method: 'post',
                 body: JSON.stringify(refreshToken),
                 headers: { 'Content-Type': 'application/json' }
@@ -51,7 +47,7 @@ class UserManagementService implements IUserManagement {
      */
     async login(loginModel: LoginDto): Promise<any> {
         try {
-            const result: Response = await fetch(authenticateUrl, {
+            const result: Response = await fetch(environment.authenticateUrl as string, {
                 method: 'post',
                 body: JSON.stringify(loginModel),
                 headers: { 'Content-Type': 'application/json' }
@@ -76,7 +72,7 @@ class UserManagementService implements IUserManagement {
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
         try {
-            const result: Response = await fetch(registerUrl, {
+            const result: Response = await fetch(environment.registerUserUrl as string, {
                 method: 'post',
                 body: JSON.stringify(user),
                 headers: { 'Content-Type': 'application/json' }
@@ -182,6 +178,27 @@ class UserManagementService implements IUserManagement {
     }
 
     /**
+     * Fetch user profile details
+     * @param userName user name
+     * @returns 
+     */
+    async getUserProfile(userName: string): Promise<UserProfile> {
+        let userProfile = new UserProfile();
+
+        //Fetch permissioned user profile from keycloak
+        try {
+            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)).json();
+            if (data.status != undefined && data.status == 404)
+                throw new Error();
+            else userProfile = new UserProfile(data);
+        } catch (error: any) {
+            console.error(error);
+            throw new UserNotFoundException(userName);
+        }
+        return userProfile;
+    }
+
+    /**
      * Assigns the user permissions
      * @param rolesReq roles to be assigned
      * @param requestingUserId userd id for which roles to be assigned
@@ -192,7 +209,7 @@ class UserManagementService implements IUserManagement {
 
         //Fetch permissioned user profile from keycloak
         try {
-            const data: any = await (await fetch(`${userProfileUrl}?userName=${rolesReq.user_name}`)).json();
+            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
             if (data.status != undefined && data.status == 404)
                 throw new Error();
             else userProfile = new UserProfile(data);
@@ -251,7 +268,7 @@ class UserManagementService implements IUserManagement {
 
         //Fetch permissioned user profile from keycloak
         try {
-            const data: any = await (await fetch(`${userProfileUrl}?userName=${rolesReq.user_name}`)).json();
+            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
             if (data.status != undefined && data.status == 404)
                 throw new Error("User not found or does not exist.");
             else userProfile = new UserProfile(data);

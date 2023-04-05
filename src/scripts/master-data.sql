@@ -7,7 +7,6 @@ INSERT INTO public.permission(name, description) VALUES ( 'add_org_users', 'Can 
 INSERT INTO public.permission(name, description) VALUES ( 'gtfs_flex_upload', 'Can upload for gtfs flex service');
 INSERT INTO public.permission(name, description) VALUES ( 'gtfs_pathways_upload', 'Can upload for gtfs pathways service');
 INSERT INTO public.permission(name, description) VALUES ( 'osw_upload', 'Can upload for osw service');
--- INSERT INTO public.permission(name, description) VALUES ( 'consumer_query', 'Can consume TDEI system services. [Read-only]');
 INSERT INTO public.permission(name, description) VALUES ( 'register_flex_services', 'Can register for gtfs flex services');
 INSERT INTO public.permission(name, description) VALUES ( 'register_pathways_station', 'Can register for gtfs pathways stations');
 --Trucates any existing permission
@@ -18,7 +17,6 @@ INSERT INTO public.roles(name, description)	VALUES ('poc', 'Point of contact of 
 INSERT INTO public.roles(name, description)	VALUES ('tdei_user', 'User of the TDEI system');
 INSERT INTO public.roles(name, description)	VALUES ('pathways_data_generator', 'Pathways Data generator can publish file for the Organization');
 INSERT INTO public.roles(name, description)	VALUES ('osw_data_generator', 'OSW Data generator can publish file for the Organization');
-
 
 -- POC -> tdei_user, poc, data_generator
 --flex-data_generator
@@ -32,15 +30,15 @@ INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 303);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 304);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 305);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 306);
+INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 307);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 308);
-INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (203, 309);
 --tdei_user
 -- INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (204, 307);
 --tdei_admin
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 301);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 302);
+INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 307);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 308);
-INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 309);
 
 --Insert three test organizations
 with flexOrg as (
