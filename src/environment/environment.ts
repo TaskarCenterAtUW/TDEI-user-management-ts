@@ -16,14 +16,14 @@ export const environment = {
         port: parseInt(process.env.DATABASE_PORT ?? "5432"),
     },
     appPort: parseInt(process.env.APPLICATION_PORT ?? "8080"),
-    secretGenerateUrl: process.env.AUTH_SECRET_TOKEN_GENERATE_URL,
-    secretVerifyUrl: process.env.AUTH_SECRET_TOKEN_VERIFY_URL,
-    apiKeyVerifyUrl: process.env.AUTH_API_KEY_VERIFY_URL,
-    registerUserUrl: process.env.REGISTER_USER_URL,
-    userProfileUrl: process.env.USER_PROFILE_URL,
-    permissionUrl: process.env.PERMISSION_URL,
-    authenticateUrl: process.env.AUTHENTICATE_URL,
-    validateAccessTokenUrl: process.env.VALIDATE_ACCESS_TOKEN_URL,
-    refreshUrl: process.env.REFRESH_TOKEN_URL
+    secretGenerateUrl: `${process.env.AUTH_SERVICE_BASE_URL}/generateSecret`,
+    secretVerifyUrl: `${process.env.AUTH_SERVICE_BASE_URL}/validateSecret`,
+    apiKeyVerifyUrl: `${process.env.AUTH_SERVICE_BASE_URL}/validateApiKey`,
+    registerUserUrl: `${process.env.AUTH_SERVICE_BASE_URL}/registerUser`,
+    userProfileUrl: `${process.env.AUTH_SERVICE_BASE_URL}/getUserByUsername`,
+    permissionUrl: `${process.env.AUTH_SERVICE_BASE_URL}/hasPermission`,
+    authenticateUrl: `${process.env.AUTH_SERVICE_BASE_URL}/authenticate`,
+    validateAccessTokenUrl: `${process.env.AUTH_SERVICE_BASE_URL}/validateAccessToken`,
+    refreshUrl: `${process.env.AUTH_SERVICE_BASE_URL}/refreshToken`
 
 }

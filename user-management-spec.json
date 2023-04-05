@@ -132,7 +132,12 @@
                     "403": {
                         "description": "User not authenticated/authorized to perform this action."
                     }
-                }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
             }
         },
         "/api/v1/refresh-token": {
