@@ -3,7 +3,7 @@ import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/da
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { IUserManagement } from "./interface/user-management-interface";
-import { ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
+import { ForeignKeyException, UnAuthenticated, UserNotFoundException } from "../exceptions/http/http-exceptions";
 import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
@@ -61,7 +61,7 @@ class UserManagementService implements IUserManagement {
             return data;
         } catch (error: any) {
             console.error(error);
-            throw new Error("Error authenticating the user");
+            throw new UnAuthenticated();
         }
         return {};
     }
