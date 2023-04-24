@@ -1714,7 +1714,7 @@
                         "type": "string"
                     },
                     "email": {
-                        "type": "null"
+                        "type": "string"
                     },
                     "username": {
                         "type": "string"
