@@ -131,10 +131,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -205,6 +205,9 @@
                             }
                         }
                     },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
                     "500": {
                         "description": "Internal server error."
                     }
@@ -250,10 +253,10 @@
                         }
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     },
                     "500": {
                         "description": "An server error occurred."
@@ -297,10 +300,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 }
             }
@@ -395,10 +398,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 }
             },
@@ -437,10 +440,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -490,10 +493,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -545,10 +548,10 @@
                         "description": "Successful."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     },
                     "500": {
                         "description": "An server error occurred."
@@ -646,10 +649,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -693,10 +696,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -746,10 +749,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -801,10 +804,10 @@
                         "description": "Successful."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     },
                     "500": {
                         "description": "An server error occurred."
@@ -851,10 +854,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -903,10 +906,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -997,10 +1000,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -1044,10 +1047,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -1084,10 +1087,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -1163,10 +1166,10 @@
                         "description": "Internal server error."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     }
                 },
                 "security": [
@@ -1209,10 +1212,10 @@
                         "description": "Successful."
                     },
                     "401": {
-                        "description": "Expired/Invalid token."
+                        "description": "Unauthenticated request"
                     },
                     "403": {
-                        "description": "User not authenticated/authorized to perform this action."
+                        "description": "Unauthorized request"
                     },
                     "500": {
                         "description": "An server error occurred."
