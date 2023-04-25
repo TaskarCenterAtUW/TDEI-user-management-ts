@@ -46,8 +46,8 @@ class PathwaysStationController implements IController {
         try {
             //Transform the body to DTO
             let station = StationDto.from(request.body);
-            pathwaysStationService.createStation(station).then((user) => {
-                Ok(response, { data: user });
+            pathwaysStationService.createStation(station).then((stationId) => {
+                Ok(response, { data: stationId });
             }).catch((error: any) => {
                 console.error('Error creating the station');
                 console.error(error);
