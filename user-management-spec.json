@@ -197,6 +197,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "title": "RoleResponse",
                                     "type": "object",
                                     "properties": {
                                         "data": {
@@ -297,6 +298,7 @@
                         "content": {
                             "application/json": {
                                 "schema": {
+                                    "title": "RegisterResponse",
                                     "type": "object",
                                     "properties": {
                                         "data": {
@@ -781,7 +783,7 @@
                 ],
                 "summary": "Activates/Deactives the service.",
                 "description": "Activates/Deactives the service.",
-                "operationId": "setServiceStatus",
+                "operationId": "deleteService",
                 "parameters": [
                     {
                         "name": "orgId",
@@ -1198,7 +1200,7 @@
                 ],
                 "summary": "Activates/Deactives the organization.",
                 "description": "Activates/Deactives the organization.",
-                "operationId": "setServiceStatus",
+                "operationId": "deleteOrganization",
                 "parameters": [
                     {
                         "name": "orgId",
