@@ -15,18 +15,16 @@ Step 1: Create .env file in root folder with below variables and specify values 
 
 |Name| Description |  
 |--|--|  
-| PROVIDER | Provider for cloud service or local |
+|PROVIDER | Provider for cloud service or local |
 |QUEUECONNECTION | Queue connection string |
 |STORAGECONNECTION | Storage connection string|
-|APPLICATION_PORT |Port on which application will run|
+|PORT |Port on which application will run|
 |DATABASE_USER | Keycloak secret from portal |  
 |DATABASE_HOST | Queue connection string |  
 |DATABASE_PASSWORD | Storage connection string|  
 |DATABASE_DB |Port on which application will run|  
 |DATABASE_PORT | Upload topic subscription name|  
-|AUTH_SECRET_TOKEN_GENERATE_URL | Secret token generate url|
-|AUTH_SECRET_TOKEN_VERIFY_URL | Secret token verify url|
-|AUTH_API_KEY_VERIFY_URL | API key verify url|
+|AUTH_SERVICE_BASE_URL | Base URL for authentication service |
 
 Step 2: Spin up Postgres server and PgAdmin dashboard for visualization. Docker need to be install on the system first before proceeding.
 ```docker compose up from root directory```
@@ -42,7 +40,7 @@ Follow the steps to install the node packages required for both building and run
     npm install
     ```
 2. To start the server, use the command `npm run start`
-3. The http server by default starts with 8080 port or whatever is declared in `APPLICATION_PORT`
+3. The http server by default starts with 8080 port or whatever is declared in `PORT`
 4. By default `health/ping` call on `localhost:8080` gives a sample response
 
 
