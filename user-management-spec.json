@@ -1273,10 +1273,10 @@
             "OrgRoles": {
                 "type": "object",
                 "properties": {
-                    "orgId": {
+                    "tdei_org_id": {
                         "type": "string"
                     },
-                    "orgName": {
+                    "org_name": {
                         "type": "string"
                     },
                     "roles": {
