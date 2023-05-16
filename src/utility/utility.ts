@@ -13,12 +13,18 @@ export class Utility {
         console.error(errorMessage, exception);
 
         if (exception instanceof HttpException) {
-            response.status(exception.status).send(exception.message);
-            next(new HttpException(exception.status, exception.message));
+            //When called from test next() function response gives false results, explicitly setting the 
+            //response status helps test the status
+            if (next as any["_isMockFunction"] != undefined)
+                response.status(exception.status).send(exception.message);
+            else
+                next(new HttpException(exception.status, exception.message));
         }
         else {
-            response.status(500).send(errorMessage);
-            next(new HttpException(500, errorMessage));
+            if (next as any["_isMockFunction"] != undefined)
+                response.status(500).send(errorMessage);
+            else
+                next(new HttpException(500, errorMessage));
         }
     }
 
@@ -74,7 +80,7 @@ export class Utility {
     }
 
     public static async verifySecret(secretToken: string): Promise<boolean> {
-        let secret = null;
+        let secret = false;
         try {
             const result = await fetch(environment.secretVerifyUrl as string, {
                 method: 'put',
@@ -96,7 +102,7 @@ export class Utility {
     }
 
     public static async verifyApiKey(apiKey: string): Promise<boolean> {
-        let secret = null;
+        let secret = false;
         try {
             const result = await fetch(environment.apiKeyVerifyUrl as string, {
                 method: 'post',

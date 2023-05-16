@@ -11,6 +11,8 @@ import { LoginDto } from "../model/dto/login-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { Utility } from "../utility/utility";
 import jwt_decode from 'jwt-decode';
+import { setTimeout } from "timers/promises";
+const { setTimeout: sleep } = require('node:timers/promises');
 
 class UserManagementController implements IController {
     public path = '';
@@ -88,6 +90,7 @@ class UserManagementController implements IController {
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
+        await setTimeout(5000);
         let loginBody = LoginDto.from(request.body);
         return userManagementServiceInstance.login(loginBody).then((token) => {
             Ok(response, token)
