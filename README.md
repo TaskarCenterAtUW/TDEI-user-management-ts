@@ -1,8 +1,8 @@
 # Introduction 
-User management service helps TDEI system to manage the user and the permissions.
+User management service helps TDEI system to manage the user permissions and TDEI entities like organization, stations, service.
 
-# Getting Started
-The project is built on top of NodeJS framework. All the regular nuances for a NodeJS project are valid for this.
+## Getting Started
+The project is built on NodeJS framework. All the regular nuances for a NodeJS project are valid for this.
 
 ## System requirements
 | Software | Version|
@@ -11,7 +11,9 @@ The project is built on top of NodeJS framework. All the regular nuances for a N
 | Typescript | 4.8.2 |
 
 ### Local setup
-Step 1: Create .env file in root folder with below variables and specify values as required
+---
+
+Step 1: Application configuration is read from .env file. Below are the list of environemnt variables service is dependent on. An example of environment file is available [here](./env.example) and description of environment variable is presented in below table
 
 |Name| Description |  
 |--|--|  
@@ -33,6 +35,8 @@ Step 4: Run the script init.sql under script folder. That will create table sche
 Step 5: Run the script master-data.sql under script folder. This will insert the master roles, permissions, test users in the database
 
 #### Build and Test
+---
+
 Follow the steps to install the node packages required for both building and running the application
 
 1. Install the dependencies. Run the following command in terminal on the same directory as `package.json`
@@ -42,5 +46,13 @@ Follow the steps to install the node packages required for both building and run
 2. To start the server, use the command `npm run start`
 3. The http server by default starts with 8080 port or whatever is declared in `PORT`
 4. By default `health/ping` call on `localhost:8080` gives a sample response
+
+
+## System flow diagram
+---
+
+Detailed use case description can be found [here](https://github.com/TaskarCenterAtUW/TDEI-internaldocs/blob/master/adr/user-management-flow.md)
+
+![user-flow](./src/assets/user-management-flow.jpg)
 
 
