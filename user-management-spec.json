@@ -400,7 +400,12 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Station"
+                                    "title": "StationResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Station"
+                                    },
+                                    "description": "List of stations"
                                 }
                             }
                         }
@@ -651,7 +656,12 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/Service"
+                                    "title": "ServiceResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Service"
+                                    },
+                                    "description": "List of services"
                                 }
                             }
                         }
@@ -1002,7 +1012,12 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/OrganizationList"
+                                    "title": "OrganizationListResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrganizationList"
+                                    },
+                                    "description": "List of organizations"
                                 }
                             }
                         }
@@ -1168,7 +1183,12 @@
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "$ref": "#/components/schemas/OrgUser"
+                                    "title": "OrgUserResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/OrgUser"
+                                    },
+                                    "description": "List of org users"
                                 }
                             }
                         }
