@@ -29,12 +29,15 @@ Step 1: Application configuration is read from .env file. Below are the list of 
 |AUTH_SERVICE_BASE_URL | Base URL for authentication service |
 
 Step 2: Spin up Postgres server and PgAdmin dashboard for visualization. Docker need to be install on the system first before proceeding.
-```docker compose up from root directory```
+```docker compose up``` from root directory
+
 Step 3: Create the database tdei in the Postgresql
+
 Step 4: Run the script init.sql under script folder. That will create table schemas in the database [One time]
+
 Step 5: Run the script master-data.sql under script folder. This will insert the master roles, permissions, test users in the database
 
-#### Build and Test
+#### Build
 ---
 
 Follow the steps to install the node packages required for both building and running the application
@@ -43,8 +46,11 @@ Follow the steps to install the node packages required for both building and run
     ```shell
     npm install
     ```
+
 2. To start the server, use the command `npm run start`
+
 3. The http server by default starts with 8080 port or whatever is declared in `PORT`
+
 4. By default `health/ping` call on `localhost:8080` gives a sample response
 
 
