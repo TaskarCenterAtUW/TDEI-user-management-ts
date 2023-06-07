@@ -52,7 +52,7 @@ class OrganizationController implements IController {
             params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
             organizationService.getOrganizationUsers(params).then((result) => {
-                response.send(result);
+                response.status(200).send(result);
             }).catch((error: any) => {
                 console.error('Error fetching the organization users');
                 console.error(error);
@@ -71,13 +71,14 @@ class OrganizationController implements IController {
             params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
             organizationService.getOrganizations(params).then((result) => {
-                response.send(result);
+                response.status(200).send(result);
             }).catch((error: any) => {
-                console.error('Error fetching the organizations');
-                console.error(error);
+                console.error('Error fetching the organizations', error);
+                response.status(500).send("Error fetching the organizations");
                 next(error);
             });
         } catch (error) {
+            response.status(500).send("Error fetching the organizations");
             next(error);
         }
     }
