@@ -8,6 +8,7 @@ import { Role } from "../constants/role-constants";
 import organizationService from "../service/organization-service";
 import { OrgQueryParams } from "../model/params/organization-get-query-params";
 import { OrgUserQueryParams } from "../model/params/organization-user-query-params";
+import { Utility } from "../utility/utility";
 
 class OrganizationController implements IController {
     public path = '';
@@ -30,16 +31,16 @@ class OrganizationController implements IController {
             let orgId = request.params.orgId;
             let status = JSON.parse(request.params.status);
 
-            organizationService.setOrganizationStatus(orgId, status)
+            return organizationService.setOrganizationStatus(orgId, status)
                 .then((success) => {
                     Ok(response, success);
                 }).catch((error: any) => {
-                    console.error('Error updating the organization.');
-                    console.error(error);
-                    next(error);
+                    let errorMessage = "Error updating the organization.";
+                    Utility.handleError(response, next, error, errorMessage);
                 });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error updating the organization.";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -51,15 +52,15 @@ class OrganizationController implements IController {
             params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            organizationService.getOrganizationUsers(params).then((result) => {
-                response.status(200).send(result);
+            return organizationService.getOrganizationUsers(params).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the organization users');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the organization users.";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the organization users.";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -70,16 +71,15 @@ class OrganizationController implements IController {
             params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            organizationService.getOrganizations(params).then((result) => {
-                response.status(200).send(result);
+            return organizationService.getOrganizations(params).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the organizations', error);
-                response.status(500).send("Error fetching the organizations");
-                next(error);
+                let errorMessage = "Error fetching the organizations";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            response.status(500).send("Error fetching the organizations");
-            next(error);
+            let errorMessage = "Error fetching the organizations";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -88,15 +88,15 @@ class OrganizationController implements IController {
             //Model validation happens at the middleware.
             //Transform the body to DTO
             let organization = OrganizationDto.from(request.body);
-            organizationService.createOrganization(organization).then((org) => {
+            return organizationService.createOrganization(organization).then((org) => {
                 Ok(response, { data: org });
             }).catch((error: any) => {
-                console.error('Error creating the organization');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error creating the organization";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error creating the organization";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -109,15 +109,16 @@ class OrganizationController implements IController {
             //Check for Organization Id for update
             if (!organization.tdei_org_id || organization.tdei_org_id == "0")
                 BadRequest(response, "Organization Id not provided.")
-            organizationService.updateOrganization(organization).then((org) => {
-                Ok(response);
+
+            return organizationService.updateOrganization(organization).then((org) => {
+                Ok(response, true);
             }).catch((error: any) => {
-                console.error('Error updating the organization');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error updating the organization";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error updating the organization";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 }

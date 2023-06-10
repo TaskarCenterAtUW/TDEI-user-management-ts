@@ -53,6 +53,16 @@ Follow the steps to install the node packages required for both building and run
 
 4. By default `health/ping` call on `localhost:8080` gives a sample response
 
+## Test
+
+Follow the steps to install the node packages required for testing the application
+
+1. Ensure we have installed the dependencies. Run the following command in terminal on the same directory level as `package.json`
+    ```shell
+    npm install
+    ```
+2. To start testing suits, use the command `npm test` , this command will execute all the unit test suites defined for application.
+
 
 ## System flow diagram
 ---

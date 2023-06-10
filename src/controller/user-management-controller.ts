@@ -11,6 +11,7 @@ import { LoginDto } from "../model/dto/login-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { Utility } from "../utility/utility";
 import jwt_decode from 'jwt-decode';
+import { UnAuthenticated } from "../exceptions/http/http-exceptions";
 
 class UserManagementController implements IController {
     public path = '';
@@ -38,15 +39,15 @@ class UserManagementController implements IController {
 
             let token = request.headers.refresh_token?.toString();
 
-            userManagementService.refreshToken(token ?? "").then((token) => {
-                response.send(token)
+            return userManagementService.refreshToken(token ?? "").then((token) => {
+                Ok(response, token)
             }).catch((error: Error) => {
-                console.error(error.message);
-                next(error);
+                let errorMessage = "Error refreshing the user token";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            console.error('Error refreshing the user token');
-            next(error);
+            let errorMessage = "Error refreshing the user token";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -56,15 +57,15 @@ class UserManagementController implements IController {
             let user_name = request.query.user_name;
             if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
 
-            userManagementService.getUserProfile(user_name as string).then((result) => {
-                response.send(result);
+            return userManagementService.getUserProfile(user_name as string).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the user profile');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the user profile";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the user profile";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -74,50 +75,50 @@ class UserManagementController implements IController {
             var decoded: any = jwt_decode(authToken);
 
             let userId = request.params.userId;
+            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
 
             if (decoded.sub != userId) throw new HttpException(403, "Not authorized.");
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
-            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
 
-            userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
-                response.send(result);
+            return userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the user org & roles');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the user org & roles";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the user org & roles";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             let loginBody = LoginDto.from(request.body);
-            userManagementService.login(loginBody).then((token) => {
-                response.send(token)
+            return userManagementService.login(loginBody).then((token) => {
+                Ok(response, token)
             }).catch((error: any) => {
-                console.error('Error authenticating the user');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error authenticating the user";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error authenticating the user";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
-            userManagementService.getRoles().then((roles) => {
+            return userManagementService.getRoles().then((roles) => {
                 Ok(response, { data: roles });
             }).catch((error: any) => {
-                console.error('Error fetching the roles');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the roles";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the roles";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -126,15 +127,15 @@ class UserManagementController implements IController {
             //Transform the body to DTO
             let registerUserBody = new RegisterUserDto(request.body);
             //Call service to register the user
-            userManagementService.registerUser(registerUserBody).catch((error: any) => {
-                console.error('Error registering the user');
-                console.log(error);
-                next(error);
+            return userManagementService.registerUser(registerUserBody).catch((error: any) => {
+                let errorMessage = "Error registering the user";
+                Utility.handleError(response, next, error, errorMessage);
             }).then((user) => {
                 Ok(response, { data: user });
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error registering the user";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -142,15 +143,16 @@ class UserManagementController implements IController {
         try {
             //Transform the body to DTO
             let permissonObj = new RolesReqDto(request.body);
-            userManagementService.updatePermissions(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error assigning the permissions to the user');
-                console.error(error);
-                next(error);
-            }).then((flag) => {
-                Ok(response, { data: "Successful!" });
-            });
+            return userManagementService.updatePermissions(permissonObj, request.userId)
+                .catch((error: any) => {
+                    let errorMessage = "Error assigning the permissions to the user";
+                    Utility.handleError(response, next, error, errorMessage);
+                }).then((flag) => {
+                    Ok(response, { data: "Successful!" });
+                });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error assigning the permissions to the user";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -158,15 +160,15 @@ class UserManagementController implements IController {
         try {
             //Transform the body to DTO
             let permissonObj = new RolesReqDto(request.body);
-            userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error revoking the permissions of the user');
-                console.error(error);
-                next(error);
+            return userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
+                let errorMessage = 'Error revoking the permissions of the user';
+                Utility.handleError(response, next, error, errorMessage);
             }).then((flag) => {
                 Ok(response, { data: "Successful!" });
             });
         } catch (error) {
-            next(error);
+            let errorMessage = 'Error revoking the permissions of the user';
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 }

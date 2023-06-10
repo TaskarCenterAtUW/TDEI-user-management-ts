@@ -6,7 +6,7 @@ import { AppHttpResponse } from './app-http-response.model';
  * @param body An optional body that will be sent within the response' body.
  */
 export function Ok(response: Response, body?: AppHttpResponse | any): Response {
-  return body ? response.send(body) : response.send();
+  return body ? response.status(200).send(body) : response.send();
 }
 
 /**

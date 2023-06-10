@@ -8,6 +8,7 @@ import { Role } from "../constants/role-constants";
 import pathwaysStationService from "../service/pathways-station-service";
 import { StationQueryParams } from "../model/params/station-get-query-params";
 import { StationUpdateDto } from "../model/dto/station-update-dto";
+import { Utility } from "../utility/utility";
 
 class PathwaysStationController implements IController {
     public path = '';
@@ -29,16 +30,16 @@ class PathwaysStationController implements IController {
             let stationId = request.params.stationId;
             let status = JSON.parse(request.params.status);
 
-            pathwaysStationService.setStationStatus(stationId, status)
+            return pathwaysStationService.setStationStatus(stationId, status)
                 .then((success) => {
                     Ok(response);
                 }).catch((error: any) => {
-                    console.error('Error updating the station.');
-                    console.error(error);
-                    next(error);
+                    let errorMessage = "Error updating the station.";
+                    Utility.handleError(response, next, error, errorMessage);
                 });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error updating the station.";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -46,15 +47,15 @@ class PathwaysStationController implements IController {
         try {
             //Transform the body to DTO
             let station = StationDto.from(request.body);
-            pathwaysStationService.createStation(station).then((stationId) => {
+            return pathwaysStationService.createStation(station).then((stationId) => {
                 Ok(response, { data: stationId });
             }).catch((error: any) => {
-                console.error('Error creating the station');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error creating the station";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error creating the station";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -67,15 +68,15 @@ class PathwaysStationController implements IController {
             if (!verifyResult.valid)
                 return BadRequest(response, verifyResult.message);
 
-            pathwaysStationService.updateStation(station).then((result) => {
-                Ok(response);
+            return pathwaysStationService.updateStation(station).then((result) => {
+                Ok(response, true);
             }).catch((error: any) => {
-                console.error('Error updating the station');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error updating the station";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error updating the station";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -87,15 +88,15 @@ class PathwaysStationController implements IController {
             params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            pathwaysStationService.getStation(params).then((result) => {
-                response.send(result);
+            return pathwaysStationService.getStation(params).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the gtfs pathways stations');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the gtfs pathways stations";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the gtfs pathways stations";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 }

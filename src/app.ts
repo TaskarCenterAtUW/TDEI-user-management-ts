@@ -8,7 +8,9 @@ import { Core } from "nodets-ms-core";
 import { errorHandler } from "./middleware/error-handler-middleware";
 import { unhandledExceptionAndRejectionHandler } from "./middleware/unhandled-exception-rejection-handler";
 import swaggerUi from "swagger-ui-express";
-const swaggerDocument = require('../user-management-spec.json');
+import dbClient from "./database/data-source";
+import swaggerDocument from "./assets/user-management-spec.json";
+// const swaggerDocument = require('./assets/user-management-spec.json');
 
 class App {
     public app: express.Application;
@@ -25,6 +27,7 @@ class App {
         this.initializeControllers(controllers);
         this.initializeLibraries();
         this.initializeSwagger();
+        dbClient.initializaDatabse();
         //Last middleware to be registered: error handler. 
         this.app.use(errorHandler);
     }
