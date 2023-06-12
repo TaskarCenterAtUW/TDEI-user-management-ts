@@ -98,6 +98,16 @@ describe("Flex Controller Test", () => {
                 expect(updateServiceSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(400);
             });
+
+            test("When service_id not provided, Expect to return HTTP status 400", async () => {
+                //Arrange
+                let req = getMockReq({ body: { service_name: "test_service" } });
+                const { res, next } = getMockRes();
+                //Act
+                await flexServiceController.updateService(req, res, next);
+                //Assert
+                expect(res.status).toHaveBeenCalledWith(400);
+            });
         });
     });
 
@@ -130,7 +140,9 @@ describe("Flex Controller Test", () => {
                         searchText: "test",
                         tdei_service_id: "tdei_service_id",
                         tdei_org_id: "tdei_org_id",
-                        bbox: <any>[23, 43, 45, 67]
+                        bbox: <any>[23, 43, 45, 67],
+                        page_no: "1",
+                        page_size: "10"
                     }
                 });
                 const { res, next } = getMockRes();
@@ -160,6 +172,39 @@ describe("Flex Controller Test", () => {
                 await flexServiceController.getService(req, res, next);
                 //Assert
                 expect(getServiceSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(500);
+            });
+        });
+    });
+
+    describe("Update Service Status", () => {
+        describe("Functional", () => {
+            test("When requested, Expect to return boolean true on success", async () => {
+                //Arrange
+                let req = getMockReq({ params: <any>{ serviceId: "test_serviceId", status: "true" } });
+                const { res, next } = getMockRes();
+                const updateServiceSpy = jest
+                    .spyOn(flexService, "setServiceStatus")
+                    .mockResolvedValueOnce(true);
+                //Act
+                await flexServiceController.deleteService(req, res, next);
+                //Assert
+                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(true);
+            });
+
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
+                //Arrange
+                let req = getMockReq({ params: <any>{ serviceId: "test_serviceId", status: "true" } });
+                const { res, next } = getMockRes();
+                const updateServiceSpy = jest
+                    .spyOn(flexService, "setServiceStatus")
+                    .mockRejectedValueOnce(new Error());
+                //Act
+                await flexServiceController.deleteService(req, res, next);
+                //Assert
+                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(500);
             });
         });

@@ -26,78 +26,62 @@ class PathwaysStationController implements IController {
     }
 
     public deleteStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            let stationId = request.params.stationId;
-            let status = JSON.parse(request.params.status);
+        let stationId = request.params.stationId;
+        let status = JSON.parse(request.params.status);
 
-            return pathwaysStationService.setStationStatus(stationId, status)
-                .then((success) => {
-                    Ok(response);
-                }).catch((error: any) => {
-                    let errorMessage = "Error updating the station.";
-                    Utility.handleError(response, next, error, errorMessage);
-                });
-        } catch (error) {
-            let errorMessage = "Error updating the station.";
-            Utility.handleError(response, next, error, errorMessage);
-        }
+        return pathwaysStationService.setStationStatus(stationId, status)
+            .then((success) => {
+                Ok(response, success);
+            }).catch((error: any) => {
+                let errorMessage = "Error updating the station.";
+                Utility.handleError(response, next, error, errorMessage);
+            });
+
     }
 
     public createStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let station = StationDto.from(request.body);
-            return pathwaysStationService.createStation(station).then((stationId) => {
-                Ok(response, { data: stationId });
-            }).catch((error: any) => {
-                let errorMessage = "Error creating the station";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        //Transform the body to DTO
+        let station = StationDto.from(request.body);
+        return pathwaysStationService.createStation(station).then((stationId) => {
+            Ok(response, { data: stationId });
+        }).catch((error: any) => {
             let errorMessage = "Error creating the station";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
+
     }
 
     public updateStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let station = StationUpdateDto.from(request.body);
-            //Verify input
-            let verifyResult = station.verifyInput();
-            if (!verifyResult.valid)
-                return BadRequest(response, verifyResult.message);
+        //Transform the body to DTO
+        let station = StationUpdateDto.from(request.body);
+        //Verify input
+        let verifyResult = station.verifyInput();
+        if (!verifyResult.valid)
+            return BadRequest(response, verifyResult.message);
 
-            return pathwaysStationService.updateStation(station).then((result) => {
-                Ok(response, true);
-            }).catch((error: any) => {
-                let errorMessage = "Error updating the station";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        return pathwaysStationService.updateStation(station).then((result) => {
+            Ok(response, true);
+        }).catch((error: any) => {
             let errorMessage = "Error updating the station";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
+
     }
 
     public getStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
 
-            var params = StationQueryParams.from(request.query);
+        var params = StationQueryParams.from(request.query);
 
-            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            return pathwaysStationService.getStation(params).then((result) => {
-                Ok(response, result);
-            }).catch((error: any) => {
-                let errorMessage = "Error fetching the gtfs pathways stations";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        return pathwaysStationService.getStation(params).then((result) => {
+            Ok(response, result);
+        }).catch((error: any) => {
             let errorMessage = "Error fetching the gtfs pathways stations";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
+
     }
 }
 

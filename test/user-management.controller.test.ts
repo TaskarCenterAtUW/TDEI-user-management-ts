@@ -401,6 +401,10 @@ describe("User Management Controller Test", () => {
             test("When requested, Expect to return organization role details", async () => {
                 //Arrange
                 let req = getMockReq({
+                    query: {
+                        page_no: "1",
+                        page_size: "10"
+                    },
                     params: <any>{ userId: "testuserid" },
                     headers: <any>{ "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlcmlkIn0.MQjKH-T8EEWz1q8RjkE8wYgDS5zNPQAJeZHkffdadPY" }
                 });

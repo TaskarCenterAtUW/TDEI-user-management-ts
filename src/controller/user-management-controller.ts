@@ -11,7 +11,6 @@ import { LoginDto } from "../model/dto/login-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { Utility } from "../utility/utility";
 import jwt_decode from 'jwt-decode';
-import { UnAuthenticated } from "../exceptions/http/http-exceptions";
 
 class UserManagementController implements IController {
     public path = '';
@@ -33,22 +32,17 @@ class UserManagementController implements IController {
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
-                BadRequest(response);
+        if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
+            BadRequest(response);
 
-            let token = request.headers.refresh_token?.toString();
+        let token = request.headers.refresh_token?.toString();
 
-            return userManagementService.refreshToken(token ?? "").then((token) => {
-                Ok(response, token)
-            }).catch((error: Error) => {
-                let errorMessage = "Error refreshing the user token";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        return userManagementService.refreshToken(token ?? "").then((token) => {
+            Ok(response, token)
+        }).catch((error: Error) => {
             let errorMessage = "Error refreshing the user token";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
     }
 
     public getUserProfile = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -94,82 +88,61 @@ class UserManagementController implements IController {
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            let loginBody = LoginDto.from(request.body);
-            return userManagementService.login(loginBody).then((token) => {
-                Ok(response, token)
-            }).catch((error: any) => {
-                let errorMessage = "Error authenticating the user";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        let loginBody = LoginDto.from(request.body);
+        return userManagementService.login(loginBody).then((token) => {
+            Ok(response, token)
+        }).catch((error: any) => {
             let errorMessage = "Error authenticating the user";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
     }
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            return userManagementService.getRoles().then((roles) => {
-                Ok(response, { data: roles });
-            }).catch((error: any) => {
-                let errorMessage = "Error fetching the roles";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
+        return userManagementService.getRoles().then((roles) => {
+            Ok(response, { data: roles });
+        }).catch((error: any) => {
             let errorMessage = "Error fetching the roles";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        });
+
     }
 
     public registerUser = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let registerUserBody = new RegisterUserDto(request.body);
-            //Call service to register the user
-            return userManagementService.registerUser(registerUserBody).catch((error: any) => {
-                let errorMessage = "Error registering the user";
-                Utility.handleError(response, next, error, errorMessage);
-            }).then((user) => {
-                Ok(response, { data: user });
-            });
-        } catch (error) {
+        //Transform the body to DTO
+        let registerUserBody = new RegisterUserDto(request.body);
+        //Call service to register the user
+        return userManagementService.registerUser(registerUserBody).catch((error: any) => {
             let errorMessage = "Error registering the user";
             Utility.handleError(response, next, error, errorMessage);
-        }
+        }).then((user) => {
+            Ok(response, { data: user });
+        });
+
     }
 
     public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let permissonObj = new RolesReqDto(request.body);
-            return userManagementService.updatePermissions(permissonObj, request.userId)
-                .catch((error: any) => {
-                    let errorMessage = "Error assigning the permissions to the user";
-                    Utility.handleError(response, next, error, errorMessage);
-                }).then((flag) => {
-                    Ok(response, { data: "Successful!" });
-                });
-        } catch (error) {
-            let errorMessage = "Error assigning the permissions to the user";
-            Utility.handleError(response, next, error, errorMessage);
-        }
-    }
-
-    public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let permissonObj = new RolesReqDto(request.body);
-            return userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
-                let errorMessage = 'Error revoking the permissions of the user';
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementService.updatePermissions(permissonObj, request.userId)
+            .catch((error: any) => {
+                let errorMessage = "Error assigning the permissions to the user";
                 Utility.handleError(response, next, error, errorMessage);
             }).then((flag) => {
                 Ok(response, { data: "Successful!" });
             });
-        } catch (error) {
+
+    }
+
+    public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
             let errorMessage = 'Error revoking the permissions of the user';
             Utility.handleError(response, next, error, errorMessage);
-        }
+        }).then((flag) => {
+            Ok(response, { data: "Successful!" });
+        });
+
     }
 }
 

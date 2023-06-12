@@ -98,6 +98,16 @@ describe("Pathways Controller Test", () => {
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(400);
             });
+
+            test("When station_id not provided, Expect to return HTTP status 400", async () => {
+                //Arrange
+                let req = getMockReq({ body: { station_name: "test_station" } });
+                const { res, next } = getMockRes();
+                //Act
+                await pathwaysStationServiceController.updateStation(req, res, next);
+                //Assert
+                expect(res.status).toHaveBeenCalledWith(400);
+            });
         });
     });
 
@@ -130,7 +140,9 @@ describe("Pathways Controller Test", () => {
                         searchText: "test",
                         tdei_station_id: "tdei_station_id",
                         tdei_org_id: "tdei_org_id",
-                        bbox: <any>[23, 43, 45, 67]
+                        bbox: <any>[23, 43, 45, 67],
+                        page_no: "1",
+                        page_size: "10"
                     }
                 });
                 const { res, next } = getMockRes();
@@ -160,6 +172,39 @@ describe("Pathways Controller Test", () => {
                 await pathwaysStationServiceController.getStation(req, res, next);
                 //Assert
                 expect(getStationSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(500);
+            });
+        });
+    });
+
+    describe("Update Station Status", () => {
+        describe("Functional", () => {
+            test("When requested, Expect to return boolean true on success", async () => {
+                //Arrange
+                let req = getMockReq({ params: <any>{ stationId: "test_stationId", status: "true" } });
+                const { res, next } = getMockRes();
+                const updateStationSpy = jest
+                    .spyOn(pathwaysStationService, "setStationStatus")
+                    .mockResolvedValueOnce(true);
+                //Act
+                await pathwaysStationServiceController.deleteStation(req, res, next);
+                //Assert
+                expect(updateStationSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(true);
+            });
+
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
+                //Arrange
+                let req = getMockReq({ params: <any>{ stationId: "test_stationId", status: "true" } });
+                const { res, next } = getMockRes();
+                const updateStationSpy = jest
+                    .spyOn(pathwaysStationService, "setStationStatus")
+                    .mockRejectedValueOnce(new Error());
+                //Act
+                await pathwaysStationServiceController.deleteStation(req, res, next);
+                //Assert
+                expect(updateStationSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(500);
             });
         });
