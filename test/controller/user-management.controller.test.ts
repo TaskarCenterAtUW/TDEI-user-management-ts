@@ -1,12 +1,12 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import userManagementController from "../src/controller/user-management-controller";
-import userManagementService from "../src/service/user-management-service";
-import { RoleDto } from "../src/model/dto/roles-dto";
-import { UserProfile } from "../src/model/dto/user-profile-dto";
-import { RolesReqDto } from "../src/model/dto/roles-req-dto";
-import { ForeignKeyException, UserNotFoundException } from "../src/exceptions/http/http-exceptions";
-import HttpException from "../src/exceptions/http/http-base-exception";
-import { OrgRoleDto } from "../src/model/dto/org-role-dto";
+import userManagementController from "../../src/controller/user-management-controller";
+import userManagementService from "../../src/service/user-management-service";
+import { RoleDto } from "../../src/model/dto/roles-dto";
+import { UserProfile } from "../../src/model/dto/user-profile-dto";
+import { RolesReqDto } from "../../src/model/dto/roles-req-dto";
+import { ForeignKeyException, UserNotFoundException } from "../../src/exceptions/http/http-exceptions";
+import HttpException from "../../src/exceptions/http/http-base-exception";
+import { OrgRoleDto } from "../../src/model/dto/org-role-dto";
 
 
 // group test using describe

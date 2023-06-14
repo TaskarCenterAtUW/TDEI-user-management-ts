@@ -1,8 +1,8 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import flexServiceController from "../src/controller/flex-service-controller";
-import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../src/exceptions/http/http-exceptions";
-import flexService from "../src/service/flex-service";
-import { ServiceDto } from "../src/model/dto/service-dto";
+import flexServiceController from "../../src/controller/flex-service-controller";
+import { DuplicateException, ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
+import flexService from "../../src/service/flex-service";
+import { ServiceDto } from "../../src/model/dto/service-dto";
 
 // group test using describe
 describe("Flex Controller Test", () => {
@@ -51,6 +51,20 @@ describe("Flex Controller Test", () => {
                 expect(createServiceSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(400);
             });
+
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
+                //Arrange
+                let req = getMockReq();
+                const { res, next } = getMockRes();
+                const createServiceSpy = jest
+                    .spyOn(flexService, "createService")
+                    .mockRejectedValueOnce(new Error("exception"));
+                //Act
+                await flexServiceController.createService(req, res, next);
+                //Assert
+                expect(createServiceSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(500);
+            });
         });
     });
 
@@ -85,18 +99,18 @@ describe("Flex Controller Test", () => {
                 expect(res.status).toHaveBeenCalledWith(400);
             });
 
-            test("When no update happens, Expect to return HTTP status 400", async () => {
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
                 //Arrange
                 let req = getMockReq({ body: { service_name: "test_service", service_id: "test_service_id" } });
                 const { res, next } = getMockRes();
                 const updateServiceSpy = jest
                     .spyOn(flexService, "updateService")
-                    .mockRejectedValueOnce(new NoDataUpdatedException());
+                    .mockRejectedValueOnce(new Error("exception"));
                 //Act
                 await flexServiceController.updateService(req, res, next);
                 //Assert
                 expect(updateServiceSpy).toHaveBeenCalledTimes(1);
-                expect(res.status).toHaveBeenCalledWith(400);
+                expect(res.status).toHaveBeenCalledWith(500);
             });
 
             test("When service_id not provided, Expect to return HTTP status 400", async () => {

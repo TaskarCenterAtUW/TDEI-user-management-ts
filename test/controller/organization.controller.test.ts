@@ -1,10 +1,10 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import organizationController from "../src/controller/organization-controller";
-import { DuplicateException } from "../src/exceptions/http/http-exceptions";
-import organizationService from "../src/service/organization-service";
-import { OrganizationListResponse } from "../src/model/dto/poc-details-dto";
+import organizationController from "../../src/controller/organization-controller";
+import { DuplicateException } from "../../src/exceptions/http/http-exceptions";
+import organizationService from "../../src/service/organization-service";
+import { OrganizationListResponse } from "../../src/model/dto/poc-details-dto";
 import { query } from "express";
-import { OrgUserDto } from "../src/model/dto/org-user-dto";
+import { OrgUserDto } from "../../src/model/dto/org-user-dto";
 
 describe("Organization Controller Test", () => {
 

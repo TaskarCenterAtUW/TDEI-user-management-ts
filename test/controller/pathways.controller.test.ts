@@ -1,9 +1,10 @@
 import { getMockReq, getMockRes } from "@jest-mock/express";
-import pathwaysStationServiceController from "../src/controller/pathways-station-controller";
-import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../src/exceptions/http/http-exceptions";
-import { StationDto } from "../src/model/dto/station-dto";
-import pathwaysStationServiceService from "../src/service/pathways-station-service";
-import pathwaysStationService from "../src/service/pathways-station-service";
+import pathwaysStationServiceController from "../../src/controller/pathways-station-controller";
+import { DuplicateException, ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
+import { StationDto } from "../../src/model/dto/station-dto";
+import pathwaysStationServiceService from "../../src/service/pathways-station-service";
+import pathwaysStationService from "../../src/service/pathways-station-service";
+import { DatabaseError } from "pg";
 
 describe("Pathways Controller Test", () => {
 
@@ -51,6 +52,20 @@ describe("Pathways Controller Test", () => {
                 expect(createStationSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(400);
             });
+
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
+                //Arrange
+                let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
+                const { res, next } = getMockRes();
+                const createStationSpy = jest
+                    .spyOn(pathwaysStationService, "createStation")
+                    .mockRejectedValueOnce(new Error("exception"));
+                //Act
+                await pathwaysStationServiceController.createStation(req, res, next);
+                //Assert
+                expect(createStationSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(500);
+            });
         });
     });
 
@@ -85,20 +100,6 @@ describe("Pathways Controller Test", () => {
                 expect(res.status).toHaveBeenCalledWith(400);
             });
 
-            test("When no update happens, Expect to return HTTP status 400", async () => {
-                //Arrange
-                let req = getMockReq({ body: { station_name: "test_station", tdei_station_id: "test_tdei_station_id" } });
-                const { res, next } = getMockRes();
-                const updateStationSpy = jest
-                    .spyOn(pathwaysStationService, "updateStation")
-                    .mockRejectedValueOnce(new NoDataUpdatedException());
-                //Act
-                await pathwaysStationServiceController.updateStation(req, res, next);
-                //Assert
-                expect(updateStationSpy).toHaveBeenCalledTimes(1);
-                expect(res.status).toHaveBeenCalledWith(400);
-            });
-
             test("When station_id not provided, Expect to return HTTP status 400", async () => {
                 //Arrange
                 let req = getMockReq({ body: { station_name: "test_station" } });
@@ -107,6 +108,20 @@ describe("Pathways Controller Test", () => {
                 await pathwaysStationServiceController.updateStation(req, res, next);
                 //Assert
                 expect(res.status).toHaveBeenCalledWith(400);
+            });
+
+            test("When database exception occurs, Expect to return HTTP status 500", async () => {
+                //Arrange
+                let req = getMockReq({ body: { station_name: "test_station", tdei_station_id: "test_tdei_station_id" } });
+                const { res, next } = getMockRes();
+                const updateStationSpy = jest
+                    .spyOn(pathwaysStationService, "updateStation")
+                    .mockRejectedValueOnce(new DatabaseError("exception", 1, "error"));
+                //Act
+                await pathwaysStationServiceController.updateStation(req, res, next);
+                //Assert
+                expect(updateStationSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(500);
             });
         });
     });
