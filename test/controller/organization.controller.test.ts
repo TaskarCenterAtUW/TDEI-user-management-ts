@@ -10,7 +10,7 @@ describe("Organization Controller Test", () => {
 
     describe("Create Organization", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return organization list", async () => {
+            test("When requested, Expect to return new organization id", async () => {
                 //Arrange
                 let req = getMockReq({ body: { org_name: "test_org_name" } });
                 const { res, next } = getMockRes();

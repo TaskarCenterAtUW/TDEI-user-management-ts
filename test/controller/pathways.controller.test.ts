@@ -10,7 +10,7 @@ describe("Pathways Controller Test", () => {
 
     describe("Create Station", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return station list", async () => {
+            test("When requested, Expect to return new station_id", async () => {
                 //Arrange
                 let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
                 const { res, next } = getMockRes();

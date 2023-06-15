@@ -9,7 +9,7 @@ describe("Flex Controller Test", () => {
 
     describe("Create Service", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return service list", async () => {
+            test("When requested, Expect to return new service_id", async () => {
                 //Arrange
                 let req = getMockReq({ body: { service_name: "test_service", tdei_org_id: "test_org_id" } });
                 const { res, next } = getMockRes();
