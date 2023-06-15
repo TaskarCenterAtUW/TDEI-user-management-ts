@@ -117,3 +117,40 @@ describe("{{Component}}", () => {
 | User Controller | Org Roles| Functional| When requested organization roles for different user| Expect to return HTTP status 403 |:white_check_mark:|
 | User Controller | Org Roles| Functional| When user not provided| Expect to return HTTP status 400 |:white_check_mark:|
 | User Controller | Org Roles| Functional| When database error| Expect to return HTTP status 500 |:white_check_mark:|
+|--|--|--|--|--|--|
+| Flex Service | Create Service| Functional| When requested| Expect to return new service_id |:white_check_mark:|
+| Flex Service | Create Service| Functional| When unique key exception thrown| Expect to return DuplicateException |:white_check_mark:|
+| Flex Service | Create Service| Functional| When foreign key exception thrown| Expect to return ForeignKeyException |:white_check_mark:|
+| Flex Service | Create Service| Functional| When database exception thrown| Expect to throw error |:white_check_mark:|
+| Flex Service | Update Service| Functional| When requested| Expect to return success |:white_check_mark:|
+| Flex Service | Update Service| Functional| When unique key exception thrown| Expect to return DuplicateException |:white_check_mark:|
+| Flex Service | Update Service| Functional| When database exception thrown| Expect to throw error |:white_check_mark:|
+| Flex Service | Get Flex Service| Functional| When requested| Expect to return list of services |:white_check_mark:|
+| Flex Service | Get Flex Service| Functional| When database exception occured| Expect to throw error |:white_check_mark:|
+| Flex Service | Update Service Status| Functional| When requested| Expect to return success |:white_check_mark:|
+| Flex Service | Update Service Status| Functional| When database error occured| Expect to throw error |:white_check_mark:|
+|--|--|--|--|--|--|
+| Pathways Station Service | Create Station| Functional| When requested| Expect to return new station_id |:white_check_mark:|
+| Pathways Station Service | Create Station| Functional| When unique key exception thrown| Expect to return DuplicateException |:white_check_mark:|
+| Pathways Station Service | Create Station| Functional| When foreign key exception thrown| Expect to return ForeignKeyException |:white_check_mark:|
+| Pathways Station Service | Create Station| Functional| When database exception thrown| Expect to throw error |:white_check_mark:|
+| Pathways Station Service | Update Station| Functional| When requested| Expect to return success |:white_check_mark:|
+| Pathways Station Service | Update Station| Functional| When unique key exception thrown| Expect to return DuplicateException |:white_check_mark:|
+| Pathways Station Service | Update Station| Functional| When database exception thrown| Expect to throw error |:white_check_mark:|
+| Pathways Station Service | Get Pathways Station| Functional| When requested| Expect to return list of stations |:white_check_mark:|
+| Pathways Station Service | Get Pathways Station| Functional| When database exception occured| Expect to throw error |:white_check_mark:|
+| Pathways Station Service | Update Station Status| Functional| When requested| Expect to return success |:white_check_mark:|
+| Pathways Station Service | Update Station Status| Functional| When database error occured| Expect to throw error |:white_check_mark:|
+|--|--|--|--|--|--|
+| Organization Service | Create Organization | Functional| When requested| Expect to return new organization_id |:white_check_mark:|
+| Organization Service | Create Organization | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
+| Organization Service | Create Organization | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
+| Organization Service | Update Organization | Functional| When requested| Expect to return true on success |:white_check_mark:|
+| Organization Service | Update Organization | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
+| Organization Service | Update Organization | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
+| Organization Service | Get Organization | Functional| When requested| Expect to return list of organizations |:white_check_mark:|
+| Organization Service | Get Organization | Functional| When database exception occured| Expect to throw error |:white_check_mark:|
+| Organization Service | Get Organization Users | Functional| When requested| Expect to return list of organization users |:white_check_mark:|
+| Organization Service | Get Organization Users | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| Organization Service | Update Organization Status | Functional| When requested| Expect to return success |:white_check_mark:|
+| Organization Service | Update Organization Status | Functional| When database error occured| Expect to throw error |:white_check_mark:|
