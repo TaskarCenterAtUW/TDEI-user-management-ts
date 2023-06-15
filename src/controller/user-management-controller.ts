@@ -3,7 +3,7 @@ import validationMiddleware from "../middleware/dto-validation-middleware";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { BadRequest, Ok } from "../model/http/http-responses";
-import userManagementService from "../service/user-management-service";
+import userManagementServiceInstance from "../service/user-management-service";
 import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
@@ -37,7 +37,7 @@ class UserManagementController implements IController {
 
         let token = request.headers.refresh_token?.toString();
 
-        return userManagementService.refreshToken(token ?? "").then((token) => {
+        return userManagementServiceInstance.refreshToken(token ?? "").then((token) => {
             Ok(response, token)
         }).catch((error: Error) => {
             let errorMessage = "Error refreshing the user token";
@@ -51,7 +51,7 @@ class UserManagementController implements IController {
             let user_name = request.query.user_name;
             if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
 
-            return userManagementService.getUserProfile(user_name as string).then((result) => {
+            return userManagementServiceInstance.getUserProfile(user_name as string).then((result) => {
                 Ok(response, result);
             }).catch((error: any) => {
                 let errorMessage = "Error fetching the user profile";
@@ -75,7 +75,7 @@ class UserManagementController implements IController {
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            return userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+            return userManagementServiceInstance.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
                 Ok(response, result);
             }).catch((error: any) => {
                 let errorMessage = "Error fetching the user org & roles";
@@ -89,7 +89,7 @@ class UserManagementController implements IController {
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
         let loginBody = LoginDto.from(request.body);
-        return userManagementService.login(loginBody).then((token) => {
+        return userManagementServiceInstance.login(loginBody).then((token) => {
             Ok(response, token)
         }).catch((error: any) => {
             let errorMessage = "Error authenticating the user";
@@ -98,7 +98,7 @@ class UserManagementController implements IController {
     }
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
-        return userManagementService.getRoles().then((roles) => {
+        return userManagementServiceInstance.getRoles().then((roles) => {
             Ok(response, { data: roles });
         }).catch((error: any) => {
             let errorMessage = "Error fetching the roles";
@@ -111,7 +111,7 @@ class UserManagementController implements IController {
         //Transform the body to DTO
         let registerUserBody = new RegisterUserDto(request.body);
         //Call service to register the user
-        return userManagementService.registerUser(registerUserBody).catch((error: any) => {
+        return userManagementServiceInstance.registerUser(registerUserBody).catch((error: any) => {
             let errorMessage = "Error registering the user";
             Utility.handleError(response, next, error, errorMessage);
         }).then((user) => {
@@ -123,7 +123,7 @@ class UserManagementController implements IController {
     public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
         //Transform the body to DTO
         let permissonObj = new RolesReqDto(request.body);
-        return userManagementService.updatePermissions(permissonObj, request.userId)
+        return userManagementServiceInstance.updatePermissions(permissonObj, request.userId)
             .catch((error: any) => {
                 let errorMessage = "Error assigning the permissions to the user";
                 Utility.handleError(response, next, error, errorMessage);
@@ -136,7 +136,7 @@ class UserManagementController implements IController {
     public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
         //Transform the body to DTO
         let permissonObj = new RolesReqDto(request.body);
-        return userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
+        return userManagementServiceInstance.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
             let errorMessage = 'Error revoking the permissions of the user';
             Utility.handleError(response, next, error, errorMessage);
         }).then((flag) => {

@@ -9,15 +9,16 @@ import { StationQueryParams } from "../../src/model/params/station-get-query-par
 import { StationDto } from "../../src/model/dto/station-dto";
 
 // group test using describe
-describe("Pathways Station Test", () => {
+describe("Pathways Service Test", () => {
 
     describe("Create Station", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return station list", async () => {
+            test("When requested, Expect to return new station_id", async () => {
                 //Arrange
                 let input = new StationDto({
                     station_name: "test_station_name",
                     tdei_org_id: "test_tdei_org_id",
+                    polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
                     rows: [
@@ -90,6 +91,7 @@ describe("Pathways Station Test", () => {
                 let input = new StationUpdateDto({
                     station_name: "test_station_name",
                     tdei_station_id: "test_station_id",
+                    polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
                     rowCount: 1
@@ -208,9 +210,6 @@ describe("Pathways Station Test", () => {
 
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
-                let response = <QueryResult>{
-                    rowCount: 1 //effected row
-                }
                 const updateStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));

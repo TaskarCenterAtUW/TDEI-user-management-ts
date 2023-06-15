@@ -13,11 +13,12 @@ describe("Flex Service Test", () => {
 
     describe("Create Service", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return service list", async () => {
+            test("When requested, Expect to return new service_id", async () => {
                 //Arrange
                 let input = new ServiceDto({
                     service_name: "test_service_name",
                     tdei_org_id: "test_tdei_org_id",
+                    polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
                     rows: [
@@ -38,6 +39,7 @@ describe("Flex Service Test", () => {
                 let input = new ServiceDto({
                     service_name: "test_service_name",
                     tdei_org_id: "test_tdei_org_id",
+                    polygon: undefined
                 });
 
                 const createServiceSpy = jest
@@ -90,6 +92,7 @@ describe("Flex Service Test", () => {
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
                     service_id: "test_service_id",
+                    polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
                     rowCount: 1
@@ -108,6 +111,7 @@ describe("Flex Service Test", () => {
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
                     service_id: "test_service_id",
+                    polygon: undefined
                 });
 
                 const updateServiceSpy = jest
@@ -208,9 +212,6 @@ describe("Flex Service Test", () => {
 
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
-                let response = <QueryResult>{
-                    rowCount: 1 //effected row
-                }
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
