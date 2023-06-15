@@ -154,3 +154,35 @@ describe("{{Component}}", () => {
 | Organization Service | Get Organization Users | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 | Organization Service | Update Organization Status | Functional| When requested| Expect to return success |:white_check_mark:|
 | Organization Service | Update Organization Status | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+|--|--|--|--|--|--|
+| User Management Service | Refresh Token | Functional| When requested| Expect to return refreshed access token |:white_check_mark:|
+| User Management Service | Refresh Token | Functional| When error refreshing token| Expect to throw error |:white_check_mark:|
+| User Management Service | Login | Functional| When requested| Expect to return access token |:white_check_mark:|
+| User Management Service | Login | Functional| When error authenticating| Expect to throw error |:white_check_mark:|
+| User Management Service | Register User | Functional| When requested| Expect to return user profile response on success |:white_check_mark:|
+| User Management Service | Register User | Functional| When user already exists with same email| Expect to throw error |:white_check_mark:|
+| User Management Service | Register User | Functional| When error registering| Expect to throw error |:white_check_mark:|
+| User Management Service | User Profile | Functional| When requested| Expect to return user profile response on success |:white_check_mark:|
+| User Management Service | User Profile | Functional| When user profile not found| Expect to throw UserNotFoundException |:white_check_mark:|
+| User Management Service | Get Roles | Functional| When requested| Expect to return list of roles |:white_check_mark:|
+| User Management Service | Get Roles | Functional| When database error occured| Expect to throw Error |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When requested as Admin| Expect to return true on success |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When requested as POC| Expect to return true on success |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When requested as POC with admin restricted permissions| Expect to throw HttpException |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When managing own permissions| Expect to return HttpException |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When foreign key exception occured| Expect to throw ForeignKeyDbException |:white_check_mark:|
+| User Management Service | Update Permission | Functional| When database exception occured| Expect to throw Error |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When requested as Admin| Expect to return true on success |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When requested as POC| Expect to return true on success |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When requested as POC with admin restricted permissions| Expect to throw HttpException |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When managing own permissions| Expect to return HttpException |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When removing user from organization| Expect to return true on success |:white_check_mark:|
+| User Management Service | Remove User from Organization | Functional| When requested| Expect to return success |:white_check_mark:|
+| User Management Service | Remove User from Organization | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| User Management Service | Remove User Roles from Organization | Functional| When requested| Expect to return success |:white_check_mark:|
+| User Management Service | Get Role Details by Name | Functional| When requested| Expect to return map of role_id and name |:white_check_mark:|
+| User Management Service | Get Role Details by Name | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| User Management Service | Get User Roles | Functional| When requested| Expect to return list of user roles |:white_check_mark:|
+| User Management Service | Get User Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| User Management Service | Get User Orgs with Roles | Functional| When requested| Expect to return list of user orgs with roles |:white_check_mark:|
+| User Management Service | Get User Orgs with Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
