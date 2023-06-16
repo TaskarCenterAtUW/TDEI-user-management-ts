@@ -8,6 +8,7 @@ import { Role } from "../constants/role-constants";
 import flexService from "../service/flex-service";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
+import { Utility } from "../utility/utility";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -25,79 +26,63 @@ class FlexServiceController implements IController {
     }
 
     public deleteService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            let serviceId = request.params.serviceId;
-            let status = JSON.parse(request.params.status);
+        let serviceId = request.params.serviceId;
+        let status = JSON.parse(request.params.status);
 
-            flexService.setServiceStatus(serviceId, status)
-                .then((success) => {
-                    Ok(response);
-                }).catch((error: any) => {
-                    console.error('Error updating the service.');
-                    console.error(error);
-                    next(error);
-                });
-        } catch (error) {
-            next(error);
-        }
+        return flexService.setServiceStatus(serviceId, status)
+            .then((success) => {
+                Ok(response, success);
+            }).catch((error: any) => {
+                let errorMessage = "Error deleting the service.";
+                Utility.handleError(response, next, error, errorMessage);
+            });
+
     }
 
     public createService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let service = ServiceDto.from(request.body);
-            flexService.createService(service)
-                .then((service) => {
-                    Ok(response, { data: service });
-                }).catch((error: any) => {
-                    console.error('Error creating the service');
-                    console.error(error);
-                    next(error);
-                });
-        } catch (error) {
-            next(error);
-        }
+        //Transform the body to DTO
+        let service = ServiceDto.from(request.body);
+        return flexService.createService(service)
+            .then((service) => {
+                Ok(response, { data: service });
+            }).catch((error: any) => {
+                let errorMessage = "Error creating the service.";
+                Utility.handleError(response, next, error, errorMessage);
+            });
+
     }
 
     public updateService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let station = ServiceUpdateDto.from(request.body);
-            //Verify input
-            let verifyResult = station.verifyInput();
-            if (!verifyResult.valid)
-                return BadRequest(response, verifyResult.message);
+        //Transform the body to DTO
+        let station = ServiceUpdateDto.from(request.body);
+        //Verify input
+        let verifyResult = station.verifyInput();
+        if (!verifyResult.valid)
+            return BadRequest(response, verifyResult.message);
 
-            flexService.updateService(station).then((result) => {
-                Ok(response);
-            }).catch((error: any) => {
-                console.error('Error updating the flex service');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
+        return flexService.updateService(station).then((result) => {
+            Ok(response, true);
+        }).catch((error: any) => {
+            let errorMessage = "Error updating the service.";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+
     }
 
     public getService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
 
-            var params = ServiceQueryParams.from(request.query);
+        var params = ServiceQueryParams.from(request.query);
 
-            params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            flexService.getService(params).then((result) => {
-                response.send(result);
-            }).catch((error: any) => {
-                console.error('Error fetching the gtfs flex service');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
+        return flexService.getService(params).then((result) => {
+            Ok(response, result);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the gtfs flex service.";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+
     }
 }
 

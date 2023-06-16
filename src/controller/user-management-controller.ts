@@ -3,7 +3,7 @@ import validationMiddleware from "../middleware/dto-validation-middleware";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { BadRequest, Ok } from "../model/http/http-responses";
-import userManagementService from "../service/user-management-service";
+import userManagementServiceInstance from "../service/user-management-service";
 import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
@@ -32,22 +32,17 @@ class UserManagementController implements IController {
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
-                BadRequest(response);
+        if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
+            BadRequest(response);
 
-            let token = request.headers.refresh_token?.toString();
+        let token = request.headers.refresh_token?.toString();
 
-            userManagementService.refreshToken(token ?? "").then((token) => {
-                response.send(token)
-            }).catch((error: Error) => {
-                console.error(error.message);
-                next(error);
-            });
-        } catch (error) {
-            console.error('Error refreshing the user token');
-            next(error);
-        }
+        return userManagementServiceInstance.refreshToken(token ?? "").then((token) => {
+            Ok(response, token)
+        }).catch((error: Error) => {
+            let errorMessage = "Error refreshing the user token";
+            Utility.handleError(response, next, error, errorMessage);
+        });
     }
 
     public getUserProfile = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -56,15 +51,15 @@ class UserManagementController implements IController {
             let user_name = request.query.user_name;
             if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
 
-            userManagementService.getUserProfile(user_name as string).then((result) => {
-                response.send(result);
+            return userManagementServiceInstance.getUserProfile(user_name as string).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the user profile');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the user profile";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the user profile";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
@@ -74,100 +69,80 @@ class UserManagementController implements IController {
             var decoded: any = jwt_decode(authToken);
 
             let userId = request.params.userId;
+            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
 
             if (decoded.sub != userId) throw new HttpException(403, "Not authorized.");
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
-            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
 
-            userManagementService.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
-                response.send(result);
+            return userManagementServiceInstance.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+                Ok(response, result);
             }).catch((error: any) => {
-                console.error('Error fetching the user org & roles');
-                console.error(error);
-                next(error);
+                let errorMessage = "Error fetching the user org & roles";
+                Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            next(error);
+            let errorMessage = "Error fetching the user org & roles";
+            Utility.handleError(response, next, error, errorMessage);
         }
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            let loginBody = LoginDto.from(request.body);
-            userManagementService.login(loginBody).then((token) => {
-                response.send(token)
-            }).catch((error: any) => {
-                console.error('Error authenticating the user');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
+        let loginBody = LoginDto.from(request.body);
+        return userManagementServiceInstance.login(loginBody).then((token) => {
+            Ok(response, token)
+        }).catch((error: any) => {
+            let errorMessage = "Error authenticating the user";
+            Utility.handleError(response, next, error, errorMessage);
+        });
     }
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            userManagementService.getRoles().then((roles) => {
-                Ok(response, { data: roles });
-            }).catch((error: any) => {
-                console.error('Error fetching the roles');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
+        return userManagementServiceInstance.getRoles().then((roles) => {
+            Ok(response, { data: roles });
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+
     }
 
     public registerUser = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let registerUserBody = new RegisterUserDto(request.body);
-            //Call service to register the user
-            userManagementService.registerUser(registerUserBody).catch((error: any) => {
-                console.error('Error registering the user');
-                console.log(error);
-                next(error);
-            }).then((user) => {
-                Ok(response, { data: user });
-            });
-        } catch (error) {
-            next(error);
-        }
+        //Transform the body to DTO
+        let registerUserBody = new RegisterUserDto(request.body);
+        //Call service to register the user
+        return userManagementServiceInstance.registerUser(registerUserBody).catch((error: any) => {
+            let errorMessage = "Error registering the user";
+            Utility.handleError(response, next, error, errorMessage);
+        }).then((user) => {
+            Ok(response, { data: user });
+        });
+
     }
 
     public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let permissonObj = new RolesReqDto(request.body);
-            userManagementService.updatePermissions(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error assigning the permissions to the user');
-                console.error(error);
-                next(error);
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementServiceInstance.updatePermissions(permissonObj, request.userId)
+            .catch((error: any) => {
+                let errorMessage = "Error assigning the permissions to the user";
+                Utility.handleError(response, next, error, errorMessage);
             }).then((flag) => {
                 Ok(response, { data: "Successful!" });
             });
-        } catch (error) {
-            next(error);
-        }
+
     }
 
     public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let permissonObj = new RolesReqDto(request.body);
-            userManagementService.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error revoking the permissions of the user');
-                console.error(error);
-                next(error);
-            }).then((flag) => {
-                Ok(response, { data: "Successful!" });
-            });
-        } catch (error) {
-            next(error);
-        }
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementServiceInstance.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
+            let errorMessage = 'Error revoking the permissions of the user';
+            Utility.handleError(response, next, error, errorMessage);
+        }).then((flag) => {
+            Ok(response, { data: "Successful!" });
+        });
+
     }
 }
 

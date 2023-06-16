@@ -1,8 +1,26 @@
 import fetch from "node-fetch";
 import { environment } from "../environment/environment";
 import HttpException from "../exceptions/http/http-base-exception";
+import express, { NextFunction, Request } from "express";
 
 export class Utility {
+
+    public static handleError(
+        response: express.Response,
+        next: NextFunction,
+        exception: any, errorMessage: string) {
+
+        console.error(errorMessage, exception);
+
+        if (exception instanceof HttpException) {
+            response.status(exception.status).send(exception.message);
+            next(new HttpException(exception.status, exception.message));
+        }
+        else {
+            response.status(500).send(errorMessage);
+            next(new HttpException(500, errorMessage));
+        }
+    }
 
     public static extractToken(req: any) {
         if (req.headers.authorization && req.headers.authorization.split(' ')[0] === 'Bearer') {

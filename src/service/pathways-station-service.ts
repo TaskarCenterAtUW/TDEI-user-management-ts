@@ -1,7 +1,7 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { StationDto } from "../model/dto/station-dto";
-import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
+import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
 import { IPathwaysStationService } from "./interface/pathways-station-interface";
 import { QueryConfig } from "pg";
 import { StationQueryParams } from "../model/params/station-get-query-params";
@@ -45,8 +45,6 @@ class PathwaysStationService implements IPathwaysStationService {
 
         return await dbClient.query(station.getUpdateQuery())
             .then(res => {
-                if (res.rowCount == 0)
-                    throw new NoDataUpdatedException();
                 return true;
             })
             .catch(e => {

@@ -16,7 +16,7 @@ import { OrgRoleDto } from "../model/dto/org-role-dto";
 import { environment } from "../environment/environment";
 
 
-class UserManagementService implements IUserManagement {
+export class UserManagementService implements IUserManagement {
     /**
     * Reissues the new access token in the case of valid refresh token input
     * @param refreshToken refresh token
@@ -63,7 +63,6 @@ class UserManagementService implements IUserManagement {
             console.error(error);
             throw new UnAuthenticated();
         }
-        return {};
     }
     /**
      * Creates new user in TDEI system
@@ -78,7 +77,7 @@ class UserManagementService implements IUserManagement {
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            if (result.status != undefined && result.status != 200)
+            if (result.status != undefined && result.status == 409)
                 throw new HttpException(409, "User already exists with email " + user.email);
 
             if (result.status != undefined && result.status != 200)
@@ -183,19 +182,18 @@ class UserManagementService implements IUserManagement {
      * @returns 
      */
     async getUserProfile(userName: string): Promise<UserProfile> {
-        let userProfile = new UserProfile();
-
         //Fetch permissioned user profile from keycloak
         try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)).json();
-            if (data.status != undefined && data.status == 404)
+            let response = await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)
+            const data: any = await response.json();
+            if (response.status != undefined && response.status != 200)
                 throw new Error();
-            else userProfile = new UserProfile(data);
+            let result = new UserProfile(data);
+            return result;
         } catch (error: any) {
             console.error(error);
             throw new UserNotFoundException(userName);
         }
-        return userProfile;
     }
 
     /**
@@ -205,19 +203,9 @@ class UserManagementService implements IUserManagement {
      * @returns boolean flag
      */
     async updatePermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
-        let userProfile = new UserProfile();
 
         //Fetch permissioned user profile from keycloak
-        try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
-            if (data.status != undefined && data.status == 404)
-                throw new Error();
-            else userProfile = new UserProfile(data);
-        } catch (error: any) {
-            console.error(error);
-            throw new UserNotFoundException(rolesReq.user_name);
-        }
-
+        let userProfile = await this.getUserProfile(rolesReq.user_name);
 
         //Get the user_id from user_entity table
         let userId = userProfile.id;
@@ -250,9 +238,9 @@ class UserManagementService implements IUserManagement {
                 if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
                 }
-                else if (e instanceof UniqueKeyDbException) {
-                    throw new HttpException(400, "User already assigned with the specific roles");
-                }
+                // else if (e instanceof UniqueKeyDbException) {
+                //     throw new HttpException(400, "User already assigned with the specific roles");
+                // }
                 throw e;
             });
     }
@@ -264,18 +252,8 @@ class UserManagementService implements IUserManagement {
      * @returns boolean flag
      */
     async revokeUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
-        let userProfile = new UserProfile();
+        let userProfile = await this.getUserProfile(rolesReq.user_name);
 
-        //Fetch permissioned user profile from keycloak
-        try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
-            if (data.status != undefined && data.status == 404)
-                throw new Error("User not found or does not exist.");
-            else userProfile = new UserProfile(data);
-        } catch (error: any) {
-            console.error(error);
-            throw new UserNotFoundException(rolesReq.user_name);
-        }
         //Get the user_id from user_entity table
         let userId = userProfile.id;
 
@@ -328,5 +306,5 @@ class UserManagementService implements IUserManagement {
     }
 }
 
-const userManagementService: IUserManagement = new UserManagementService();
-export default userManagementService;
+const userManagementServiceInstance: IUserManagement = new UserManagementService();
+export default userManagementServiceInstance;
