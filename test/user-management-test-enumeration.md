@@ -186,3 +186,18 @@ describe("{{Component}}", () => {
 | User Management Service | Get User Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 | User Management Service | Get User Orgs with Roles | Functional| When requested| Expect to return list of user orgs with roles |:white_check_mark:|
 | User Management Service | Get User Orgs with Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+
+
+### Integration Test cases
+
+| Component | Feature Under Test | Scenario | Expectation | Status |
+|--|--|--|--|--|
+| User Management Service | Auth Service | Verifying auth service generate secret api integration | Expect to return true |:white_check_mark:|
+| User Management Service | Auth Service | Verifying refresh token | Expect to return refresh token |:white_check_mark:|
+| User Management Service | Auth Service | Verifying login auth | Expect to return access token |:white_check_mark:|
+| User Management Service | Auth Service | Verifying register user api integration | Expect to return user profile |:white_check_mark:|
+| User Management Service | Auth Service | Validating access token | Expect to return user profile |:white_check_mark:|
+| User Management Service | Permission Request | Verifying auth service hasPermission api integration| Expect to return false |:white_check_mark:|
+| User Management Service | Auth service | Verifying authentication | Expect to return access token |:white_check_mark:|
+| User Management Service | Auth service | Validating secret | Expect to return access token |:white_check_mark:|
+| User Management Service | Auth service | Validating api key | Expect to return true |:white_check_mark:|
