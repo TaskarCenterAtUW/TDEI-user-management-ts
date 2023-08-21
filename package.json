@@ -4,7 +4,8 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "jest",
+    "test": "jest --testRegex 'test/unit'",
+    "test:integration": "TEST_ENV=integration jest --testRegex 'test/integration' --forceExit",
     "test:watch": "jest --watchAll",
     "test:coverage": "jest --coverage",
     "build": "rimraf ./build && tsc",
@@ -30,7 +31,7 @@
     "jwt-decode": "^3.1.2",
     "lodash": "4.17.21",
     "node-fetch": "^2.6.7",
-    "nodets-ms-core": "0.0.6",
+    "nodets-ms-core": "0.0.7",
     "pg": "^8.8.0",
     "pg-format": "^1.0.4",
     "reflect-metadata": "^0.1.13",
@@ -62,3 +63,4 @@
     "typescript": "^4.8.2"
   }
 }
+
