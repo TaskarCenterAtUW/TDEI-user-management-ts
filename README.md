@@ -26,7 +26,7 @@ Step 1: Application configuration is read from .env file. Below are the list of 
 |DATABASE_PASSWORD | Storage connection string|  
 |DATABASE_DB |Port on which application will run|  
 |DATABASE_PORT | Upload topic subscription name|  
-|AUTH_SERVICE_BASE_URL | Base URL for authentication service |
+|AUTH_HOST | Base URL for authentication service |
 
 Step 2: Spin up Postgres server and PgAdmin dashboard for visualization. Docker need to be install on the system first before proceeding.
 ```docker compose up``` from root directory
@@ -62,6 +62,36 @@ Follow the steps to install the node packages required for testing the applicati
     npm install
     ```
 2. To start testing suits, use the command `npm test` , this command will execute all the unit test suites defined for application.
+
+Note: Unit test doesnt require any of the env variables. Running the above command will execute the suites.
+
+## How to run integration test
+To run integration test you need a `.env` file which will be available on request.
+
+Steps to run:
+
+Execute the following commands.
+
+```
+npm run i
+```
+
+``` 
+npm run test:integration
+```
+
+## Required env for running tests
+
+For running integration test, following env variables are required.
+
+|Name| Description |
+|--|--|
+|QUEUECONNECTION | Queue connection string |
+|STORAGECONNECTION | Storage connection string|
+|AUTH_HOST | Host of the authentication service |
+|VALIDATION_SUBSCRIPTION | Upload topic subscription name|
+|VALIDATION_TOPIC | Validation topic name|
+|DATASVC_TOPIC | Data service publishing topic|
 
 
 ## System flow diagram

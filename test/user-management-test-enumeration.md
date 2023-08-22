@@ -186,3 +186,11 @@ describe("{{Component}}", () => {
 | User Management Service | Get User Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 | User Management Service | Get User Orgs with Roles | Functional| When requested| Expect to return list of user orgs with roles |:white_check_mark:|
 | User Management Service | Get User Orgs with Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+
+
+### Integration Test cases
+
+| Component | Feature Under Test | Scenario | Expectation | Status |
+|--|--|--|--|--|
+| User Management Service | Auth Service | Verifying auth service generate secret api integration | Expect to return HTTP status 200 |:white_check_mark:|
+| User Management Service | Permission Request | Verifying auth permission with invalid credentials| Expect to resolve as false (and not throw exception) |:white_check_mark:|
