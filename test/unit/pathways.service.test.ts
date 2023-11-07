@@ -17,7 +17,7 @@ describe("Pathways Service Test", () => {
                 //Arrange
                 let input = new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_project_group_id",
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
@@ -38,7 +38,7 @@ describe("Pathways Service Test", () => {
                 //Arrange
                 let input = new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_project_group_id",
                 });
 
                 const createStationSpy = jest
@@ -54,7 +54,7 @@ describe("Pathways Service Test", () => {
                 //Arrange
                 let input = new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_project_group_id",
                 });
 
                 const createStationSpy = jest
@@ -70,7 +70,7 @@ describe("Pathways Service Test", () => {
                 //Arrange
                 let input = new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_project_group_id",
                 });
 
                 const createStationSpy = jest
@@ -146,14 +146,14 @@ describe("Pathways Service Test", () => {
                 let station = new StationDto({
                     station_name: "station_name",
                     tdei_station_id: "tdei_station_id",
-                    tdei_org_id: "tdei_org_id",
+                    tdei_project_group_id: "tdei_project_group_id",
                     polygon: TestHelper.getPolygon()
                 });
 
                 let dbResult: any = {
                     name: "station_name",
                     station_id: "tdei_station_id",
-                    owner_org: "tdei_org_id",
+                    owner_project_group: "tdei_project_group_id",
                     polygon: JSON.stringify(station.polygon.features[0].geometry)
                 }
 
@@ -168,7 +168,7 @@ describe("Pathways Service Test", () => {
                 let list = await pathwaysStationService.getStation(new StationQueryParams({
                     searchText: "test",
                     tdei_station_id: "tdei_station_id",
-                    tdei_org_id: "tdei_org_id",
+                    tdei_project_group_id: "tdei_project_group_id",
                     bbox: <any>[23, 43, 45, 67],
                     page_no: 1,
                     page_size: 10

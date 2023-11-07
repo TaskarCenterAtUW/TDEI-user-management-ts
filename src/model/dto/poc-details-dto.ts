@@ -1,6 +1,6 @@
 import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
-import { OrganizationDto } from "./organization-dto";
+import { ProjectGroupDto } from "./project-group-dto";
 
 export class PocDetails extends BaseDto {
     @Prop()
@@ -16,7 +16,7 @@ export class PocDetails extends BaseDto {
     }
 }
 
-export class OrganizationListResponse extends OrganizationDto {
+export class ProjectGroupListResponse extends ProjectGroupDto {
     @Prop()
     poc!: PocDetails[];
 }

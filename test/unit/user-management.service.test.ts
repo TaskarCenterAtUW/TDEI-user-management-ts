@@ -232,7 +232,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 let dbRoles = new Map<string, string>();
@@ -275,7 +275,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 let dbRoles = new Map<string, string>();
@@ -318,7 +318,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.TDEI_ADMIN],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -345,7 +345,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -368,7 +368,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 let dbRoles = new Map<string, string>();
@@ -407,7 +407,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 let dbRoles = new Map<string, string>;
@@ -450,7 +450,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 let dbRoles = new Map<string, string>();
@@ -486,7 +486,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -517,7 +517,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.TDEI_ADMIN],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -544,7 +544,7 @@ describe("User Management Service Test", () => {
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [Role.DATA_GENERATOR],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -561,13 +561,13 @@ describe("User Management Service Test", () => {
                 expect(getUserProfileSpy).toHaveBeenCalledTimes(1);
             });
 
-            test("When removing user from organization, Expect to return true on success", async () => {
+            test("When removing user from project groups, Expect to return true on success", async () => {
                 //Arrange
                 let userService = new UserManagementService();
                 let input = new RolesReqDto({
                     user_name: "test_user_name",
                     roles: [],
-                    tdei_org_id: "tdei_org_id"
+                    tdei_project_group_id: "tdei_project_group_id"
                 });
 
                 const getUserProfileSpy = jest
@@ -581,7 +581,7 @@ describe("User Management Service Test", () => {
                     .spyOn(UserManagementService.prototype as any, "getUserRoles")
                     .mockResolvedValueOnce(<any>[Role.POC]);
                 const removeRolesSpy = jest
-                    .spyOn(UserManagementService.prototype as any, "removeUserFromOrg")
+                    .spyOn(UserManagementService.prototype as any, "removeUserFromProjectGroup")
                     .mockResolvedValueOnce(true);
                 //Act
                 let result = await userService.revokeUserPermissions(input, "test_user_id");
@@ -595,7 +595,7 @@ describe("User Management Service Test", () => {
         });
     });
 
-    describe("Remove User from Organization", () => {
+    describe("Remove User from Project Groups", () => {
         describe("Functional", () => {
 
             test("When requested, Expect to return success", async () => {
@@ -608,7 +608,7 @@ describe("User Management Service Test", () => {
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
-                await userService["removeUserFromOrg"]("org_id", "user_id");
+                await userService["removeUserFromProjectGroup"]("project_group_Id", "user_id");
                 //Assert
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
@@ -621,14 +621,14 @@ describe("User Management Service Test", () => {
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(userService["removeUserFromOrg"]("org_id", "user_id")).rejects.toThrow(Error);
+                await expect(userService["removeUserFromProjectGroup"]("project_group_Id", "user_id")).rejects.toThrow(Error);
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
 
         });
     });
 
-    describe("Remove User Roles from Organization", () => {
+    describe("Remove User Roles from Project Groups", () => {
         describe("Functional", () => {
 
             test("When requested, Expect to return success", async () => {
@@ -746,43 +746,43 @@ describe("User Management Service Test", () => {
         });
     });
 
-    describe("Get User Orgs with Roles", () => {
+    describe("Get User Project Groups with Roles", () => {
         describe("Functional", () => {
 
-            test("When requested, Expect to return list of user orgs with roles", async () => {
+            test("When requested, Expect to return list of user project groups with roles", async () => {
                 //Arrange
                 let userService = new UserManagementService();
                 let response = <QueryResult>{
                     rowCount: 1, //effected row
                     rows: [
                         {
-                            org: "org_name",
-                            org_id: "org_id",
+                            project_group_name: "project_group_name",
+                            project_group_id: "project_group_id",
                             roles: [Role.DATA_GENERATOR]
                         }
                     ]
                 }
-                const getUserorgRolesSpy = jest
+                const getUserProjectGroupRolesSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
-                let result = await userService.getUserOrgsWithRoles("user_id", 1, 10);
+                let result = await userService.getUserProjectGroupsWithRoles("user_id", 1, 10);
                 //Assert
-                expect(result[0].org_name).toBe("org_name");
-                expect(getUserorgRolesSpy).toHaveBeenCalledTimes(1);
+                expect(result[0].project_group_name).toBe("project_group_name");
+                expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
                 let userService = new UserManagementService();
 
-                const getUserorgRolesSpy = jest
+                const getUserProjectGroupRolesSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new Error());
                 //Act
                 //Assert
-                await expect(userService.getUserOrgsWithRoles("user_id", 1, 10)).rejects.toThrow(Error);
-                expect(getUserorgRolesSpy).toHaveBeenCalledTimes(1);
+                await expect(userService.getUserProjectGroupsWithRoles("user_id", 1, 10)).rejects.toThrow(Error);
+                expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
             });
 
         });

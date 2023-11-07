@@ -11,7 +11,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     tdei_service_id: string | undefined;
     @IsOptional()
     @Prop()
-    tdei_org_id: string | undefined;
+    tdei_project_group_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
@@ -36,7 +36,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
      */
     getQueryObject() {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("service", ["service_id", "name", "owner_org", "ST_AsGeoJSON(polygon) as polygon"]);
+        queryObject.buildSelect("service", ["service_id", "name", "owner_project_group", "ST_AsGeoJSON(polygon) as polygon"]);
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
@@ -46,8 +46,8 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         if (this.tdei_service_id != undefined && this.tdei_service_id.length != 0) {
             queryObject.condition(` service_id = $${queryObject.paramCouter++} `, this.tdei_service_id);
         }
-        if (this.tdei_org_id != undefined && this.tdei_org_id.length != 0) {
-            queryObject.condition(` owner_org = $${queryObject.paramCouter++} `, this.tdei_org_id);
+        if (this.tdei_project_group_id != undefined && this.tdei_project_group_id.length != 0) {
+            queryObject.condition(` owner_project_group = $${queryObject.paramCouter++} `, this.tdei_project_group_id);
         }
         if (this.bbox && this.bbox.length > 0 && this.bbox.length == 4) {
             queryObject.condition(`polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,
@@ -56,7 +56,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         else if (this.bbox.length > 0 && this.bbox.length != 4) {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
-        //Always pull active organization
+        //Always pull active project group
         queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
 
         return queryObject;
