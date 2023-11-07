@@ -156,7 +156,7 @@ export class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
-        var sql = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN projectgroup o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
+        var sql = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
 
         return await dbClient.query(sql)
             .then(res => {

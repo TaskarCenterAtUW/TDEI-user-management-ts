@@ -38,7 +38,7 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
                                    ue.first_name,'last_name', ue.last_name,'enabled', ue.enabled) 
                 ) FILTER (WHERE ue.username IS NOT NULL), '[]')
          as userDetails 
-        from projectgroup o         
+        from project_group o         
         left join user_roles ur on o.project_group_id = ur.project_group_id and ur.role_id = (select role_id from roles where name='poc' limit 1)       
         left join keycloak.user_entity ue on ur.user_id = ue.id AND ue.enabled = true         
         `.replace(/\n/g, ""));

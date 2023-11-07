@@ -15,7 +15,7 @@ class ProjectGroupService implements IProjectGroupService {
 
     async setProjectGroupStatus(projectGroupId: string, status: boolean): Promise<boolean> {
         const query = {
-            text: `UPDATE projectgroup set is_active = $1 WHERE project_group_id = $2`,
+            text: `UPDATE project_group set is_active = $1 WHERE project_group_id = $2`,
             values: [status, projectGroupId],
         }
         return await dbClient.query(query)

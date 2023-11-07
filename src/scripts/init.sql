@@ -1,10 +1,10 @@
 CREATE EXTENSION IF NOT EXISTS postgis;
     
-    -- Table: public.projectgroup
+    -- Table: public.project_group
 
-    -- DROP TABLE IF EXISTS public.projectgroup;
+    -- DROP TABLE IF EXISTS public.project_group;
 
-    CREATE TABLE IF NOT EXISTS public.projectgroup
+    CREATE TABLE IF NOT EXISTS public.project_group
     (
         project_group_id character varying(100) COLLATE pg_catalog."default" NOT NULL DEFAULT gen_random_uuid(),
         name character varying(100) COLLATE pg_catalog."default" NOT NULL,
@@ -89,7 +89,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
         CONSTRAINT service_pkey PRIMARY KEY (service_id),
         CONSTRAINT unq_service_project_group UNIQUE (name, owner_project_group),
         CONSTRAINT fk_project_group_id FOREIGN KEY (owner_project_group)
-            REFERENCES public.projectgroup (project_group_id) MATCH SIMPLE
+            REFERENCES public.project_group (project_group_id) MATCH SIMPLE
             ON UPDATE NO ACTION
             ON DELETE NO ACTION
             NOT VALID
@@ -113,7 +113,7 @@ CREATE TABLE IF NOT EXISTS public.station
     CONSTRAINT station_pkey PRIMARY KEY (station_id),
     CONSTRAINT unq_station_project_group UNIQUE (name, owner_project_group),
     CONSTRAINT fk_project_group_id FOREIGN KEY (owner_project_group)
-        REFERENCES public.projectgroup (project_group_id) MATCH SIMPLE
+        REFERENCES public.project_group (project_group_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
 )
@@ -132,7 +132,7 @@ CREATE TABLE IF NOT EXISTS public.station
         project_group_id character varying(100) COLLATE pg_catalog."default",
         CONSTRAINT unq_user_role_project_group UNIQUE (user_id, role_id, project_group_id),
         CONSTRAINT fk_project_group_id FOREIGN KEY (project_group_id)
-            REFERENCES public.projectgroup (project_group_id) MATCH SIMPLE
+            REFERENCES public.project_group (project_group_id) MATCH SIMPLE
             ON UPDATE NO ACTION
             ON DELETE NO ACTION,
         CONSTRAINT fk_role_id FOREIGN KEY (role_id)
@@ -145,7 +145,7 @@ CREATE TABLE IF NOT EXISTS public.station
 
 
 CREATE INDEX IF NOT EXISTS project_group_geom_idx
-  ON projectgroup
+  ON project_group
   USING GIST (polygon);
 CREATE INDEX IF NOT EXISTS service_geom_idx
     ON public.service USING gist

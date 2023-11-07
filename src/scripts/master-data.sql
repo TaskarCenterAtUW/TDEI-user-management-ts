@@ -42,21 +42,21 @@ INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 308);
 
 --Insert three test project
 with flexProjectGroup as (
-  INSERT INTO public.projectgroup(name, phone, url, address) VALUES ('Seattle2', '12345', 'www.seattle.com', 'seattle, usa') RETURNING projectgroup.id
+  INSERT INTO public.project_group(name, phone, url, address) VALUES ('Seattle2', '12345', 'www.seattle.com', 'seattle, usa') RETURNING project_group.id
 )
 INSERT INTO public.user_roles (user_id, role_id, project_group_id)	
 SELECT 'a5014caa-c597-4290-b462-8c41edea870c', 203, id
 FROM flexProjectGroup;
 
 with pathwayProjectGroup as (
-  INSERT INTO public.projectgroup(name, phone, url, address) VALUES ('Washington', '12345', 'www.washington.com', 'washington, usa') RETURNING projectgroup.id
+  INSERT INTO public.project_group(name, phone, url, address) VALUES ('Washington', '12345', 'www.washington.com', 'washington, usa') RETURNING project_group.id
 )
 INSERT INTO public.user_roles (user_id, role_id, project_group_id)	
 SELECT '0edff839-2753-44e6-88fb-3674430b05be', 203, id
 FROM pathwayProjectGroup;
 
 with oswProjectGroup as (
-  INSERT INTO public.projectgroup(name, phone, url, address) VALUES ('Texas', '12345', 'www.texas.com', 'texas, usa') RETURNING projectgroup.id
+  INSERT INTO public.project_group(name, phone, url, address) VALUES ('Texas', '12345', 'www.texas.com', 'texas, usa') RETURNING project_group.id
 )
 INSERT INTO public.user_roles (user_id, role_id, project_group_id)	
 SELECT '4c8bad08-593e-428b-aa3f-fe26ecb45141', 203, id

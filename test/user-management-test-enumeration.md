@@ -150,7 +150,7 @@ describe("{{Component}}", () => {
 | Project Groups Service | Update Project Group | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
 | Project Groups Service | Get Project Group | Functional| When requested| Expect to return list of project group |:white_check_mark:|
 | Project Groups Service | Get Project Group | Functional| When database exception occured| Expect to throw error |:white_check_mark:|
-| Project Groups Service | Get ProjectGroup Users | Functional| When requested| Expect to return list of projectGroups users |:white_check_mark:|
+| Project Groups Service | Get Project Group Users | Functional| When requested| Expect to return list of project groups users |:white_check_mark:|
 | Project Groups Service | Get Project Group Users | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 | Project Groups Service | Update Project Group Status | Functional| When requested| Expect to return success |:white_check_mark:|
 | Project Groups Service | Update Project Group Status | Functional| When database error occured| Expect to throw error |:white_check_mark:|
