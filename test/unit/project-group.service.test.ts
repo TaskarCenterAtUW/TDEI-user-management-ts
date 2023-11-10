@@ -1,23 +1,23 @@
 import dbClient from "../../src/database/data-source";
 import { DatabaseError, QueryResult } from "pg";
-import organizationService from "../../src/service/organization-service";
-import { OrganizationDto } from "../../src/model/dto/organization-dto";
+import projectGroupService from "../../src/service/project-group-service";
+import { ProjectGroupDto } from "../../src/model/dto/project-group-dto";
 import UniqueKeyDbException from "../../src/exceptions/db/database-exceptions";
 import { DuplicateException } from "../../src/exceptions/http/http-exceptions";
-import { OrgQueryParams } from "../../src/model/params/organization-get-query-params";
+import { ProjectGroupQueryParams } from "../../src/model/params/project-group-get-query-params";
 import { TestHelper } from "../common/test-helper";
-import { OrganizationListResponse, PocDetails } from "../../src/model/dto/poc-details-dto";
-import { OrgUserQueryParams } from "../../src/model/params/organization-user-query-params";
+import { ProjectGroupListResponse, PocDetails } from "../../src/model/dto/poc-details-dto";
+import { ProjectGroupUserQueryParams } from "../../src/model/params/project-group-user-query-params";
 
 // group test using describe
-describe("Organization Service Test", () => {
+describe("Project Group Service Test", () => {
 
-    describe("Create Organization", () => {
+    describe("Create Project Group", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return new organization_id", async () => {
+            test("When requested, Expect to return new project_group_id", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -25,7 +25,7 @@ describe("Organization Service Test", () => {
                 });
                 let response = <QueryResult>{
                     rows: [
-                        { org_id: "new_org_id" }
+                        { project_group_id: "new_project_group_id" }
                     ]
                 }
                 const createStationSpy = jest
@@ -33,14 +33,14 @@ describe("Organization Service Test", () => {
                     .mockResolvedValueOnce(response);
                 //Act
                 //Assert
-                expect(await organizationService.createOrganization(input)).toBe("new_org_id");
+                expect(await projectGroupService.createProjectGroup(input)).toBe("new_project_group_id");
                 expect(createStationSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When unique key exception occurs, Expect to throw DuplicateException", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -52,14 +52,14 @@ describe("Organization Service Test", () => {
                     .mockRejectedValueOnce(new UniqueKeyDbException("error"));
                 //Act
                 //Assert
-                await expect(organizationService.createOrganization(input)).rejects.toThrow(DuplicateException);
+                await expect(projectGroupService.createProjectGroup(input)).rejects.toThrow(DuplicateException);
                 expect(createStationSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database exception occurs, Expect to throw error", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -71,18 +71,18 @@ describe("Organization Service Test", () => {
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(organizationService.createOrganization(input)).rejects.toThrow(Error);
+                await expect(projectGroupService.createProjectGroup(input)).rejects.toThrow(Error);
                 expect(createStationSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
 
-    describe("Update Organization", () => {
+    describe("Update Project Group", () => {
         describe("Functional", () => {
             test("When requested, Expect to return true on success", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -96,14 +96,14 @@ describe("Organization Service Test", () => {
                     .mockResolvedValueOnce(response);
                 //Act
                 //Assert
-                expect(await organizationService.updateOrganization(input)).toBe(true);
+                expect(await projectGroupService.updateProjectGroup(input)).toBe(true);
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When unique key exception occurs, Expect to throw DuplicateException", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -115,14 +115,14 @@ describe("Organization Service Test", () => {
                     .mockRejectedValueOnce(new UniqueKeyDbException("error"));
                 //Act
                 //Assert
-                await expect(organizationService.updateOrganization(input)).rejects.toThrow(DuplicateException);
+                await expect(projectGroupService.updateProjectGroup(input)).rejects.toThrow(DuplicateException);
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database exception occurs, Expect to throw error", async () => {
                 //Arrange
-                let input = new OrganizationDto({
-                    org_name: "org_name",
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
                     phone: "9999999",
                     address: "test",
                     url: "test",
@@ -134,31 +134,31 @@ describe("Organization Service Test", () => {
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(organizationService.updateOrganization(input)).rejects.toThrow(Error);
+                await expect(projectGroupService.updateProjectGroup(input)).rejects.toThrow(Error);
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
 
-    describe("Get Organizations", () => {
+    describe("Get Project Groups", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return list of organizations", async () => {
+            test("When requested, Expect to return list of project groups", async () => {
                 //Arrange
-                let org = new OrganizationListResponse({
-                    org_name: "org_name",
-                    tdei_org_id: "org_id",
+                let projectgroup = new ProjectGroupListResponse({
+                    project_group_name: "project_group_name",
+                    tdei_project_group_id: "project_group_id",
                     polygon: TestHelper.getPolygon(),
                 });
-                org.poc = [<PocDetails>{
+                projectgroup.poc = [<PocDetails>{
                     first_name: "first_name",
                     last_name: "last_name",
                     email: "email"
                 }];
 
                 let dbResult: any = {
-                    name: "org_name",
-                    org_id: "org_id",
-                    polygon: JSON.stringify(org.polygon.features[0].geometry),
+                    name: "project_group_name",
+                    project_group_id: "project_group_id",
+                    polygon: JSON.stringify(projectgroup.polygon.features[0].geometry),
                     userdetails: [{
                         first_name: "first_name",
                         last_name: "last_name",
@@ -170,42 +170,42 @@ describe("Organization Service Test", () => {
                     rowCount: 1,
                     rows: [dbResult]
                 }
-                const getOrgSpy = jest
+                const getProjectGroupSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
-                let list = await organizationService.getOrganizations(new OrgQueryParams({
+                let list = await projectGroupService.getProjectGroups(new ProjectGroupQueryParams({
                     searchText: "test",
-                    tdei_org_id: "tdei_org_id",
+                    tdei_project_group_id: "tdei_project_group_id",
                     bbox: <any>[23, 43, 45, 67],
                     page_no: 1,
                     page_size: 10
                 }));
                 //Assert
-                expect(getOrgSpy).toHaveBeenCalledTimes(1);
-                expect(list[0]).toMatchObject(org);
+                expect(getProjectGroupSpy).toHaveBeenCalledTimes(1);
+                expect(list[0]).toMatchObject(projectgroup);
             });
 
             test("When database exception occured, Expect to throw error", async () => {
                 //Arrange
-                const updateOrgSpy = jest
+                const updateProjectGroupSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(organizationService.getOrganizations(new OrgQueryParams())).rejects.toThrow(Error);
-                expect(updateOrgSpy).toHaveBeenCalledTimes(1);
+                await expect(projectGroupService.getProjectGroups(new ProjectGroupQueryParams())).rejects.toThrow(Error);
+                expect(updateProjectGroupSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
 
-    describe("Get Organization Users", () => {
+    describe("Get Project Group Users", () => {
         describe("Functional", () => {
 
-            test("When requested, Expect to return list of organization users", async () => {
+            test("When requested, Expect to return list of project group users", async () => {
                 //Arrange
-                let input = new OrgUserQueryParams({
-                    orgId: "orgId",
+                let input = new ProjectGroupUserQueryParams({
+                    tdei_project_group_id: "projectGroupId",
                     page_no: 1,
                     page_size: 10,
                     searchText: "test"
@@ -229,31 +229,31 @@ describe("Organization Service Test", () => {
                     ]
                 };
 
-                const getOrgUserSpy = jest
+                const getProjectGroupUserSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
-                let result = await organizationService.getOrganizationUsers(input)
+                let result = await projectGroupService.getProjectGroupUsers(input)
                 //Assert
                 expect(result[0].user_id).toBe("test_user_id");
-                expect(getOrgUserSpy).toHaveBeenCalledTimes(1);
+                expect(getProjectGroupUserSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
-                const getOrgUserSpy = jest
+                const getProjectGroupUserSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(organizationService.getOrganizationUsers(new OrgUserQueryParams())).rejects.toThrow(Error);
-                expect(getOrgUserSpy).toHaveBeenCalledTimes(1);
+                await expect(projectGroupService.getProjectGroupUsers(new ProjectGroupUserQueryParams())).rejects.toThrow(Error);
+                expect(getProjectGroupUserSpy).toHaveBeenCalledTimes(1);
             });
 
         });
     });
 
-    describe("Update Organization Status", () => {
+    describe("Update Project Group Status", () => {
         describe("Functional", () => {
 
             test("When requested, Expect to return success", async () => {
@@ -261,24 +261,24 @@ describe("Organization Service Test", () => {
                 let response = <QueryResult>{
                     rowCount: 1 //effected row
                 }
-                const updateOrgSpy = jest
+                const updateProjectGroupSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
                 //Assert
-                expect(await organizationService.setOrganizationStatus("orgId", true)).toBe(true);
-                expect(updateOrgSpy).toHaveBeenCalledTimes(1);
+                expect(await projectGroupService.setProjectGroupStatus("projectGroupId", true)).toBe(true);
+                expect(updateProjectGroupSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
-                const updateOrgSpy = jest
+                const updateProjectGroupSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(organizationService.setOrganizationStatus("orgId", true)).rejects.toThrow(Error);
-                expect(updateOrgSpy).toHaveBeenCalledTimes(1);
+                await expect(projectGroupService.setProjectGroupStatus("projectGroupId", true)).rejects.toThrow(Error);
+                expect(updateProjectGroupSpy).toHaveBeenCalledTimes(1);
             });
 
         });

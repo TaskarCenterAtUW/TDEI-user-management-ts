@@ -25,7 +25,7 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
         this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
-        this.router.get(`${this.path}/api/v1/org-roles/:userId`, authorizationMiddleware([]), this.orgRoles);
+        this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([]), this.projectGroupRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
@@ -63,7 +63,7 @@ class UserManagementController implements IController {
         }
     }
 
-    public orgRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+    public projectGroupRoles = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             let authToken = Utility.extractToken(request);
             var decoded: any = jwt_decode(authToken);
@@ -75,14 +75,14 @@ class UserManagementController implements IController {
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
-            return userManagementServiceInstance.getUserOrgsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+            return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size).then((result) => {
                 Ok(response, result);
             }).catch((error: any) => {
-                let errorMessage = "Error fetching the user org & roles";
+                let errorMessage = "Error fetching the user project group & roles";
                 Utility.handleError(response, next, error, errorMessage);
             });
         } catch (error) {
-            let errorMessage = "Error fetching the user org & roles";
+            let errorMessage = "Error fetching the user project group & roles";
             Utility.handleError(response, next, error, errorMessage);
         }
     }

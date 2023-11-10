@@ -43,8 +43,8 @@
             "description": "User Management operations"
         },
         {
-            "name": "Organization",
-            "description": "Organization Management operations"
+            "name": "ProjectGroup",
+            "description": "Project Group Management operations"
         },
         {
             "name": "GTFS Pathways Station",
@@ -226,19 +226,19 @@
                 ]
             }
         },
-        "/api/v1/org-roles/{userId}": {
+        "/api/v1/project-group-roles/{userId}": {
             "get": {
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Gets the user associated organizations with roles.",
-                "description": "Gets the user associated organizations with roles.",
-                "operationId": "orgRoles",
+                "summary": "Gets the user associated project groups with roles.",
+                "description": "Gets the user associated project groups with roles.",
+                "operationId": "projectGroupRoles",
                 "parameters": [
                     {
                         "name": "userId",
                         "in": "path",
-                        "description": "User id for which oraganizations to be fetched",
+                        "description": "User id for which project groups to be fetched",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -247,13 +247,13 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Successful response - Returns the user oraganizations with roles.",
+                        "description": "Successful response - Returns the user project groups with roles.",
                         "content": {
                             "application/json": {
                                 "schema": {
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/OrgRoles"
+                                        "$ref": "#/components/schemas/ProjectGroupRoles"
                                     }
                                 }
                             }
@@ -350,9 +350,9 @@
                         }
                     },
                     {
-                        "name": "tdei_org_id",
+                        "name": "tdei_project_group_id",
                         "in": "query",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -472,7 +472,7 @@
                 ]
             }
         },
-        "/api/v1/station/{orgId}": {
+        "/api/v1/station/{projectGroupId}": {
             "put": {
                 "tags": [
                     "GTFS Pathways Station"
@@ -482,9 +482,9 @@
                 "operationId": "updateStation",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -525,7 +525,7 @@
                 ]
             }
         },
-        "/api/v1/station/{orgId}/{stationId}/active/{status}": {
+        "/api/v1/station/{projectGroupId}/{stationId}/active/{status}": {
             "delete": {
                 "tags": [
                     "GTFS Pathways Station"
@@ -535,9 +535,9 @@
                 "operationId": "setServiceStatus",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -606,9 +606,9 @@
                         }
                     },
                     {
-                        "name": "tdei_org_id",
+                        "name": "tdei_project_group_id",
                         "in": "query",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -733,7 +733,7 @@
                 ]
             }
         },
-        "/api/v1/service/{orgId}": {
+        "/api/v1/service/{projectGroupId}": {
             "put": {
                 "tags": [
                     "GTFS Flex Service"
@@ -743,9 +743,9 @@
                 "operationId": "updateService",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -786,7 +786,7 @@
                 ]
             }
         },
-        "/api/v1/service/{orgId}/{serviceId}/active/{status}": {
+        "/api/v1/service/{projectGroupId}/{serviceId}/active/{status}": {
             "delete": {
                 "tags": [
                     "GTFS Flex Service"
@@ -796,9 +796,9 @@
                 "operationId": "deleteService",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Owner organization id.",
+                        "description": "Owner project group id.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -844,8 +844,8 @@
                 "tags": [
                     "User Management"
                 ],
-                "summary": "Associates a user with the organization and permissions in the TDEI system",
-                "description": "Associates a user with the organization and permissions in the TDEI system. Returns the boolean flag true.",
+                "summary": "Associates a user with the project group and permissions in the TDEI system",
+                "description": "Associates a user with the project group and permissions in the TDEI system. Returns the boolean flag true.",
                 "operationId": "permission",
                 "requestBody": {
                     "content": {
@@ -943,19 +943,19 @@
                 ]
             }
         },
-        "/api/v1/organization": {
+        "/api/v1/project-group": {
             "get": {
                 "tags": [
-                    "Organization"
+                    "ProjectGroup"
                 ],
-                "summary": "Gets the organizations in the TDEI system ",
-                "description": "Gets the organizations in the TDEI system .",
-                "operationId": "getOrganization",
+                "summary": "Gets the project groups in the TDEI system ",
+                "description": "Gets the project groups in the TDEI system.",
+                "operationId": "getProjectGroup",
                 "parameters": [
                     {
-                        "name": "tdei_org_id",
+                        "name": "tdei_project_group_id",
                         "in": "query",
-                        "description": "Search by organization Id.",
+                        "description": "Search by project group Id.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -964,7 +964,7 @@
                     {
                         "name": "searchText",
                         "in": "query",
-                        "description": "Search by organization name.",
+                        "description": "Search by project group name.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -1008,16 +1008,16 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the list of organizations.",
+                        "description": "Returns the list of project groups.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "title": "OrganizationListResponse",
+                                    "title": "ProjectGroupListResponse",
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/OrganizationList"
+                                        "$ref": "#/components/schemas/ProjectGroupList"
                                     },
-                                    "description": "List of organizations"
+                                    "description": "List of project groups"
                                 }
                             }
                         }
@@ -1043,16 +1043,16 @@
             },
             "post": {
                 "tags": [
-                    "Organization"
+                    "ProjectGroup"
                 ],
-                "summary": "Creates an organization in the TDEI system ",
-                "description": "Creates an organization in the TDEI system.  Returns the id for the newly created organization.",
-                "operationId": "createOrganization",
+                "summary": "Creates an project group in the TDEI system ",
+                "description": "Creates an project group in the TDEI system.  Returns the id for the newly created project group.",
+                "operationId": "createProjectGroup",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Organization"
+                                "$ref": "#/components/schemas/ProjectGroup"
                             }
                         }
                     },
@@ -1060,7 +1060,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Successful response - Returns the id for the newly created organization.",
+                        "description": "Successful response - Returns the id for the newly created project group.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1090,16 +1090,16 @@
             },
             "put": {
                 "tags": [
-                    "Organization"
+                    "ProjectGroup"
                 ],
-                "summary": "Updates an organization in the TDEI system ",
-                "description": "Updates an organization in the TDEI system.  Returns success if updated.",
-                "operationId": "updateOrganization",
+                "summary": "Updates an project group in the TDEI system ",
+                "description": "Updates an project group in the TDEI system.  Returns success if updated.",
+                "operationId": "updateProjectGroup",
                 "requestBody": {
                     "content": {
                         "application/json": {
                             "schema": {
-                                "$ref": "#/components/schemas/Organization"
+                                "$ref": "#/components/schemas/ProjectGroup"
                             }
                         }
                     },
@@ -1107,7 +1107,7 @@
                 },
                 "responses": {
                     "200": {
-                        "description": "Organization update successful."
+                        "description": "Project group update successful."
                     },
                     "400": {
                         "description": "Invalid request."
@@ -1129,19 +1129,19 @@
                 ]
             }
         },
-        "/api/v1/organization/{orgId}/users": {
+        "/api/v1/project-group/{projectGroupId}/users": {
             "get": {
                 "tags": [
-                    "Organization"
+                    "ProjectGroup"
                 ],
-                "summary": "Gets the organization users in the TDEI system ",
-                "description": "Gets the organization users in the TDEI system .",
-                "operationId": "getOrganizationUsers",
+                "summary": "Gets the project group users in the TDEI system ",
+                "description": "Gets the project group users in the TDEI system.",
+                "operationId": "getProjectGroupUsers",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Organization id for which users to be fetched",
+                        "description": "Project group id for which users to be fetched",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1150,7 +1150,7 @@
                     {
                         "name": "searchText",
                         "in": "query",
-                        "description": "Search by organization name.",
+                        "description": "Search by project group name.",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -1179,16 +1179,16 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the list of organization users.",
+                        "description": "Returns the list of project group users.",
                         "content": {
                             "application/json": {
                                 "schema": {
-                                    "title": "OrgUserResponse",
+                                    "title": "ProjectGroupUserResponse",
                                     "type": "array",
                                     "items": {
-                                        "$ref": "#/components/schemas/OrgUser"
+                                        "$ref": "#/components/schemas/ProjectGroupUser"
                                     },
-                                    "description": "List of org users"
+                                    "description": "List of project group users"
                                 }
                             }
                         }
@@ -1213,19 +1213,19 @@
                 ]
             }
         },
-        "/api/v1/organization/{orgId}/active/{status}": {
+        "/api/v1/project-group/{projectGroupId}/active/{status}": {
             "delete": {
                 "tags": [
-                    "Organization"
+                    "ProjectGroup"
                 ],
-                "summary": "Activates/Deactives the organization.",
-                "description": "Activates/Deactives the organization.",
-                "operationId": "deleteOrganization",
+                "summary": "Activates/Deactives the project group.",
+                "description": "Activates/Deactives the project group.",
+                "operationId": "deleteProjectGroup",
                 "parameters": [
                     {
-                        "name": "orgId",
+                        "name": "projectGroupId",
                         "in": "path",
-                        "description": "Organization Id of the organization to be Activated/Deactivated.",
+                        "description": "projectGroupId of the project group to be Activated/Deactivated.",
                         "required": true,
                         "schema": {
                             "type": "string"
@@ -1234,7 +1234,7 @@
                     {
                         "name": "status",
                         "in": "path",
-                        "description": "Boolean flag to Activate/Deactivate organization.",
+                        "description": "Boolean flag to Activate/Deactivate project group.",
                         "required": true,
                         "schema": {
                             "type": "boolean"
@@ -1290,25 +1290,25 @@
                 },
                 "description": "Describes a user registration details."
             },
-            "OrgRoles": {
+            "ProjectGroupRoles": {
                 "type": "object",
                 "properties": {
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string"
                     },
-                    "org_name": {
+                    "project_group_name": {
                         "type": "string"
                     },
                     "roles": {
                         "type": "array",
-                        "description": "List of roles associated with oraganization.",
+                        "description": "List of roles associated with project group.",
                         "items": {
                             "type": "string",
-                            "description": "Role associated with oraganization."
+                            "description": "Role associated with project group."
                         }
                     }
                 },
-                "description": "User associated organizations and roles."
+                "description": "User associated project groups and roles."
             },
             "User": {
                 "type": "object",
@@ -1382,7 +1382,7 @@
             },
             "Station": {
                 "required": [
-                    "tdei_org_id",
+                    "tdei_project_group_id",
                     "station_name"
                 ],
                 "type": "object",
@@ -1392,9 +1392,9 @@
                         "description": "Station Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization id of the station."
+                        "description": "Project group id of the station."
                     },
                     "station_name": {
                         "type": "string",
@@ -1430,7 +1430,7 @@
             },
             "Service": {
                 "required": [
-                    "tdei_org_id, ",
+                    "tdei_project_group_id, ",
                     "service_name"
                 ],
                 "type": "object",
@@ -1440,9 +1440,9 @@
                         "description": "Service Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization id of the service."
+                        "description": "Project group id of the service."
                     },
                     "service_name": {
                         "type": "string",
@@ -1492,9 +1492,9 @@
                 ],
                 "type": "object",
                 "properties": {
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization id to which point of contact to be associated."
+                        "description": "Project group id to which point of contact to be associated."
                     },
                     "poc_user_name": {
                         "type": "string",
@@ -1505,15 +1505,15 @@
             },
             "RoleDetails": {
                 "required": [
-                    "tdei_org_id",
+                    "tdei_project_group_id",
                     "roles",
                     "user_name"
                 ],
                 "type": "object",
                 "properties": {
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization id to which user to be associated."
+                        "description": "Project group id to which user to be associated."
                     },
                     "user_name": {
                         "type": "string",
@@ -1561,78 +1561,78 @@
                 },
                 "description": "Describes a gtfs pathways station."
             },
-            "Organization": {
+            "ProjectGroup": {
                 "required": [
                     "email",
-                    "org_name",
+                    "project_group_name",
                     "address"
                 ],
                 "type": "object",
                 "properties": {
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization Id uniquely represented in the TDEI system. System generated.",
+                        "description": "Project group Id uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
-                    "org_name": {
+                    "project_group_name": {
                         "type": "string",
-                        "description": "Name of the organization."
+                        "description": "Name of the project group."
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Phone of the organization for communication."
+                        "description": "Phone of the project group for communication."
                     },
                     "url": {
                         "type": "string",
-                        "description": "Url of the transit organization."
+                        "description": "Url of the transit project group."
                     },
                     "address": {
                         "type": "string",
-                        "description": "Address of the transit organization."
+                        "description": "Address of the transit project group."
                     },
                     "polygon": {
                         "$ref": "#/components/schemas/Polygon"
                     }
                 },
-                "description": "Describes an Organization."
+                "description": "Describes an Project Group."
             },
-            "OrganizationList": {
+            "ProjectGroupList": {
                 "type": "object",
                 "properties": {
-                    "tdei_org_id": {
+                    "tdei_project_group_id": {
                         "type": "string",
-                        "description": "Organization Id uniquely represented in the TDEI system. System generated.",
+                        "description": "ProjectGroupId uniquely represented in the TDEI system. System generated.",
                         "default": "0"
                     },
                     "name": {
                         "type": "string",
-                        "description": "Name of the organization."
+                        "description": "Name of the project group."
                     },
                     "phone": {
                         "type": "string",
-                        "description": "Phone of the organization for communication."
+                        "description": "Phone of the project group for communication."
                     },
                     "url": {
                         "type": "string",
-                        "description": "Url of the transit organization."
+                        "description": "Url of the transit project group."
                     },
                     "address": {
                         "type": "string",
-                        "description": "Address of the transit organization."
+                        "description": "Address of the transit project group."
                     },
                     "polygon": {
                         "$ref": "#/components/schemas/Polygon"
                     },
                     "poc": {
                         "type": "array",
-                        "description": "Organization POC details",
+                        "description": "Project group POC details",
                         "items": {
                             "$ref": "#/components/schemas/POC",
                             "description": "POC details"
                         }
                     }
                 },
-                "description": "Describes an Organization."
+                "description": "Describes an Project group."
             },
             "POC": {
                 "type": "object",
@@ -1738,7 +1738,7 @@
                     }
                 }
             },
-            "OrgUser": {
+            "ProjectGroupUser": {
                 "type": "object",
                 "properties": {
                     "user_id": {

@@ -12,7 +12,7 @@ describe("Pathways Controller Test", () => {
         describe("Functional", () => {
             test("When requested, Expect to return new station_id", async () => {
                 //Arrange
-                let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
+                let req = getMockReq({ body: { station_name: "test_station", tdei_project_group_id: "test_project_group_id" } });
                 const { res, next } = getMockRes();
                 const createStationSpy = jest
                     .spyOn(pathwaysStationServiceService, "createStation")
@@ -27,7 +27,7 @@ describe("Pathways Controller Test", () => {
 
             test("When database foreignkey constraint exception occurs, Expect to return HTTP status 400", async () => {
                 //Arrange
-                let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
+                let req = getMockReq({ body: { station_name: "test_station", tdei_project_group_id: "test_project_group_id" } });
                 const { res, next } = getMockRes();
                 const createStationSpy = jest
                     .spyOn(pathwaysStationService, "createStation")
@@ -39,9 +39,9 @@ describe("Pathways Controller Test", () => {
                 expect(res.status).toHaveBeenCalledWith(400);
             });
 
-            test("When database uniquekey constraint (same station_name + org_id) exception occurs, Expect to return HTTP status 400", async () => {
+            test("When database uniquekey constraint (same station_name + project_group_id) exception occurs, Expect to return HTTP status 400", async () => {
                 //Arrange
-                let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
+                let req = getMockReq({ body: { station_name: "test_station", tdei_project_group_id: "test_project_group_id" } });
                 const { res, next } = getMockRes();
                 const createStationSpy = jest
                     .spyOn(pathwaysStationService, "createStation")
@@ -55,7 +55,7 @@ describe("Pathways Controller Test", () => {
 
             test("When database exception occurs, Expect to return HTTP status 500", async () => {
                 //Arrange
-                let req = getMockReq({ body: { station_name: "test_station", tdei_org_id: "test_org_id" } });
+                let req = getMockReq({ body: { station_name: "test_station", tdei_project_group_id: "test_project_group_id" } });
                 const { res, next } = getMockRes();
                 const createStationSpy = jest
                     .spyOn(pathwaysStationService, "createStation")
@@ -86,7 +86,7 @@ describe("Pathways Controller Test", () => {
                 expect(res.send).toBeCalledWith(true);
             });
 
-            test("When database uniquekey constraint (same station_name + org_id) exception occurs, Expect to return HTTP status 400", async () => {
+            test("When database uniquekey constraint (same station_name + project_group_id) exception occurs, Expect to return HTTP status 400", async () => {
                 //Arrange
                 let req = getMockReq({ body: { station_name: "test_station", tdei_station_id: "test_tdei_station_id" } });
                 const { res, next } = getMockRes();
@@ -134,7 +134,7 @@ describe("Pathways Controller Test", () => {
                 const { res, next } = getMockRes();
                 var list = [new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id"
+                    tdei_project_group_id: "test_tdei_project_group_id"
                 })];
                 const getStationSpy = jest
                     .spyOn(pathwaysStationService, "getStation")
@@ -154,7 +154,7 @@ describe("Pathways Controller Test", () => {
                     query: {
                         searchText: "test",
                         tdei_station_id: "tdei_station_id",
-                        tdei_org_id: "tdei_org_id",
+                        tdei_project_group_id: "tdei_project_group_id",
                         bbox: <any>[23, 43, 45, 67],
                         page_no: "1",
                         page_size: "10"
@@ -163,7 +163,7 @@ describe("Pathways Controller Test", () => {
                 const { res, next } = getMockRes();
                 var list = [new StationDto({
                     station_name: "test_station_name",
-                    tdei_org_id: "test_tdei_org_id"
+                    tdei_project_group_id: "test_tdei_project_group_id"
                 })];
                 const getStationSpy = jest
                     .spyOn(pathwaysStationService, "getStation")

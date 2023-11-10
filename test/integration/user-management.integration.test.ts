@@ -1,10 +1,7 @@
 import { Core } from "nodets-ms-core";
 import { environment } from "../../src/environment/environment";
 import fetch from "node-fetch";
-import e from "express";
 import { PermissionRequest } from "nodets-ms-core/lib/core/auth/model/permission_request";
-import {UserManagementService} from "../../src/service/user-management-service";
-import { RegisterUserDto } from "../../src/model/dto/register-user-dto";
 
 describe("User Management Test", () => {
 
@@ -22,7 +19,7 @@ describe("User Management Test", () => {
         }
         console.log(environment.secretGenerateUrl);
 
-        
+
 
         //Act
         const getSecret = await fetch(environment.secretGenerateUrl as string, {
@@ -32,11 +29,11 @@ describe("User Management Test", () => {
         //Assert
         expect(getSecret.status == 200).toBeTruthy();
     }, 15000);
-     /**
-     * Environement dependency 
-     * AUTH_HOST
-     */
-     test("Verifying auth service hasPermission api integration", async () => {
+    /**
+    * Environement dependency 
+    * AUTH_HOST
+    */
+    test("Verifying auth service hasPermission api integration", async () => {
         //Pre-requisite environment dependency
         if (!process.env.AUTH_HOST) {
             console.error("AUTH_HOST environment not set");
@@ -47,7 +44,7 @@ describe("User Management Test", () => {
         //Arrange
         var permissionRequest = new PermissionRequest({
             userId: "test_userId",
-            orgId: "test_orgId",
+            projectGroupId: "test_projectGroupId",
             permssions: ["tdei-admin", "poc", "user-management_data_generator"],
             shouldSatisfyAll: false
         });

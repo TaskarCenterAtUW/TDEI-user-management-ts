@@ -11,7 +11,7 @@ describe("Flex Controller Test", () => {
         describe("Functional", () => {
             test("When requested, Expect to return new service_id", async () => {
                 //Arrange
-                let req = getMockReq({ body: { service_name: "test_service", tdei_org_id: "test_org_id" } });
+                let req = getMockReq({ body: { service_name: "test_service", tdei_project_group_id: "test_project_group_id" } });
                 const { res, next } = getMockRes();
                 const createServiceSpy = jest
                     .spyOn(flexService, "createService")
@@ -38,7 +38,7 @@ describe("Flex Controller Test", () => {
                 expect(res.status).toHaveBeenCalledWith(400);
             });
 
-            test("When database uniquekey constraint (same service_name + org_id) exception occurs, Expect to return HTTP status 400", async () => {
+            test("When database uniquekey constraint (same service_name + project_group_id) exception occurs, Expect to return HTTP status 400", async () => {
                 //Arrange
                 let req = getMockReq();
                 const { res, next } = getMockRes();
@@ -85,7 +85,7 @@ describe("Flex Controller Test", () => {
                 expect(res.send).toBeCalledWith(true);
             });
 
-            test("When database uniquekey constraint (same service_name + org_id) exception occurs, Expect to return HTTP status 400", async () => {
+            test("When database uniquekey constraint (same service_name + project_group_id) exception occurs, Expect to return HTTP status 400", async () => {
                 //Arrange
                 let req = getMockReq({ body: { service_name: "test_service", service_id: "test_service_id" } });
                 const { res, next } = getMockRes();
@@ -133,7 +133,7 @@ describe("Flex Controller Test", () => {
                 const { res, next } = getMockRes();
                 var list = [new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id"
+                    tdei_project_group_id: "test_tdei_project_group_id"
                 })];
                 const getServiceSpy = jest
                     .spyOn(flexService, "getService")
@@ -153,7 +153,7 @@ describe("Flex Controller Test", () => {
                     query: {
                         searchText: "test",
                         tdei_service_id: "tdei_service_id",
-                        tdei_org_id: "tdei_org_id",
+                        tdei_project_group_id: "tdei_project_group_id",
                         bbox: <any>[23, 43, 45, 67],
                         page_no: "1",
                         page_size: "10"
@@ -162,7 +162,7 @@ describe("Flex Controller Test", () => {
                 const { res, next } = getMockRes();
                 var list = [new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id"
+                    tdei_project_group_id: "test_tdei_project_group_id"
                 })];
                 const getServiceSpy = jest
                     .spyOn(flexService, "getService")

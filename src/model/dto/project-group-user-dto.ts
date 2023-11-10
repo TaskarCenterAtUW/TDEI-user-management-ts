@@ -1,7 +1,7 @@
 import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
 
-export class OrgUserDto extends BaseDto {
+export class ProjectGroupUserDto extends BaseDto {
     @Prop()
     user_id!: string;
     @Prop()
@@ -16,7 +16,7 @@ export class OrgUserDto extends BaseDto {
     phone!: string;
     @Prop()
     roles!: string[];
-    constructor(init?: Partial<OrgUserDto>) {
+    constructor(init?: Partial<ProjectGroupUserDto>) {
         super();
         Object.assign(this, init);
     }

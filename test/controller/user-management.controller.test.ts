@@ -6,7 +6,7 @@ import { UserProfile } from "../../src/model/dto/user-profile-dto";
 import { RolesReqDto } from "../../src/model/dto/roles-req-dto";
 import { ForeignKeyException, UserNotFoundException } from "../../src/exceptions/http/http-exceptions";
 import HttpException from "../../src/exceptions/http/http-base-exception";
-import { OrgRoleDto } from "../../src/model/dto/org-role-dto";
+import { ProjectGroupRoleDto } from "../../src/model/dto/project-group-role-dto";
 
 
 // group test using describe
@@ -168,7 +168,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const updatePermissionsSpy = jest
                     .spyOn(userManagementService, "updatePermissions")
@@ -186,7 +186,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const updatePermissionsSpy = jest
                     .spyOn(userManagementService, "updatePermissions")
@@ -204,7 +204,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const updatePermissionsSpy = jest
                     .spyOn(userManagementService, "updatePermissions")
@@ -222,7 +222,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const updatePermissionsSpy = jest
                     .spyOn(userManagementService, "updatePermissions")
@@ -240,7 +240,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const updatePermissionsSpy = jest
                     .spyOn(userManagementService, "updatePermissions")
@@ -263,7 +263,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const revokeUserPermissionsSpy = jest
                     .spyOn(userManagementService, "revokeUserPermissions")
@@ -281,7 +281,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const revokeUserPermissionsSpy = jest
                     .spyOn(userManagementService, "revokeUserPermissions")
@@ -299,7 +299,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const revokeUserPermissionsSpy = jest
                     .spyOn(userManagementService, "revokeUserPermissions")
@@ -317,7 +317,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const revokeUserPermissionsSpy = jest
                     .spyOn(userManagementService, "revokeUserPermissions")
@@ -335,7 +335,7 @@ describe("User Management Controller Test", () => {
                 let requestBody = new RolesReqDto();
                 requestBody.roles = ["poc"];
                 requestBody.user_name = "test_user";
-                requestBody.tdei_org_id = "test_org";
+                requestBody.tdei_project_group_id = "test_project_group";
                 let req = getMockReq({ body: requestBody });
                 const revokeUserPermissionsSpy = jest
                     .spyOn(userManagementService, "revokeUserPermissions")
@@ -395,10 +395,10 @@ describe("User Management Controller Test", () => {
         });
     });
 
-    describe("Org Roles", () => {
+    describe("Project Group Roles", () => {
         describe("Functional", () => {
             //Generate jwt with sample 'sub' :'testuserid' claim which represents userId, https://www.javainuse.com/jwtgenerator
-            test("When requested, Expect to return organization role details", async () => {
+            test("When requested, Expect to return project group role details", async () => {
                 //Arrange
                 let req = getMockReq({
                     query: {
@@ -409,26 +409,26 @@ describe("User Management Controller Test", () => {
                     headers: <any>{ "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlcmlkIn0.MQjKH-T8EEWz1q8RjkE8wYgDS5zNPQAJeZHkffdadPY" }
                 });
                 const { res, next } = getMockRes();
-                let response = new OrgRoleDto({ roles: ["poc"] });
+                let response = new ProjectGroupRoleDto({ roles: ["poc"] });
                 const getUserProfileSpy = jest
-                    .spyOn(userManagementService, "getUserOrgsWithRoles")
+                    .spyOn(userManagementService, "getUserProjectGroupsWithRoles")
                     .mockResolvedValueOnce([response]);
                 //Act
-                await userManagementController.orgRoles(req, res, next);
+                await userManagementController.projectGroupRoles(req, res, next);
                 //Assert
                 expect(getUserProfileSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.send).toBeCalledWith([response]);
             });
 
-            test("When requested organization roles for different user, Expect to return HTTP status 403", async () => {
+            test("When requested project group roles for different user, Expect to return HTTP status 403", async () => {
                 let req = getMockReq({
                     params: <any>{ userId: "testuserid2" },
                     headers: <any>{ "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiJ0ZXN0dXNlcmlkIn0.MQjKH-T8EEWz1q8RjkE8wYgDS5zNPQAJeZHkffdadPY" }
                 });
                 const { res, next } = getMockRes();
                 //Act
-                await userManagementController.orgRoles(req, res, next);
+                await userManagementController.projectGroupRoles(req, res, next);
                 //Assert
                 expect(res.status).toHaveBeenCalledWith(403);
             });
@@ -440,7 +440,7 @@ describe("User Management Controller Test", () => {
                 });
                 const { res, next } = getMockRes();
                 //Act
-                await userManagementController.orgRoles(req, res, next);
+                await userManagementController.projectGroupRoles(req, res, next);
                 //Assert
                 expect(res.status).toHaveBeenCalledWith(400);
             });
@@ -453,10 +453,10 @@ describe("User Management Controller Test", () => {
                 });
                 const { res, next } = getMockRes();
                 const getUserProfileSpy = jest
-                    .spyOn(userManagementService, "getUserOrgsWithRoles")
+                    .spyOn(userManagementService, "getUserProjectGroupsWithRoles")
                     .mockRejectedValueOnce(new Error("DB error"));
                 //Act
-                await userManagementController.orgRoles(req, res, next);
+                await userManagementController.projectGroupRoles(req, res, next);
                 //Assert
                 expect(res.status).toHaveBeenCalledWith(500);
             });

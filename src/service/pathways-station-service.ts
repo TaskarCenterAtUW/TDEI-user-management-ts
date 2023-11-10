@@ -70,7 +70,7 @@ class PathwaysStationService implements IPathwaysStationService {
                     let station = StationDto.from(x);
                     station.station_name = x.name;
                     station.tdei_station_id = x.station_id;
-                    station.tdei_org_id = x.owner_org;
+                    station.tdei_project_group_id = x.owner_project_group;
                     if (station.polygon) {
                         var polygon = JSON.parse(x.polygon) as Geometry;
                         station.polygon = {

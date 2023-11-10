@@ -1,5 +1,5 @@
 # Introduction 
-User management service helps TDEI system to manage the user permissions and TDEI entities like organization, stations, service.
+User management service helps TDEI system to manage the user permissions and TDEI entities like project group, stations, service.
 
 ## Getting Started
 The project is built on NodeJS framework. All the regular nuances for a NodeJS project are valid for this.

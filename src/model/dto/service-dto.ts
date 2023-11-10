@@ -10,7 +10,7 @@ export class ServiceDto extends BaseDto {
     tdei_service_id: string = "0";
     @IsNotEmpty()
     @Prop()
-    tdei_org_id!: string;
+    tdei_project_group_id!: string;
     @IsNotEmpty()
     @Prop("service_name")
     service_name!: string;
@@ -31,8 +31,8 @@ export class ServiceDto extends BaseDto {
     getInsertQuery(): QueryConfig {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
-            text: `INSERT INTO service(name, owner_org ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})  RETURNING service.service_id`,
-            values: [this.service_name, this.tdei_org_id],
+            text: `INSERT INTO service(name, owner_project_group ${polygonExists ? ', polygon ' : ''}) VALUES($1, $2 ${polygonExists ? ', ST_GeomFromGeoJSON($3) ' : ''})  RETURNING service.service_id`,
+            values: [this.service_name, this.tdei_project_group_id],
         }
         if (polygonExists) {
             queryObject.values.push(JSON.stringify(this.polygon.features[0].geometry));

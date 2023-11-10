@@ -51,10 +51,10 @@ describe("{{Component}}", () => {
 |--|--|--|--|--|--|
 | Flex Controller | Create Service | Functional| When requested | Expect to return new service_id |:white_check_mark:|
 | Flex Controller | Create Service | Functional| When database foreignkey constraint exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
-| Flex Controller | Create Service | Functional| When database uniquekey constraint (same service_name + org_id) exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
+| Flex Controller | Create Service | Functional| When database uniquekey constraint (same service_name + project_group_id) exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
 | Flex Controller | Create Service | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 | Flex Controller | Update Service | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
-| Flex Controller | Update Service | Functional| When database uniquekey constraint (same service_name + org_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
+| Flex Controller | Update Service | Functional| When database uniquekey constraint (same service_name + project_group_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
 | Flex Controller | Update Service | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 | Flex Controller | Update Service | Functional| When service_id not provided| Expect to return HTTP status 400 |:white_check_mark:|
 | Flex Controller | Get Flex Service | Functional| When requested without any filter| Expect to return flex service list |:white_check_mark:|
@@ -65,10 +65,10 @@ describe("{{Component}}", () => {
 |--|--|--|--|--|--|
 | Pathways Controller | Create Station | Functional| When requested | Expect to return new station_id |:white_check_mark:|
 | Pathways Controller | Create Station | Functional| When database foreignkey constraint exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
-| Pathways Controller | Create Station | Functional| When database uniquekey constraint (same station_name + org_id) exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
+| Pathways Controller | Create Station | Functional| When database uniquekey constraint (same station_name + project_group_id) exception occurs | Expect to return HTTP status 400 |:white_check_mark:|
 | Pathways Controller | Create Station | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 | Pathways Controller | Update Station | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
-| Pathways Controller | Update Station | Functional| When database uniquekey constraint (same station_name + org_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
+| Pathways Controller | Update Station | Functional| When database uniquekey constraint (same station_name + project_group_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
 | Pathways Controller | Update Station | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 | Pathways Controller | Update Station | Functional| When station_id not provided| Expect to return HTTP status 400 |:white_check_mark:|
 | Pathways Controller | Get Pathways Station | Functional| When requested without any filter| Expect to return pathways station list |:white_check_mark:|
@@ -77,19 +77,19 @@ describe("{{Component}}", () => {
 | Pathways Controller | Update Station Status | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
 | Pathways Controller | Update Station Status | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 |--|--|--|--|--|--|
-| Org Controller | Create Organization | Functional| When requested| Expect to return new organization id |:white_check_mark:|
-| Org Controller | Create Organization | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
-| Org Controller | Create Organization | Functional| When database uniquekey constraint (same org_name ) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
-| Org Controller | Update Organization | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
-| Org Controller | Update Organization | Functional|When database uniquekey constraint (same org_name + org_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
-| Org Controller | Update Organization | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
-| Org Controller | Get Organization | Functional| When requested without any filter| Expect to return organization list |:white_check_mark:|
-| Org Controller | Get Organization | Functional| When requested with all filters| Expect to return organization list |:white_check_mark:|
-| Org Controller | Get Organization | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
-| Org Controller | Update Organization Status | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
-| Org Controller | Update Organization Status | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
-| Org Controller | Get Organization Users | Functional| When requested| Expect to return organization users list |:white_check_mark:|
-| Org Controller | Get Organization Users | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
+| Project Group Controller | Create Project Group | Functional| When requested| Expect to return new projectGroups id |:white_check_mark:|
+| Project Group Controller | Create Project Group | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
+| Project Group Controller | Create Project Group | Functional| When database uniquekey constraint (same project_group_name ) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
+| Project Group Controller | Update Project Group | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
+| Project Group Controller | Update Project Group | Functional|When database uniquekey constraint (same project_group_name + project_group_id) exception occurs| Expect to return HTTP status 400 |:white_check_mark:|
+| Project Group Controller | Update Project Group | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
+| Project Group Controller | Get Project Group | Functional| When requested without any filter| Expect to return project group list |:white_check_mark:|
+| Project Group Controller | Get Project Group | Functional| When requested with all filters| Expect to return projectGroups list |:white_check_mark:|
+| Project Group Controller | Get Project Group | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
+| Project Group Controller | Update Project Group Status | Functional| When requested| Expect to return boolean true on success |:white_check_mark:|
+| Project Group Controller | Update Project Group Status | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
+| Project Group Controller | Get Project Group Users | Functional| When requested| Expect to return projectGroups users list |:white_check_mark:|
+| Project Group Controller | Get Project Group Users | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
 |--|--|--|--|--|--|
 | User Controller | Get Roles | Functional| When requested| Expect to return Role list |:white_check_mark:|
 | User Controller | Get Roles | Functional| When database exception occurs| Expect to return HTTP status 500 |:white_check_mark:|
@@ -113,10 +113,10 @@ describe("{{Component}}", () => {
 | User Controller | User Profile | Functional| When provided username| Expect to return user profile details |:white_check_mark:|
 | User Controller | User Profile | Functional| When not provided user_name| Expect to return HTTP status 400 |:white_check_mark:|
 | User Controller | User Profile | Functional| When user not found| Expect to return HTTP status 404 |:white_check_mark:|
-| User Controller | Org Roles| Functional| When requested| Expect to return organization role details |:white_check_mark:|
-| User Controller | Org Roles| Functional| When requested organization roles for different user| Expect to return HTTP status 403 |:white_check_mark:|
-| User Controller | Org Roles| Functional| When user not provided| Expect to return HTTP status 400 |:white_check_mark:|
-| User Controller | Org Roles| Functional| When database error| Expect to return HTTP status 500 |:white_check_mark:|
+| User Controller | Project Group Roles| Functional| When requested| Expect to return projectGroups role details |:white_check_mark:|
+| User Controller | Project Group Roles| Functional| When requested projectGroups roles for different user| Expect to return HTTP status 403 |:white_check_mark:|
+| User Controller | Project Group Roles| Functional| When user not provided| Expect to return HTTP status 400 |:white_check_mark:|
+| User Controller | Project Group Roles| Functional| When database error| Expect to return HTTP status 500 |:white_check_mark:|
 |--|--|--|--|--|--|
 | Flex Service | Create Service| Functional| When requested| Expect to return new service_id |:white_check_mark:|
 | Flex Service | Create Service| Functional| When unique key exception thrown| Expect to return DuplicateException |:white_check_mark:|
@@ -142,18 +142,18 @@ describe("{{Component}}", () => {
 | Pathways Station Service | Update Station Status| Functional| When requested| Expect to return success |:white_check_mark:|
 | Pathways Station Service | Update Station Status| Functional| When database error occured| Expect to throw error |:white_check_mark:|
 |--|--|--|--|--|--|
-| Organization Service | Create Organization | Functional| When requested| Expect to return new organization_id |:white_check_mark:|
-| Organization Service | Create Organization | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
-| Organization Service | Create Organization | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
-| Organization Service | Update Organization | Functional| When requested| Expect to return true on success |:white_check_mark:|
-| Organization Service | Update Organization | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
-| Organization Service | Update Organization | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
-| Organization Service | Get Organization | Functional| When requested| Expect to return list of organizations |:white_check_mark:|
-| Organization Service | Get Organization | Functional| When database exception occured| Expect to throw error |:white_check_mark:|
-| Organization Service | Get Organization Users | Functional| When requested| Expect to return list of organization users |:white_check_mark:|
-| Organization Service | Get Organization Users | Functional| When database error occured| Expect to throw error |:white_check_mark:|
-| Organization Service | Update Organization Status | Functional| When requested| Expect to return success |:white_check_mark:|
-| Organization Service | Update Organization Status | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| Project Groups Service | Create Project Group | Functional| When requested| Expect to return new project_group_id |:white_check_mark:|
+| Project Groups Service | Create Project Group | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
+| Project Groups Service | Create Project Group | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
+| Project Groups Service | Update Project Group | Functional| When requested| Expect to return true on success |:white_check_mark:|
+| Project Groups Service | Update Project Group | Functional| When unique key exception occurs| Expect to throw DuplicateException |:white_check_mark:|
+| Project Groups Service | Update Project Group | Functional| When database exception occurs| Expect to throw error |:white_check_mark:|
+| Project Groups Service | Get Project Group | Functional| When requested| Expect to return list of project group |:white_check_mark:|
+| Project Groups Service | Get Project Group | Functional| When database exception occured| Expect to throw error |:white_check_mark:|
+| Project Groups Service | Get Project Group Users | Functional| When requested| Expect to return list of project groups users |:white_check_mark:|
+| Project Groups Service | Get Project Group Users | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| Project Groups Service | Update Project Group Status | Functional| When requested| Expect to return success |:white_check_mark:|
+| Project Groups Service | Update Project Group Status | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 |--|--|--|--|--|--|
 | User Management Service | Refresh Token | Functional| When requested| Expect to return refreshed access token |:white_check_mark:|
 | User Management Service | Refresh Token | Functional| When error refreshing token| Expect to throw error |:white_check_mark:|
@@ -176,16 +176,16 @@ describe("{{Component}}", () => {
 | User Management Service | Revoke Permission | Functional| When requested as POC| Expect to return true on success |:white_check_mark:|
 | User Management Service | Revoke Permission | Functional| When requested as POC with admin restricted permissions| Expect to throw HttpException |:white_check_mark:|
 | User Management Service | Revoke Permission | Functional| When managing own permissions| Expect to return HttpException |:white_check_mark:|
-| User Management Service | Revoke Permission | Functional| When removing user from organization| Expect to return true on success |:white_check_mark:|
-| User Management Service | Remove User from Organization | Functional| When requested| Expect to return success |:white_check_mark:|
-| User Management Service | Remove User from Organization | Functional| When database error occured| Expect to throw error |:white_check_mark:|
-| User Management Service | Remove User Roles from Organization | Functional| When requested| Expect to return success |:white_check_mark:|
+| User Management Service | Revoke Permission | Functional| When removing user from project groups| Expect to return true on success |:white_check_mark:|
+| User Management Service | Remove User from Project groups | Functional| When requested| Expect to return success |:white_check_mark:|
+| User Management Service | Remove User from Project groups | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| User Management Service | Remove User Roles from Project groups | Functional| When requested| Expect to return success |:white_check_mark:|
 | User Management Service | Get Role Details by Name | Functional| When requested| Expect to return map of role_id and name |:white_check_mark:|
 | User Management Service | Get Role Details by Name | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 | User Management Service | Get User Roles | Functional| When requested| Expect to return list of user roles |:white_check_mark:|
 | User Management Service | Get User Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
-| User Management Service | Get User Orgs with Roles | Functional| When requested| Expect to return list of user orgs with roles |:white_check_mark:|
-| User Management Service | Get User Orgs with Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
+| User Management Service | Get User Project groups with Roles | Functional| When requested| Expect to return list of user project groups with roles |:white_check_mark:|
+| User Management Service | Get User Project groups with Roles | Functional| When database error occured| Expect to throw error |:white_check_mark:|
 
 
 ### Integration Test cases

@@ -17,7 +17,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_tdei_project_group_id",
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
@@ -38,7 +38,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_tdei_project_group_id",
                     polygon: undefined
                 });
 
@@ -55,7 +55,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_tdei_project_group_id",
                 });
 
                 const createServiceSpy = jest
@@ -71,7 +71,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceDto({
                     service_name: "test_service_name",
-                    tdei_org_id: "test_tdei_org_id",
+                    tdei_project_group_id: "test_tdei_project_group_id",
                 });
 
                 const createServiceSpy = jest
@@ -148,14 +148,14 @@ describe("Flex Service Test", () => {
                 let service = new ServiceDto({
                     service_name: "service_name",
                     tdei_service_id: "tdei_service_id",
-                    tdei_org_id: "tdei_org_id",
+                    tdei_project_group_id: "tdei_project_group_id",
                     polygon: TestHelper.getPolygon()
                 });
 
                 let dbResult: any = {
                     name: "service_name",
                     service_id: "tdei_service_id",
-                    owner_org: "tdei_org_id",
+                    owner_project_group: "tdei_project_group_id",
                     polygon: JSON.stringify(service.polygon.features[0].geometry)
                 }
 
@@ -170,7 +170,7 @@ describe("Flex Service Test", () => {
                 let list = await flexService.getService(new ServiceQueryParams({
                     searchText: "test",
                     tdei_service_id: "tdei_service_id",
-                    tdei_org_id: "tdei_org_id",
+                    tdei_project_group_id: "tdei_project_group_id",
                     bbox: <any>[23, 43, 45, 67],
                     page_no: 1,
                     page_size: 10
