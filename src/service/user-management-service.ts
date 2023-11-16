@@ -3,7 +3,7 @@ import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/da
 import { RolesReqDto } from "../model/dto/roles-req-dto";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { IUserManagement } from "./interface/user-management-interface";
-import { ForeignKeyException, UserNotFoundException } from "../exceptions/http/http-exceptions";
+import { ForeignKeyException, UnAuthenticated, UserNotFoundException } from "../exceptions/http/http-exceptions";
 import format from "pg-format";
 import fetch, { Response } from 'node-fetch';
 import { UserProfile } from "../model/dto/user-profile-dto";
@@ -12,11 +12,11 @@ import { RoleDto } from "../model/dto/roles-dto";
 import { LoginDto } from "../model/dto/login-dto";
 import { Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
-import { OrgRoleDto } from "../model/dto/org-role-dto";
+import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 
 
-class UserManagementService implements IUserManagement {
+export class UserManagementService implements IUserManagement {
     /**
     * Reissues the new access token in the case of valid refresh token input
     * @param refreshToken refresh token
@@ -61,9 +61,8 @@ class UserManagementService implements IUserManagement {
             return data;
         } catch (error: any) {
             console.error(error);
-            throw new Error("Error authenticating the user");
+            throw new UnAuthenticated();
         }
-        return {};
     }
     /**
      * Creates new user in TDEI system
@@ -78,7 +77,7 @@ class UserManagementService implements IUserManagement {
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            if (result.status != undefined && result.status != 200)
+            if (result.status != undefined && result.status == 409)
                 throw new HttpException(409, "User already exists with email " + user.email);
 
             if (result.status != undefined && result.status != 200)
@@ -142,14 +141,14 @@ class UserManagementService implements IUserManagement {
     }
 
     /**
-     * Get user associated organizations and roles.
+     * Get user associated project groups and roles.
      * @param userId user id 
      * @param page_no page number
      * @param page_size page size
-     * @returns List of User organizations with roles
+     * @returns List of User project groups with roles
      */
-    async getUserOrgsWithRoles(userId: string, page_no: number, page_size: number): Promise<OrgRoleDto[]> {
-        let orgRoleList: OrgRoleDto[] = [];
+    async getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number): Promise<ProjectGroupRoleDto[]> {
+        let projectGroupRoleList: ProjectGroupRoleDto[] = [];
 
         //Set defaults if not provided
         if (page_no == undefined) page_no = 1;
@@ -157,19 +156,19 @@ class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
-        var sql = format('SELECT o.name as org, o.org_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN organization o on ur.org_id = o.org_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.org_id LIMIT %L OFFSET %L', userId, take, skip);
+        var sql = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
 
         return await dbClient.query(sql)
             .then(res => {
                 res.rows.forEach(x => {
-                    let orgRole: OrgRoleDto = new OrgRoleDto();
-                    orgRole.org_name = x.org;
-                    orgRole.tdei_org_id = x.org_id;
-                    orgRole.roles = x.roles;
+                    let projectGroupRole: ProjectGroupRoleDto = new ProjectGroupRoleDto();
+                    projectGroupRole.project_group_name = x.project_group_name;
+                    projectGroupRole.tdei_project_group_id = x.project_group_id;
+                    projectGroupRole.roles = x.roles;
 
-                    orgRoleList.push(orgRole);
+                    projectGroupRoleList.push(projectGroupRole);
                 });
-                return orgRoleList;
+                return projectGroupRoleList;
             })
             .catch(e => {
                 throw e;
@@ -183,19 +182,18 @@ class UserManagementService implements IUserManagement {
      * @returns 
      */
     async getUserProfile(userName: string): Promise<UserProfile> {
-        let userProfile = new UserProfile();
-
         //Fetch permissioned user profile from keycloak
         try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)).json();
-            if (data.status != undefined && data.status == 404)
+            let response = await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)
+            const data: any = await response.json();
+            if (response.status != undefined && response.status != 200)
                 throw new Error();
-            else userProfile = new UserProfile(data);
+            let result = new UserProfile(data);
+            return result;
         } catch (error: any) {
             console.error(error);
             throw new UserNotFoundException(userName);
         }
-        return userProfile;
     }
 
     /**
@@ -205,19 +203,9 @@ class UserManagementService implements IUserManagement {
      * @returns boolean flag
      */
     async updatePermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
-        let userProfile = new UserProfile();
 
         //Fetch permissioned user profile from keycloak
-        try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
-            if (data.status != undefined && data.status == 404)
-                throw new Error();
-            else userProfile = new UserProfile(data);
-        } catch (error: any) {
-            console.error(error);
-            throw new UserNotFoundException(rolesReq.user_name);
-        }
-
+        let userProfile = await this.getUserProfile(rolesReq.user_name);
 
         //Get the user_id from user_entity table
         let userId = userProfile.id;
@@ -239,9 +227,9 @@ class UserManagementService implements IUserManagement {
         let rolemap = await this.getRolesByNames(rolesReq.roles);
 
         let valueArr = rolesReq.roles.map(role => {
-            return [userId, rolesReq.tdei_org_id, rolemap.get(role)];
+            return [userId, rolesReq.tdei_project_group_id, rolemap.get(role)];
         });
-        let queryStr = format('DELETE FROM user_roles WHERE user_id = %L AND org_id = %L; INSERT INTO user_roles (user_id, org_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_org DO NOTHING', userId, rolesReq.tdei_org_id, valueArr);
+        let queryStr = format('DELETE FROM user_roles WHERE user_id = %L AND project_group_id = %L; INSERT INTO user_roles (user_id, project_group_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING', userId, rolesReq.tdei_project_group_id, valueArr);
         return await dbClient.query(queryStr)
             .then(res => {
                 return true;
@@ -250,9 +238,9 @@ class UserManagementService implements IUserManagement {
                 if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
                 }
-                else if (e instanceof UniqueKeyDbException) {
-                    throw new HttpException(400, "User already assigned with the specific roles");
-                }
+                // else if (e instanceof UniqueKeyDbException) {
+                //     throw new HttpException(400, "User already assigned with the specific roles");
+                // }
                 throw e;
             });
     }
@@ -264,18 +252,8 @@ class UserManagementService implements IUserManagement {
      * @returns boolean flag
      */
     async revokeUserPermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
-        let userProfile = new UserProfile();
+        let userProfile = await this.getUserProfile(rolesReq.user_name);
 
-        //Fetch permissioned user profile from keycloak
-        try {
-            const data: any = await (await fetch(`${environment.userProfileUrl as string}?userName=${rolesReq.user_name}`)).json();
-            if (data.status != undefined && data.status == 404)
-                throw new Error("User not found or does not exist.");
-            else userProfile = new UserProfile(data);
-        } catch (error: any) {
-            console.error(error);
-            throw new UserNotFoundException(rolesReq.user_name);
-        }
         //Get the user_id from user_entity table
         let userId = userProfile.id;
 
@@ -295,14 +273,14 @@ class UserManagementService implements IUserManagement {
         if (rolesReq.roles.length > 0)
             await this.removeRoles(rolesReq, userId);
         else
-            await this.removeUserFromOrg(rolesReq.tdei_org_id, userId);
+            await this.removeUserFromProjectGroup(rolesReq.tdei_project_group_id, userId);
         return true;
     }
 
-    private async removeUserFromOrg(org_id: string, userId: string) {
+    private async removeUserFromProjectGroup(project_group_id: string, userId: string) {
         const query = {
-            text: 'DELETE FROM user_roles WHERE user_id = $1 AND org_id = $2',
-            values: [userId, org_id],
+            text: 'DELETE FROM user_roles WHERE user_id = $1 AND project_group_id = $2',
+            values: [userId, project_group_id],
         };
         await dbClient.query(query)
             .catch(e => {
@@ -317,8 +295,8 @@ class UserManagementService implements IUserManagement {
 
         rolesReq.roles.forEach(async (role) => {
             const query = {
-                text: 'DELETE FROM user_roles WHERE user_id = $1 AND org_id = $2 AND role_id = $3 ',
-                values: [userId, rolesReq.tdei_org_id, rolemap.get(role)],
+                text: 'DELETE FROM user_roles WHERE user_id = $1 AND project_group_id = $2 AND role_id = $3 ',
+                values: [userId, rolesReq.tdei_project_group_id, rolemap.get(role)],
             };
             await dbClient.query(query)
                 .catch(e => {
@@ -328,5 +306,5 @@ class UserManagementService implements IUserManagement {
     }
 }
 
-const userManagementService: IUserManagement = new UserManagementService();
-export default userManagementService;
+const userManagementServiceInstance: IUserManagement = new UserManagementService();
+export default userManagementServiceInstance;

@@ -2,13 +2,13 @@ import { IsOptional } from "class-validator";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 import { DynamicQueryObject, SqlORder } from "../../database/query-object";
 
-export class OrgUserQueryParams extends AbstractDomainEntity {
+export class ProjectGroupUserQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     searchText: string | undefined;
     @IsOptional()
     @Prop()
-    orgId: string | undefined;
+    tdei_project_group_id: string | undefined;
     @IsOptional()
     @Prop()
     page_no: number = 1;
@@ -16,7 +16,7 @@ export class OrgUserQueryParams extends AbstractDomainEntity {
     @Prop()
     page_size: number = 10;
 
-    constructor(init?: Partial<OrgUserQueryParams>) {
+    constructor(init?: Partial<ProjectGroupUserQueryParams>) {
         super();
         Object.assign(this, init);
     }
@@ -27,7 +27,7 @@ export class OrgUserQueryParams extends AbstractDomainEntity {
      */
     getQueryObject() {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelectRaw(`Select ue.id as user_id, ue.first_name, ue.last_name,CONCAT(ue.first_name, ' ', ue.last_name) AS fullname, ue.email, ue.username, ur.org_id,ARRAY_AGG(distinct r.name) as roles, json_agg( distinct ua.*) as attributes
+        queryObject.buildSelectRaw(`Select ue.id as user_id, ue.first_name, ue.last_name,CONCAT(ue.first_name, ' ', ue.last_name) AS fullname, ue.email, ue.username, ur.project_group_id,ARRAY_AGG(distinct r.name) as roles, json_agg( distinct ua.*) as attributes
         from keycloak.user_entity ue 
         inner join keycloak.user_attribute ua on ue.id = ua.user_id 
         inner join user_roles ur on ue.id = ur.user_id 
@@ -39,11 +39,11 @@ export class OrgUserQueryParams extends AbstractDomainEntity {
         if (this.searchText != undefined && this.searchText.length != 0) {
             queryObject.condition(` ue.first_name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
-        if (this.orgId != undefined && this.orgId.length != 0) {
-            queryObject.condition(` ur.org_id = $${queryObject.paramCouter++} `, this.orgId);
+        if (this.tdei_project_group_id != undefined && this.tdei_project_group_id.length != 0) {
+            queryObject.condition(` ur.project_group_id = $${queryObject.paramCouter++} `, this.tdei_project_group_id);
         }
 
-        queryObject.buildGroupRaw(" group by ue.id, ue.first_name, ue.last_name, ue.email, ue.username, ur.org_id ");
+        queryObject.buildGroupRaw(" group by ue.id, ue.first_name, ue.last_name, ue.email, ue.username, ur.project_group_id ");
 
         return queryObject;
     }

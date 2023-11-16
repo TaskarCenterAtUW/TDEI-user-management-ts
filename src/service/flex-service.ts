@@ -1,7 +1,7 @@
 import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { ServiceDto } from "../model/dto/service-dto";
-import { DuplicateException, ForeignKeyException, NoDataUpdatedException } from "../exceptions/http/http-exceptions";
+import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
 import { IFlexService } from "./interface/flex-service-interface";
 import { QueryConfig } from "pg";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
@@ -45,8 +45,6 @@ class FlexService implements IFlexService {
 
         return await dbClient.query(service.getUpdateQuery())
             .then(res => {
-                if (res.rowCount == 0)
-                    throw new NoDataUpdatedException();
                 return true;
             })
             .catch(e => {
@@ -72,7 +70,7 @@ class FlexService implements IFlexService {
                     let service = ServiceDto.from(x);
                     service.service_name = x.name;
                     service.tdei_service_id = x.service_id;
-                    service.tdei_org_id = x.owner_org;
+                    service.tdei_project_group_id = x.owner_project_group;
                     if (service.polygon) {
                         var polygon = JSON.parse(x.polygon) as Geometry;
                         service.polygon = {

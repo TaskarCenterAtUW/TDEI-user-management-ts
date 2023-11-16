@@ -7,7 +7,7 @@ import { UserProfile } from '../model/dto/user-profile-dto';
 import { Utility } from '../utility/utility';
 import { environment } from '../environment/environment';
 
-function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowInraCom?: boolean): RequestHandler {
+function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean, allowInraCom?: boolean): RequestHandler {
     return async (req, res, next) => {
 
         let authToken = Utility.extractToken(req);
@@ -53,9 +53,9 @@ function authorizationMiddleware(roles: string[], validateOrg?: boolean, allowIn
                     params.append("userId", decoded.sub);
                     //Set request context
                     req.userId = decoded.sub;
-                    if (validateOrg) {
-                        let org_id = req.params.orgId ? req.params.orgId : req.body.tdei_org_id;
-                        params.append("agencyId", org_id);
+                    if (validateProjectGroup) {
+                        let projectGroup_id = req.params.projectGroupId ? req.params.projectGroupId : req.body.tdei_project_group_id;
+                        params.append("projectGroupId", projectGroup_id);
                     }
 
                     params.append("affirmative", "false");

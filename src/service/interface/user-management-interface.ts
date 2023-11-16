@@ -3,7 +3,7 @@ import { RegisterUserDto } from "../../model/dto/register-user-dto";
 import { UserProfile } from "../../model/dto/user-profile-dto";
 import { RoleDto } from "../../model/dto/roles-dto";
 import { LoginDto } from "../../model/dto/login-dto";
-import { OrgRoleDto } from "../../model/dto/org-role-dto";
+import { ProjectGroupRoleDto } from "../../model/dto/project-group-role-dto";
 
 export interface IUserManagement {
     /**
@@ -34,13 +34,13 @@ export interface IUserManagement {
      */
     login(loginModel: LoginDto): Promise<any>;
     /**
-     * Get user associated organizations and roles.
+     * Get user associated project groups and roles.
      * @param userId user id 
      * @param page_no page number
      * @param page_size page size
-     * @returns List of User organizations with roles
+     * @returns List of User project groups with roles
      */
-    getUserOrgsWithRoles(userId: string, page_no: number, page_size: number): Promise<OrgRoleDto[]>;
+    getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number): Promise<ProjectGroupRoleDto[]>;
     /**
      * Revokes the user permissions
      * @param rolesReq roles to be revoked
