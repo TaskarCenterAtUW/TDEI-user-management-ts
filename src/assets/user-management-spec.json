@@ -16,7 +16,7 @@
     },
     "servers": [
         {
-            "url": "https://tdei-usermanagement-ts-stage.azurewebsites.net",
+            "url": "https://tdei-usermanagement-stage.azurewebsites.net",
             "description": "Staging"
         },
         {
