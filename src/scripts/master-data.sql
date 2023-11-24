@@ -39,3 +39,10 @@ INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 301);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 302);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 307);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 308);
+
+-- Add admin roles 
+INSERT INTO public.user_roles
+SELECT id, 202, null 
+FROM keycloak.user_entity 
+WHERE email = 'admin@tdei.com'
+LIMIT 1; 
