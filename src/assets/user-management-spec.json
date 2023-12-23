@@ -606,6 +606,21 @@
                         }
                     },
                     {
+                        "name": "service_type",
+                        "in": "query",
+                        "description": "Service type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "flex",
+                            "enum": [
+                                "flex",
+                                "pathways",
+                                "osw"
+                            ]
+                        }
+                    },
+                    {
                         "name": "tdei_project_group_id",
                         "in": "query",
                         "description": "Owner project group id.",
@@ -1447,6 +1462,16 @@
                     "service_name": {
                         "type": "string",
                         "description": "Name of the service."
+                    },
+                    "service_type": {
+                        "type": "string",
+                        "description": "Service type",
+                        "default": "flex",
+                        "enum": [
+                            "flex",
+                            "pathways",
+                            "osw"
+                        ]
                     },
                     "polygon": {
                         "$ref": "#/components/schemas/Polygon"
