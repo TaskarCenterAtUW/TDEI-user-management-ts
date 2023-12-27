@@ -39,7 +39,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
      */
     getQueryObject() {
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
-        queryObject.buildSelect("service", ["service_id", "name", "owner_project_group", "ST_AsGeoJSON(polygon) as polygon"]);
+        queryObject.buildSelect("service", ["service_id", "service_type", "name", "owner_project_group", "ST_AsGeoJSON(polygon) as polygon"]);
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
