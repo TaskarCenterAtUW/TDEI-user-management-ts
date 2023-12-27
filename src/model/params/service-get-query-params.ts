@@ -1,4 +1,4 @@
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsNotEmpty, IsOptional } from "class-validator";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 import { DynamicQueryObject, SqlORder } from "../../database/query-object";
 
@@ -6,6 +6,9 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     searchText: string | undefined;
+    @IsNotEmpty()
+    @Prop()
+    service_type: string | undefined = "flex";
     @IsOptional()
     @Prop("tdei_service_id")
     tdei_service_id: string | undefined;
@@ -40,6 +43,9 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
+        if (this.service_type != undefined && this.service_type.length != 0) {
+            queryObject.condition(` service_type = $${queryObject.paramCouter++} `, this.service_type);
+        }
         if (this.searchText != undefined && this.searchText.length != 0) {
             queryObject.condition(` name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }

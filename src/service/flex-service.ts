@@ -70,6 +70,7 @@ class FlexService implements IFlexService {
                     let service = ServiceDto.from(x);
                     service.service_name = x.name;
                     service.tdei_service_id = x.service_id;
+                    service.service_type = x.service_type;
                     service.tdei_project_group_id = x.owner_project_group;
                     if (service.polygon) {
                         var polygon = JSON.parse(x.polygon) as Geometry;

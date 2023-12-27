@@ -25,7 +25,7 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
         this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
-        this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([]), this.projectGroupRoles);
+        this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([], false, true), this.projectGroupRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
@@ -66,12 +66,12 @@ class UserManagementController implements IController {
     public projectGroupRoles = async (request: Request, response: express.Response, next: NextFunction) => {
         try {
             let authToken = Utility.extractToken(request);
-            var decoded: any = jwt_decode(authToken);
+            var decoded: any = authToken != null ? jwt_decode(authToken) : undefined;
 
             let userId = request.params.userId;
             if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
 
-            if (decoded.sub != userId) throw new HttpException(403, "Not authorized.");
+            if (decoded && decoded.sub != userId) throw new HttpException(403, "Not authorized.");
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 

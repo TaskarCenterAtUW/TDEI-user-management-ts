@@ -147,6 +147,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let service = new ServiceDto({
                     service_name: "service_name",
+                    service_type: "flex",
                     tdei_service_id: "tdei_service_id",
                     tdei_project_group_id: "tdei_project_group_id",
                     polygon: TestHelper.getPolygon()
@@ -154,6 +155,7 @@ describe("Flex Service Test", () => {
 
                 let dbResult: any = {
                     name: "service_name",
+                    service_type: "flex",
                     service_id: "tdei_service_id",
                     owner_project_group: "tdei_project_group_id",
                     polygon: JSON.stringify(service.polygon.features[0].geometry)
@@ -169,6 +171,7 @@ describe("Flex Service Test", () => {
                 //Act
                 let list = await flexService.getService(new ServiceQueryParams({
                     searchText: "test",
+                    service_type: "flex",
                     tdei_service_id: "tdei_service_id",
                     tdei_project_group_id: "tdei_project_group_id",
                     bbox: <any>[23, 43, 45, 67],
