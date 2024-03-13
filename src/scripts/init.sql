@@ -83,6 +83,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
     (
         service_id character varying(100) COLLATE pg_catalog."default" NOT NULL DEFAULT gen_random_uuid(),
         name character varying(100) COLLATE pg_catalog."default" NOT NULL,
+        service_type character varying(20) COLLATE pg_catalog."default" NOT NULL,
         polygon geometry(Polygon,4326),
         owner_project_group character varying(100) NOT NULL,
         is_active boolean NOT NULL DEFAULT true,

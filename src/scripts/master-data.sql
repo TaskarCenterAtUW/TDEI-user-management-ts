@@ -20,6 +20,8 @@ INSERT INTO public.roles(name, description)	VALUES ('osw_data_generator', 'OSW D
 
 -- POC -> tdei_user, poc, data_generator
 --flex-data_generator
+TRUNCATE TABLE public.role_permission RESTART IDENTITY CASCADE;
+
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (201, 304);
 --pathways-data_generator
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (205, 305);
@@ -39,3 +41,12 @@ INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 301);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 302);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 307);
 INSERT INTO public.role_permission(	role_id, permission_id)	VALUES (202, 308);
+
+TRUNCATE TABLE public.user_roles RESTART IDENTITY CASCADE;
+
+-- Add admin roles 
+INSERT INTO public.user_roles
+SELECT id, 202, null 
+FROM keycloak.user_entity 
+WHERE email = 'admin@tdei.com'
+LIMIT 1; 
