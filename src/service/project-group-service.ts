@@ -109,7 +109,7 @@ class ProjectGroupService implements IProjectGroupService {
                 res.rows.forEach(x => {
                     let user = ProjectGroupUserDto.from(x);
                     if (x.attributes && x.attributes.length > 0) {
-                        let phoneObj = x.attributes.find((a: any) => a.name = "phone");
+                        let phoneObj = x.attributes.find((a: any) => a.name == "phone");
                         if (phoneObj) {
                             user.phone = phoneObj.value;
                         }
