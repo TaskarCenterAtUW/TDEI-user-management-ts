@@ -26,7 +26,7 @@ export class ForeignKeyException extends HttpException {
 
 export class UserNotFoundException extends HttpException {
     constructor(name: string) {
-        super(404, `User not found for the given username '${name}'.`);
+        super(404, `User '${name}' not part of the system.`);
     }
 }
 
