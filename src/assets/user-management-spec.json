@@ -1446,7 +1446,8 @@
             "Service": {
                 "required": [
                     "tdei_project_group_id, ",
-                    "service_name"
+                    "service_name",
+                    "service_type"
                 ],
                 "type": "object",
                 "properties": {
