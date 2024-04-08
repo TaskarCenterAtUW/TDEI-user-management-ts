@@ -14,8 +14,9 @@ export class ServiceDto extends BaseDto {
     @IsNotEmpty()
     @Prop("service_name")
     service_name!: string;
+    @IsNotEmpty()
     @Prop("service_type")
-    service_type: string = "flex";
+    service_type!: string;
     @IsOptional()
     @IsValidPolygon()
     @Prop()
