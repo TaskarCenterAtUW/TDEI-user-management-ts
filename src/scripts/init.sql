@@ -8,7 +8,7 @@ CREATE EXTENSION IF NOT EXISTS postgis;
     (
         project_group_id character varying(100) COLLATE pg_catalog."default" NOT NULL DEFAULT gen_random_uuid(),
         name character varying(100) COLLATE pg_catalog."default" NOT NULL,
-        phone character varying(20) COLLATE pg_catalog."default" NOT NULL,
+        phone character varying(20) COLLATE pg_catalog."default",
         url character varying(500) COLLATE pg_catalog."default",
         address character varying(500) COLLATE pg_catalog."default" NOT NULL,
 		polygon geometry(Polygon,4326),
