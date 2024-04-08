@@ -8,7 +8,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsNotEmpty()
     @Prop()
-    service_type: string | undefined = "flex";
+    service_type: string | undefined;
     @IsOptional()
     @Prop("tdei_service_id")
     tdei_service_id: string | undefined;
@@ -43,7 +43,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
-        if (this.service_type != undefined && this.service_type.length != 0) {
+        if (this.service_type != undefined && this.service_type.length != 0 && this.service_type != "all") {
             queryObject.condition(` service_type = $${queryObject.paramCouter++} `, this.service_type);
         }
         if (this.searchText != undefined && this.searchText.length != 0) {
