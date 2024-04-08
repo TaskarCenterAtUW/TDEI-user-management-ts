@@ -12,7 +12,6 @@ export class ProjectGroupDto extends BaseDto {
     @Prop()
     project_group_name!: string;
     @Prop()
-    @IsNotEmpty()
     phone!: string;
     @Prop()
     url!: string;
