@@ -612,8 +612,9 @@
                         "required": false,
                         "schema": {
                             "type": "string",
-                            "default": "flex",
+                            "default": "all",
                             "enum": [
+                                "all",
                                 "flex",
                                 "pathways",
                                 "osw"
