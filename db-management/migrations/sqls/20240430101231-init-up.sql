@@ -2,12 +2,12 @@ CREATE EXTENSION IF NOT EXISTS postgis;
 
 CREATE TABLE IF NOT EXISTS public.permission
 (
-    id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 301 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
+    permission_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 301 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     name character varying(100) COLLATE pg_catalog."default" NOT NULL,
     description character varying(500) COLLATE pg_catalog."default",
     CONSTRAINT perm_pkey PRIMARY KEY (id),
     CONSTRAINT unq_perm UNIQUE (name)
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.project_group
 (
@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS public.project_group
     is_active boolean NOT NULL DEFAULT true,
     CONSTRAINT project_group_pkey PRIMARY KEY (project_group_id),
     CONSTRAINT unq_project_group UNIQUE (name)
-)
+);
 
 CREATE INDEX IF NOT EXISTS project_group_geom_idx
     ON public.project_group USING gist
@@ -34,7 +34,7 @@ CREATE TABLE IF NOT EXISTS public.roles
     description character varying(500) COLLATE pg_catalog."default",
     CONSTRAINT roles_pkey PRIMARY KEY (role_id),
     CONSTRAINT unq_roles UNIQUE (name)
-)
+);
 
 
 CREATE TABLE IF NOT EXISTS public.service
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS public.service
         REFERENCES public.project_group (project_group_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-)
+);
 
 CREATE INDEX IF NOT EXISTS service_geom_idx
     ON public.service USING gist
@@ -72,21 +72,21 @@ CREATE TABLE IF NOT EXISTS public.user_roles
         REFERENCES public.roles (role_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-)
+);
 
 CREATE TABLE IF NOT EXISTS public.role_permission
 (
     role_id integer,
     permission_id integer,
     CONSTRAINT fk_permission_id FOREIGN KEY (permission_id)
-        REFERENCES public.permission (id) MATCH SIMPLE
+        REFERENCES public.permission (permission_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION,
     CONSTRAINT fk_role_id FOREIGN KEY (role_id)
         REFERENCES public.roles (role_id) MATCH SIMPLE
         ON UPDATE NO ACTION
         ON DELETE NO ACTION
-)
+);
 
 -- Master data
 
