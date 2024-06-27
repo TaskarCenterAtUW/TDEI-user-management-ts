@@ -88,31 +88,6 @@ CREATE TABLE IF NOT EXISTS public.role_permission
         ON DELETE NO ACTION
 )
 
-CREATE OR REPLACE FUNCTION public.delete_dataset_records_by_id(
-	tdei_dataset_id character varying)
-    RETURNS void
-    LANGUAGE 'plpgsql'
-    COST 100
-    VOLATILE PARALLEL UNSAFE
-AS $BODY$
-BEGIN
-    -- Delete records from content.edge
-    DELETE FROM content.edge e WHERE e.tdei_dataset_id = delete_dataset_records_by_id.tdei_dataset_id;
-
-    -- Delete records from content.node
-    DELETE FROM content.node n WHERE n.tdei_dataset_id = delete_dataset_records_by_id.tdei_dataset_id;
-
-    -- Delete records from content.extension_line
-    DELETE FROM content.extension_line l WHERE l.tdei_dataset_id = delete_dataset_records_by_id.tdei_dataset_id;
-
-    -- Delete records from content.extension_point
-    DELETE FROM content.extension_point p WHERE p.tdei_dataset_id = delete_dataset_records_by_id.tdei_dataset_id;
-
-    -- Delete records from content.extension_polygon
-    DELETE FROM content.extension_polygon po WHERE po.tdei_dataset_id = delete_dataset_records_by_id.tdei_dataset_id;
-END;
-$BODY$;
-
 -- Master data
 
 -- Insert permissions
@@ -125,17 +100,17 @@ VALUES
 ('gtfs_flex_upload', 'Can upload for gtfs flex service'),
 ('gtfs_pathways_upload', 'Can upload for gtfs pathways service'),
 ('osw_upload', 'Can upload for osw service'),
-('register_flex_services', 'Can register for gtfs flex services');
+('register_services', 'Can register services');
 
 -- Insert roles
 INSERT INTO public.roles(name, description)	
 VALUES 
-('flex_data_generator', 'Flex Data generator can publish file for the project group'),
+('flex_data_generator', 'Flex Data generator can publish dataset for the project group'),
 ('tdei_admin', 'TDEI super admin'),
 ('poc', 'Point of contact of project group'),
 ('tdei_user', 'User of the TDEI system'),
-('pathways_data_generator', 'Pathways Data generator can publish file for the project group'),
-('osw_data_generator', 'OSW Data generator can publish file for the project group');
+('pathways_data_generator', 'Pathways Data generator can publish dataset for the project group'),
+('osw_data_generator', 'OSW Data generator can publish dataset for the project group');
 
 
 INSERT INTO public.role_permission(role_id, permission_id)
@@ -150,10 +125,10 @@ WHERE (r.name, p.name) IN (
     ('poc', 'gtfs_flex_upload'),
     ('poc', 'gtfs_pathways_upload'),
     ('poc', 'osw_upload'),
-    ('poc', 'register_flex_services'),
+    ('poc', 'register_services'),
     ('tdei_admin', 'user_manage'),
     ('tdei_admin', 'add_poc'),
-    ('tdei_admin', 'register_flex_services')
+    ('tdei_admin', 'register_services')
 );
 
 -- Add admin roles 

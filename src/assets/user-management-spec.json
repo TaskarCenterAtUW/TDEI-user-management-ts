@@ -14,20 +14,7 @@
         },
         "version": "v0.1"
     },
-    "servers": [
-        {
-            "url": "https://tdei-usermanagement-stage.azurewebsites.net",
-            "description": "Staging"
-        },
-        {
-            "url": "https://tdei-usermanagement-ts-dev.azurewebsites.net",
-            "description": "Development"
-        },
-        {
-            "url": "http://localhost:3004",
-            "description": "Local Server"
-        }
-    ],
+    "servers": [],
     "security": [
         {
             "AuthorizationToken": []
@@ -47,12 +34,8 @@
             "description": "Project Group Management operations"
         },
         {
-            "name": "GTFS Pathways Station",
-            "description": "GTFS Pathways Station Management operations"
-        },
-        {
-            "name": "GTFS Flex Service",
-            "description": "GTFS Flex Service Management operations"
+            "name": "Service",
+            "description": "Service Management operations"
         }
     ],
     "paths": {
@@ -322,269 +305,13 @@
                 }
             }
         },
-        "/api/v1/station": {
-            "get": {
-                "tags": [
-                    "GTFS Pathways Station"
-                ],
-                "summary": "Gets the GTFS Pathways Station in the TDEI system ",
-                "description": "Gets the GTFS Pathways Station in the TDEI system .",
-                "operationId": "getStation",
-                "parameters": [
-                    {
-                        "name": "tdei_station_id",
-                        "in": "query",
-                        "description": "Search by station Id.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "searchText",
-                        "in": "query",
-                        "description": "Search by station name.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "tdei_project_group_id",
-                        "in": "query",
-                        "description": "Owner project group id.",
-                        "required": false,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "bbox",
-                        "in": "query",
-                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
-                        "required": false,
-                        "schema": {
-                            "maxItems": 4,
-                            "minItems": 4,
-                            "type": "array",
-                            "items": {
-                                "type": "number",
-                                "format": "double"
-                            }
-                        }
-                    },
-                    {
-                        "name": "page_no",
-                        "in": "query",
-                        "description": "Page number to fetch",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": 1
-                        }
-                    },
-                    {
-                        "name": "page_size",
-                        "in": "query",
-                        "description": "Total records to fetch.",
-                        "required": false,
-                        "schema": {
-                            "type": "string",
-                            "default": 10
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Returns the list of GTFS Pathways stations.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "title": "StationResponse",
-                                    "type": "array",
-                                    "items": {
-                                        "$ref": "#/components/schemas/Station"
-                                    },
-                                    "description": "List of stations"
-                                }
-                            }
-                        }
-                    },
-                    "400": {
-                        "description": "Invalid request."
-                    },
-                    "500": {
-                        "description": "Internal server error."
-                    },
-                    "401": {
-                        "description": "Unauthenticated request"
-                    },
-                    "403": {
-                        "description": "Unauthorized request"
-                    }
-                }
-            },
-            "post": {
-                "tags": [
-                    "GTFS Pathways Station"
-                ],
-                "summary": "Creates a GTFS Pathways station in the TDEI system",
-                "description": "Creates a GTFS Pathways station in the TDEI system. Returns the id for the newly created pathways station.",
-                "operationId": "createStation",
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/Station"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "400": {
-                        "description": "Invalid request."
-                    },
-                    "200": {
-                        "description": "Successful response - Returns the id for the newly created pathways station.",
-                        "content": {
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/Response"
-                                }
-                            }
-                        }
-                    },
-                    "500": {
-                        "description": "Internal server error."
-                    },
-                    "401": {
-                        "description": "Unauthenticated request"
-                    },
-                    "403": {
-                        "description": "Unauthorized request"
-                    }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/station/{projectGroupId}": {
-            "put": {
-                "tags": [
-                    "GTFS Pathways Station"
-                ],
-                "summary": "Updates a GTFS Pathways station in the TDEI system",
-                "description": "Updates a GTFS Pathways station in the TDEI system.",
-                "operationId": "updateStation",
-                "parameters": [
-                    {
-                        "name": "projectGroupId",
-                        "in": "path",
-                        "description": "Owner project group id.",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    }
-                ],
-                "requestBody": {
-                    "content": {
-                        "application/json": {
-                            "schema": {
-                                "$ref": "#/components/schemas/StationUpdate"
-                            }
-                        }
-                    },
-                    "required": true
-                },
-                "responses": {
-                    "400": {
-                        "description": "Invalid request."
-                    },
-                    "200": {
-                        "description": "GTFS Pathways station update successful."
-                    },
-                    "500": {
-                        "description": "Internal server error."
-                    },
-                    "401": {
-                        "description": "Unauthenticated request"
-                    },
-                    "403": {
-                        "description": "Unauthorized request"
-                    }
-                },
-                "security": [
-                    {
-                        "AuthorizationToken": []
-                    }
-                ]
-            }
-        },
-        "/api/v1/station/{projectGroupId}/{stationId}/active/{status}": {
-            "delete": {
-                "tags": [
-                    "GTFS Pathways Station"
-                ],
-                "summary": "Activates/Deactives the station.",
-                "description": "Activates/Deactives the station.",
-                "operationId": "setServiceStatus",
-                "parameters": [
-                    {
-                        "name": "projectGroupId",
-                        "in": "path",
-                        "description": "Owner project group id.",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "stationId",
-                        "in": "path",
-                        "description": "Station Id of the station to be Activated/Deactivated.",
-                        "required": true,
-                        "schema": {
-                            "type": "string"
-                        }
-                    },
-                    {
-                        "name": "status",
-                        "in": "path",
-                        "description": "Boolean flag to Activate/Deactivate station.",
-                        "required": true,
-                        "schema": {
-                            "type": "boolean"
-                        }
-                    }
-                ],
-                "responses": {
-                    "200": {
-                        "description": "Successful."
-                    },
-                    "401": {
-                        "description": "Unauthenticated request"
-                    },
-                    "403": {
-                        "description": "Unauthorized request"
-                    },
-                    "500": {
-                        "description": "An server error occurred."
-                    }
-                }
-            }
-        },
         "/api/v1/service": {
             "get": {
                 "tags": [
-                    "GTFS Flex Service"
+                    "Service"
                 ],
-                "summary": "Gets the GTFS Flex services in the TDEI system ",
-                "description": "Gets the GTFS Flex services in the TDEI system .",
+                "summary": "Gets the Services in the TDEI system ",
+                "description": "Gets the Services in the TDEI system .",
                 "operationId": "getService",
                 "parameters": [
                     {
@@ -668,7 +395,7 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the list of GTFS Flex service.",
+                        "description": "Returns the list of Service.",
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -703,10 +430,10 @@
             },
             "post": {
                 "tags": [
-                    "GTFS Flex Service"
+                    "Service"
                 ],
-                "summary": "Creates a GTFS flex service in the TDEI system",
-                "description": "Creates a GTFS flex service in the TDEI system.Returns the id for the newly created flex service.",
+                "summary": "Creates a Service in the TDEI system",
+                "description": "Creates a Service in the TDEI system.Returns the id for the newly created flex service.",
                 "operationId": "createService",
                 "requestBody": {
                     "content": {
@@ -752,10 +479,10 @@
         "/api/v1/service/{projectGroupId}": {
             "put": {
                 "tags": [
-                    "GTFS Flex Service"
+                    "Service"
                 ],
-                "summary": "Updates a GTFS flex service in the TDEI system",
-                "description": "Updates a GTFS flex service in the TDEI system.",
+                "summary": "Updates a Service in the TDEI system",
+                "description": "Updates a Service in the TDEI system.",
                 "operationId": "updateService",
                 "parameters": [
                     {
@@ -783,7 +510,7 @@
                         "description": "Invalid request."
                     },
                     "200": {
-                        "description": "GTFS Flex service update successful."
+                        "description": "Service update successful."
                     },
                     "500": {
                         "description": "Internal server error."
@@ -805,7 +532,7 @@
         "/api/v1/service/{projectGroupId}/{serviceId}/active/{status}": {
             "delete": {
                 "tags": [
-                    "GTFS Flex Service"
+                    "Service"
                 ],
                 "summary": "Activates/Deactives the service.",
                 "description": "Activates/Deactives the service.",
@@ -1396,54 +1123,6 @@
                 },
                 "description": "Describes a user registration details."
             },
-            "Station": {
-                "required": [
-                    "tdei_project_group_id",
-                    "station_name"
-                ],
-                "type": "object",
-                "properties": {
-                    "tdei_station_id": {
-                        "type": "string",
-                        "description": "Station Id uniquely represented in the TDEI system. System generated.",
-                        "default": "0"
-                    },
-                    "tdei_project_group_id": {
-                        "type": "string",
-                        "description": "Project group id of the station."
-                    },
-                    "station_name": {
-                        "type": "string",
-                        "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
-                    },
-                    "polygon": {
-                        "$ref": "#/components/schemas/Polygon"
-                    }
-                },
-                "description": "Describes a gtfs pathways station."
-            },
-            "StationUpdate": {
-                "required": [
-                    "tdei_station_id",
-                    "station_name"
-                ],
-                "type": "object",
-                "properties": {
-                    "tdei_station_id": {
-                        "type": "string",
-                        "description": "Station Id uniquely represented in the TDEI system. System generated.",
-                        "default": "0"
-                    },
-                    "station_name": {
-                        "type": "string",
-                        "description": "Name of the location. The ame should match the agency's rider-facing name for the location as printed on a timetable, published online, or represented on signage."
-                    },
-                    "polygon": {
-                        "$ref": "#/components/schemas/Polygon"
-                    }
-                },
-                "description": "Describes a gtfs pathways station update model."
-            },
             "Service": {
                 "required": [
                     "tdei_project_group_id",
@@ -1479,7 +1158,7 @@
                         "$ref": "#/components/schemas/Polygon"
                     }
                 },
-                "description": "Describes a gtfs flex service."
+                "description": "Describes a Service."
             },
             "ServiceUpdate": {
                 "required": [
@@ -1501,7 +1180,7 @@
                         "$ref": "#/components/schemas/Polygon"
                     }
                 },
-                "description": "Describes a gtfs flex service update model."
+                "description": "Describes a Service update model."
             },
             "Response": {
                 "type": "object",
