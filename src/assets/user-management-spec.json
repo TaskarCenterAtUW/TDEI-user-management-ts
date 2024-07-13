@@ -301,6 +301,9 @@
                     },
                     "403": {
                         "description": "Unauthorized request"
+                    },
+                    "409": {
+                        "description": "User already exists."
                     }
                 }
             }
