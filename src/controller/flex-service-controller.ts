@@ -9,6 +9,7 @@ import flexService from "../service/flex-service";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 import { Utility } from "../utility/utility";
+import { ValidationError, validate } from "class-validator";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -42,6 +43,14 @@ class FlexServiceController implements IController {
     public createService = async (request: Request, response: express.Response, next: NextFunction) => {
         //Transform the body to DTO
         let service = ServiceDto.from(request.body);
+
+        let errors = await validate(service);
+        if (errors.length > 0) {
+            console.log('Input validation failed');
+            let message = errors.map((error: ValidationError) => Object.values(<any>error.constraints)).join(', ');
+            return BadRequest(response, `Required fields are missing or invalid: ${message}`);
+        }
+
         return flexService.createService(service)
             .then((service) => {
                 Ok(response, { data: service });

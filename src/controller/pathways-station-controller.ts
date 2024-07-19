@@ -10,6 +10,9 @@ import { StationQueryParams } from "../model/params/station-get-query-params";
 import { StationUpdateDto } from "../model/dto/station-update-dto";
 import { Utility } from "../utility/utility";
 
+/*
+ * @deprecated This controller is deprecated and will be removed in future versions.
+*/
 class PathwaysStationController implements IController {
     public path = '';
     public router = express.Router();
@@ -19,10 +22,10 @@ class PathwaysStationController implements IController {
     }
 
     public intializeRoutes() {
-        this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
-        this.router.put(`${this.path}/api/v1/station/:projectGroupId`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationUpdateDto), this.updateStation);
-        this.router.get(`${this.path}/api/v1/station`, authorizationMiddleware([], true, true), this.getStation);
-        this.router.delete(`${this.path}/api/v1/station/:projectGroupId/:stationId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteStation);
+        // this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
+        // this.router.put(`${this.path}/api/v1/station/:projectGroupId`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationUpdateDto), this.updateStation);
+        // this.router.get(`${this.path}/api/v1/station`, authorizationMiddleware([], true, true), this.getStation);
+        // this.router.delete(`${this.path}/api/v1/station/:projectGroupId/:stationId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteStation);
     }
 
     public deleteStation = async (request: Request, response: express.Response, next: NextFunction) => {
