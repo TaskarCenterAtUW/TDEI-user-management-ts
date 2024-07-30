@@ -102,3 +102,6 @@ Detailed use case description can be found [here](https://github.com/TaskarCente
 ![user-flow](./src/assets/user-management-flow.jpg)
 
 
+## Constraints
+
+1. The maximum size for the payload of a POST request is restricted to 100kb.
