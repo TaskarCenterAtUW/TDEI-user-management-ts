@@ -1,0 +1,1 @@
+update public.roles set description = 'Responsible for the management of the project group' where name = 'poc';
