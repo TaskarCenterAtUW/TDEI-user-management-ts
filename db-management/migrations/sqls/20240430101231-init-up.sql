@@ -5,7 +5,7 @@ CREATE TABLE IF NOT EXISTS public.permission
     permission_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 301 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     name character varying(100) COLLATE pg_catalog."default" NOT NULL,
     description character varying(500) COLLATE pg_catalog."default",
-    CONSTRAINT perm_pkey PRIMARY KEY (id),
+    CONSTRAINT perm_pkey PRIMARY KEY (permission_id),
     CONSTRAINT unq_perm UNIQUE (name)
 );
 
@@ -114,7 +114,7 @@ VALUES
 
 
 INSERT INTO public.role_permission(role_id, permission_id)
-SELECT r.role_id, p.id
+SELECT r.role_id, p.permission_id
 FROM public.roles r
 CROSS JOIN public.permission p
 WHERE (r.name, p.name) IN (
