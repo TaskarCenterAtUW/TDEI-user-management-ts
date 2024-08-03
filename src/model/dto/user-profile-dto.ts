@@ -6,7 +6,7 @@ export class UserProfile {
     phone!: any
     emailVerified!: boolean
     username!: string
-
+    apiKey!: string;
     constructor(init?: Partial<UserProfile>) {
         Object.assign(this, init);
     }

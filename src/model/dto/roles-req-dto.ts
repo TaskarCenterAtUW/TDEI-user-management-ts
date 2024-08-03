@@ -1,13 +1,17 @@
-import { IsArray, IsIn, IsNotEmpty, IsNumber } from "class-validator";
+import { IsArray, IsIn, IsNotEmpty } from "class-validator";
+import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
 
 export class RolesReqDto extends BaseDto {
     @IsNotEmpty()
-    org_id!: string;
+    @Prop()
+    tdei_project_group_id!: string;
     @IsNotEmpty()
+    @Prop()
     user_name!: string;
     @IsNotEmpty({ each: true })
     @IsArray()
+    @Prop()
     roles!: string[];
 
     constructor(init?: Partial<RolesReqDto>) {

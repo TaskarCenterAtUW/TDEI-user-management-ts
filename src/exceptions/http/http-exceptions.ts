@@ -8,7 +8,13 @@ export class DuplicateException extends HttpException {
 
 export class UnAuthenticated extends HttpException {
     constructor() {
-        super(401, `User not authenticated/authorized to perform this action.`);
+        super(401, `Invalid/Expired token.`);
+    }
+}
+
+export class Forbidden extends HttpException {
+    constructor() {
+        super(403, `User not authorized to perform this action.`);
     }
 }
 
@@ -20,7 +26,13 @@ export class ForeignKeyException extends HttpException {
 
 export class UserNotFoundException extends HttpException {
     constructor(name: string) {
-        super(404, `User not found for the given username '${name}'.`);
+        super(404, `User '${name}' not part of the system.`);
+    }
+}
+
+export class NoDataUpdatedException extends HttpException {
+    constructor() {
+        super(400, `Data not updated, may be input prams not valid.`);
     }
 }
 

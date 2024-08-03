@@ -15,5 +15,15 @@ export const environment = {
         ssl: Boolean(process.env.SSL),
         port: parseInt(process.env.DATABASE_PORT ?? "5432"),
     },
-    appPort: parseInt(process.env.APPLICATION_PORT ?? "8080")
+    appPort: parseInt(process.env.PORT ?? "8080"),
+    secretGenerateUrl: `${process.env.AUTH_HOST}/api/v1/generateSecret`,
+    secretVerifyUrl: `${process.env.AUTH_HOST}/api/v1/validateSecret`,
+    apiKeyVerifyUrl: `${process.env.AUTH_HOST}/api/v1/validateApiKey`,
+    registerUserUrl: `${process.env.AUTH_HOST}/api/v1/registerUser`,
+    userProfileUrl: `${process.env.AUTH_HOST}/api/v1/getUserByUsername`,
+    permissionUrl: `${process.env.AUTH_HOST}/api/v1/hasPermission`,
+    authenticateUrl: `${process.env.AUTH_HOST}/api/v1/authenticate`,
+    validateAccessTokenUrl: `${process.env.AUTH_HOST}/api/v1/validateAccessToken`,
+    refreshUrl: `${process.env.AUTH_HOST}/api/v1/refreshToken`
+
 }

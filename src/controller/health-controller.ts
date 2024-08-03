@@ -1,5 +1,5 @@
 import express, { Request } from "express";
-import { IController } from "./interface/IController";
+import { IController } from "./interface/controller-interface";
 
 class HealthController implements IController {
     public path = '/health';
@@ -15,7 +15,7 @@ class HealthController implements IController {
 
     public getping = async (request: Request, response: express.Response) => {
         // return loaded posts
-        response.send("I'm healthy !!");
+        response.status(200).send("I'm healthy !!");
     }
 }
 

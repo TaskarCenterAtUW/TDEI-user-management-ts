@@ -1,0 +1,1496 @@
+{
+    "openapi": "3.0.1",
+    "externalDocs": {
+        "description": "Specification - swagger.json",
+        "url": "/api-docs/swagger.json"
+    },
+    "info": {
+        "title": "TDEI Management API",
+        "description": "Management API, describes admin & user activities in the TDEI system.",
+        "contact": {
+            "name": "TDEI Support",
+            "url": "https://placeholder.transequity.cs.washington.edu/support",
+            "email": "placeholder_support@transequity.cs.washington.edu"
+        },
+        "version": "v0.1"
+    },
+    "servers": [],
+    "security": [
+        {
+            "AuthorizationToken": []
+        }
+    ],
+    "tags": [
+        {
+            "name": "Auth",
+            "description": "Authentication operations"
+        },
+        {
+            "name": "User Management",
+            "description": "User Management operations"
+        },
+        {
+            "name": "ProjectGroup",
+            "description": "Project Group Management operations"
+        },
+        {
+            "name": "Service",
+            "description": "Service Management operations"
+        }
+    ],
+    "paths": {
+        "/api/v1/authenticate": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticates the user to the TDEI system",
+                "description": "Authenticates the user to the TDEI system.  Returns access token. ",
+                "operationId": "authenticate",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the access token object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
+        "/api/v1/user-profile": {
+            "get": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Gets the user profile",
+                "description": "Gets the user profile.",
+                "operationId": "getUserProfile",
+                "parameters": [
+                    {
+                        "name": "user_name",
+                        "in": "query",
+                        "description": "User name",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the user profile details.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserProfile"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/refresh-token": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Refresh the user token",
+                "description": "Refresh the user token",
+                "operationId": "refresh-token",
+                "parameters": [
+                    {
+                        "name": "refresh_token",
+                        "in": "header",
+                        "description": "Valid refresh token",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the access token object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Token"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
+        "/api/v1/roles": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the TDEI roles",
+                "description": "Gets the TDEI roles. ",
+                "operationId": "roles",
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the list of roles.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "RoleResponse",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "type": "array",
+                                            "items": {
+                                                "$ref": "#/components/schemas/Roles"
+                                            }
+                                        }
+                                    },
+                                    "description": "Holds the response data"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/project-group-roles/{userId}": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the user associated project groups with roles.",
+                "description": "Gets the user associated project groups with roles.",
+                "operationId": "projectGroupRoles",
+                "parameters": [
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User id for which project groups to be fetched",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the user project groups with roles.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProjectGroupRoles"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
+        },
+        "/api/v1/register": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Registers the user to the TDEI system",
+                "description": "Registers the user to the TDEI system.  Returns new User object. ",
+                "operationId": "registerUser",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Register"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the newly created object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "RegisterResponse",
+                                    "type": "object",
+                                    "properties": {
+                                        "data": {
+                                            "$ref": "#/components/schemas/User"
+                                        }
+                                    },
+                                    "description": "Holds the response data"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "409": {
+                        "description": "User already exists."
+                    }
+                }
+            }
+        },
+        "/api/v1/service": {
+            "get": {
+                "tags": [
+                    "Service"
+                ],
+                "summary": "Gets the Services in the TDEI system ",
+                "description": "Gets the Services in the TDEI system .",
+                "operationId": "getService",
+                "parameters": [
+                    {
+                        "name": "tdei_service_id",
+                        "in": "query",
+                        "description": "Search by service Id.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Search by service name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "service_type",
+                        "in": "query",
+                        "description": "Service type",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "all",
+                            "enum": [
+                                "all",
+                                "flex",
+                                "pathways",
+                                "osw"
+                            ]
+                        }
+                    },
+                    {
+                        "name": "tdei_project_group_id",
+                        "in": "query",
+                        "description": "Owner project group id.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
+                        "required": false,
+                        "schema": {
+                            "maxItems": 4,
+                            "minItems": 4,
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            }
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of Service.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "ServiceResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/Service"
+                                    },
+                                    "description": "List of services"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "Service"
+                ],
+                "summary": "Creates a Service in the TDEI system",
+                "description": "Creates a Service in the TDEI system.Returns the id for the newly created flex service.",
+                "operationId": "createService",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Service"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the id for the newly created flex service.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/service/{projectGroupId}": {
+            "put": {
+                "tags": [
+                    "Service"
+                ],
+                "summary": "Updates a Service in the TDEI system",
+                "description": "Updates a Service in the TDEI system.",
+                "operationId": "updateService",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "Owner project group id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ServiceUpdate"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "200": {
+                        "description": "Service update successful."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/service/{projectGroupId}/{serviceId}/active/{status}": {
+            "delete": {
+                "tags": [
+                    "Service"
+                ],
+                "summary": "Activates/Deactives the service.",
+                "description": "Activates/Deactives the service.",
+                "operationId": "deleteService",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "Owner project group id.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "serviceId",
+                        "in": "path",
+                        "description": "Service Id of the service to be Activated/Deactivated.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "Boolean flag to Activate/Deactivate service.",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
+        },
+        "/api/v1/permission": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Associates a user with the project group and permissions in the TDEI system",
+                "description": "Associates a user with the project group and permissions in the TDEI system. Returns the boolean flag true.",
+                "operationId": "permission",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleDetails"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the boolean flag true.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/permission/revoke": {
+            "put": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Revokes the user permissions",
+                "description": "Revokes the user permissions.",
+                "operationId": "revokePermission",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/RoleDetails"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the boolean flag true.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "404": {
+                        "description": "User not found."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/project-group": {
+            "get": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Gets the project groups in the TDEI system ",
+                "description": "Gets the project groups in the TDEI system.",
+                "operationId": "getProjectGroup",
+                "parameters": [
+                    {
+                        "name": "tdei_project_group_id",
+                        "in": "query",
+                        "description": "Search by project group Id.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Search by project group name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "bbox",
+                        "in": "query",
+                        "description": "A bounding box which specifies the area to be searched. A bounding box is specified by a string providing the lat/lon coordinates of the corners of the bounding box. Coordinate should be specified as west, south, east, north.",
+                        "required": false,
+                        "schema": {
+                            "maxItems": 4,
+                            "minItems": 4,
+                            "type": "array",
+                            "items": {
+                                "type": "number",
+                                "format": "double"
+                            }
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of project groups.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "ProjectGroupListResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProjectGroupList"
+                                    },
+                                    "description": "List of project groups"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            },
+            "post": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Creates an project group in the TDEI system ",
+                "description": "Creates an project group in the TDEI system.  Returns the id for the newly created project group.",
+                "operationId": "createProjectGroup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectGroup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the id for the newly created project group.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            },
+            "put": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Updates an project group in the TDEI system ",
+                "description": "Updates an project group in the TDEI system.  Returns success if updated.",
+                "operationId": "updateProjectGroup",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ProjectGroup"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Project group update successful."
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/project-group/{projectGroupId}/users": {
+            "get": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Gets the project group users in the TDEI system ",
+                "description": "Gets the project group users in the TDEI system.",
+                "operationId": "getProjectGroupUsers",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "Project group id for which users to be fetched",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Search by project group name.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the list of project group users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "ProjectGroupUserResponse",
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ProjectGroupUser"
+                                    },
+                                    "description": "List of project group users"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/project-group/{projectGroupId}/active/{status}": {
+            "delete": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Activates/Deactives the project group.",
+                "description": "Activates/Deactives the project group.",
+                "operationId": "deleteProjectGroup",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "projectGroupId of the project group to be Activated/Deactivated.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "status",
+                        "in": "path",
+                        "description": "Boolean flag to Activate/Deactivate project group.",
+                        "required": true,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
+        }
+    },
+    "components": {
+        "schemas": {
+            "Token": {
+                "type": "object",
+                "properties": {
+                    "access_token": {
+                        "type": "string"
+                    },
+                    "expires_in": {
+                        "type": "integer"
+                    },
+                    "refresh_expires_in": {
+                        "type": "integer"
+                    },
+                    "refresh_token": {
+                        "type": "string"
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Login": {
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string"
+                    },
+                    "password": {
+                        "type": "string"
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "ProjectGroupRoles": {
+                "type": "object",
+                "properties": {
+                    "tdei_project_group_id": {
+                        "type": "string"
+                    },
+                    "project_group_name": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "List of roles associated with project group.",
+                        "items": {
+                            "type": "string",
+                            "description": "Role associated with project group."
+                        }
+                    }
+                },
+                "description": "User associated project groups and roles."
+            },
+            "User": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "User Id name of the user."
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email address of the user for communication."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user for communication."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Register": {
+                "required": [
+                    "email"
+                ],
+                "type": "object",
+                "properties": {
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "format": "email",
+                        "description": "Email address of the user for communication."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user for communication."
+                    },
+                    "password": {
+                        "type": "string",
+                        "description": "Credential for the user login."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Roles": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Role name."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Role description."
+                    }
+                },
+                "description": "Describes a user registration details."
+            },
+            "Service": {
+                "required": [
+                    "tdei_project_group_id",
+                    "service_name",
+                    "service_type"
+                ],
+                "type": "object",
+                "properties": {
+                    "tdei_service_id": {
+                        "type": "string",
+                        "description": "Service Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "tdei_project_group_id": {
+                        "type": "string",
+                        "description": "Project group id of the service."
+                    },
+                    "service_name": {
+                        "type": "string",
+                        "description": "Name of the service."
+                    },
+                    "service_type": {
+                        "type": "string",
+                        "description": "Service type",
+                        "default": "flex",
+                        "enum": [
+                            "flex",
+                            "pathways",
+                            "osw"
+                        ]
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes a Service."
+            },
+            "ServiceUpdate": {
+                "required": [
+                    "tdei_service_id",
+                    "service_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "tdei_service_id": {
+                        "type": "string",
+                        "description": "Service Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "service_name": {
+                        "type": "string",
+                        "description": "Name of the service."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes a Service update model."
+            },
+            "Response": {
+                "type": "object",
+                "properties": {
+                    "data": {
+                        "type": "string",
+                        "description": "Holds the response data"
+                    }
+                },
+                "description": "Holds the response data"
+            },
+            "PointOfContact": {
+                "required": [
+                    "poc_user_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "tdei_project_group_id": {
+                        "type": "string",
+                        "description": "Project group id to which point of contact to be associated."
+                    },
+                    "poc_user_name": {
+                        "type": "string",
+                        "description": "Point of contact username. Username represents user uniquely in the TDEI system. User should be already registered in the TDEI system using [POST] /user API."
+                    }
+                },
+                "description": "Describes a point of contact details."
+            },
+            "RoleDetails": {
+                "required": [
+                    "tdei_project_group_id",
+                    "roles",
+                    "user_name"
+                ],
+                "type": "object",
+                "properties": {
+                    "tdei_project_group_id": {
+                        "type": "string",
+                        "description": "Project group id to which user to be associated."
+                    },
+                    "user_name": {
+                        "type": "string",
+                        "description": "Username represents user uniquely in the TDEI system.  User should be already registered in the TDEI system using [POST] /user API."
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "List of roles to be assigned to the user.",
+                        "items": {
+                            "type": "string",
+                            "description": "List of roles to be assigned to the user."
+                        }
+                    }
+                },
+                "description": "Describes a user permissions."
+            },
+            "UserProfile": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "email": {
+                        "type": "string",
+                        "description": "Email of the user."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the user."
+                    },
+                    "apiKey": {
+                        "type": "string",
+                        "description": "Api key of the user."
+                    }
+                },
+                "description": "Describes a gtfs pathways station."
+            },
+            "ProjectGroup": {
+                "required": [
+                    "email",
+                    "project_group_name",
+                    "address"
+                ],
+                "type": "object",
+                "properties": {
+                    "tdei_project_group_id": {
+                        "type": "string",
+                        "description": "Project group Id uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "project_group_name": {
+                        "type": "string",
+                        "description": "Name of the project group."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the project group for communication."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Url of the transit project group."
+                    },
+                    "address": {
+                        "type": "string",
+                        "description": "Address of the transit project group."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    }
+                },
+                "description": "Describes an Project Group."
+            },
+            "ProjectGroupList": {
+                "type": "object",
+                "properties": {
+                    "tdei_project_group_id": {
+                        "type": "string",
+                        "description": "ProjectGroupId uniquely represented in the TDEI system. System generated.",
+                        "default": "0"
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Name of the project group."
+                    },
+                    "phone": {
+                        "type": "string",
+                        "description": "Phone of the project group for communication."
+                    },
+                    "url": {
+                        "type": "string",
+                        "description": "Url of the transit project group."
+                    },
+                    "address": {
+                        "type": "string",
+                        "description": "Address of the transit project group."
+                    },
+                    "polygon": {
+                        "$ref": "#/components/schemas/Polygon"
+                    },
+                    "poc": {
+                        "type": "array",
+                        "description": "Project group POC details",
+                        "items": {
+                            "$ref": "#/components/schemas/POC",
+                            "description": "POC details"
+                        }
+                    }
+                },
+                "description": "Describes an Project group."
+            },
+            "POC": {
+                "type": "object",
+                "properties": {
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "first_name",
+                    "last_name",
+                    "username",
+                    "email"
+                ]
+            },
+            "Polygon": {
+                "title": "GeoJSON FeatureCollection",
+                "type": "object",
+                "required": [
+                    "type",
+                    "features"
+                ],
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "FeatureCollection"
+                        ]
+                    },
+                    "features": {
+                        "type": "array",
+                        "items": {
+                            "title": "GeoJSON Feature",
+                            "type": "object",
+                            "required": [
+                                "type",
+                                "properties",
+                                "geometry"
+                            ],
+                            "properties": {
+                                "type": {
+                                    "type": "string",
+                                    "enum": [
+                                        "Feature"
+                                    ]
+                                },
+                                "id": {
+                                    "oneOf": [
+                                        {
+                                            "type": "number"
+                                        },
+                                        {
+                                            "type": "string"
+                                        }
+                                    ]
+                                },
+                                "properties": {
+                                    "type": "object"
+                                },
+                                "geometry": {
+                                    "title": "GeoJSON Polygon",
+                                    "type": "object",
+                                    "required": [
+                                        "type",
+                                        "coordinates"
+                                    ],
+                                    "properties": {
+                                        "type": {
+                                            "type": "string",
+                                            "enum": [
+                                                "Polygon"
+                                            ]
+                                        },
+                                        "coordinates": {
+                                            "type": "array",
+                                            "items": {
+                                                "type": "array",
+                                                "minItems": 4,
+                                                "items": {
+                                                    "type": "array",
+                                                    "minItems": 2,
+                                                    "maxItems": 2,
+                                                    "items": {
+                                                        "type": "number",
+                                                        "format": "double"
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            },
+            "ProjectGroupUser": {
+                "type": "object",
+                "properties": {
+                    "user_id": {
+                        "type": "string"
+                    },
+                    "first_name": {
+                        "type": "string"
+                    },
+                    "last_name": {
+                        "type": "string"
+                    },
+                    "email": {
+                        "type": "string"
+                    },
+                    "username": {
+                        "type": "string"
+                    },
+                    "phone": {
+                        "type": "string"
+                    },
+                    "roles": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "required": [
+                    "user_id",
+                    "first_name",
+                    "last_name",
+                    "email",
+                    "username",
+                    "phone",
+                    "roles"
+                ]
+            }
+        },
+        "securitySchemes": {
+            "AuthorizationToken": {
+                "type": "http",
+                "scheme": "bearer"
+            }
+        }
+    }
+}

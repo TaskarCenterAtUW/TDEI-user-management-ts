@@ -4,9 +4,11 @@ import { environment } from '../environment/environment';
 import UniqueKeyDbException, { ForeignKeyDbException } from '../exceptions/db/database-exceptions';
 
 class PostgresDb {
-    private pool: Pool;
+    private pool: Pool = new Pool();
 
-    constructor() {
+    constructor() { }
+
+    initializaDatabse() {
         console.info("Initializing database !");
         this.pool = new Pool({
             database: environment.database.database,
@@ -22,7 +24,6 @@ class PostgresDb {
         }).on('connect', () => {
             console.log("Database initialized successfully !");
         });
-
     }
 
     /**
@@ -58,16 +59,6 @@ class PostgresDb {
         } finally {
             client.release();
         }
-    }
-
-    /**
-     * Create a client using one of the pooled connections
-     *
-     * @return client
-     */
-    private async connect(): Promise<PoolClient> {
-        const client = await this.pool.connect();
-        return client;
     }
 }
 

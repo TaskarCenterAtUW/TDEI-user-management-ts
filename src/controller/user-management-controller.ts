@@ -1,17 +1,16 @@
 import express, { NextFunction, Request } from "express";
 import validationMiddleware from "../middleware/dto-validation-middleware";
-import { OrganizationDto } from "../model/dto/organization-dto";
 import { RolesReqDto } from "../model/dto/roles-req-dto";
-import { PocRequestDto } from "../model/dto/poc-req";
 import { RegisterUserDto } from "../model/dto/register-user-dto";
-import { ServiceDto } from "../model/dto/service-dto";
-import { StationDto } from "../model/dto/station-dto";
-import { Ok } from "../model/http/http-responses";
-import userManagementService from "../service/user-management-service";
-import { IController } from "./interface/IController";
+import { BadRequest, Ok } from "../model/http/http-responses";
+import userManagementServiceInstance from "../service/user-management-service";
+import { IController } from "./interface/controller-interface";
 import authorizationMiddleware from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import { LoginDto } from "../model/dto/login-dto";
+import HttpException from "../exceptions/http/http-base-exception";
+import { Utility } from "../utility/utility";
+import jwt_decode from 'jwt-decode';
 
 class UserManagementController implements IController {
     public path = '';
@@ -23,149 +22,127 @@ class UserManagementController implements IController {
 
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
-        this.router.post(`${this.path}/api/v1/station`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(StationDto), this.createStation);
-        this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
-        this.router.post(`${this.path}/api/v1/organization`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(OrganizationDto), this.createOrganization);
-        this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.assignPermissions);
-        this.router.post(`${this.path}/api/v1/poc`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(PocRequestDto), this.assignPOC);
+        this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
+        this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
-        this.router.post(`${this.path}/api/v1/login`, validationMiddleware(LoginDto), this.login);
+        this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([], false, true), this.projectGroupRoles);
+        this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
+        this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
+        this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
+    }
+
+    public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
+        if (request.headers.refresh_token == undefined || request.headers.refresh_token == "")
+            BadRequest(response);
+
+        let token = request.headers.refresh_token?.toString();
+
+        return userManagementServiceInstance.refreshToken(token ?? "").then((token) => {
+            Ok(response, token)
+        }).catch((error: Error) => {
+            let errorMessage = "Error refreshing the user token";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public getUserProfile = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+
+            let user_name = request.query.user_name;
+            if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
+
+            return userManagementServiceInstance.getUserProfile(user_name as string).then((result) => {
+                Ok(response, result);
+            }).catch((error: any) => {
+                let errorMessage = "Error fetching the user profile";
+                Utility.handleError(response, next, error, errorMessage);
+            });
+        } catch (error) {
+            let errorMessage = "Error fetching the user profile";
+            Utility.handleError(response, next, error, errorMessage);
+        }
+    }
+
+    public projectGroupRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            let authToken = Utility.extractToken(request);
+            var decoded: any = authToken != null ? jwt_decode(authToken) : undefined;
+
+            let userId = request.params.userId;
+            if (userId == undefined || userId == null) throw new HttpException(400, "UserId missing");
+
+            if (decoded && decoded.sub != userId) throw new HttpException(403, "Not authorized.");
+            let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
+            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+
+            return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+                Ok(response, result);
+            }).catch((error: any) => {
+                let errorMessage = "Error fetching the user project group & roles";
+                Utility.handleError(response, next, error, errorMessage);
+            });
+        } catch (error) {
+            let errorMessage = "Error fetching the user project group & roles";
+            Utility.handleError(response, next, error, errorMessage);
+        }
     }
 
     public login = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-
-            let loginBody = new LoginDto(request.body);
-            userManagementService.login(loginBody).then((token) => {
-                Ok(response, { data: token });
-            }).catch((error: any) => {
-                console.error('Error authenticating the user');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
+        let loginBody = LoginDto.from(request.body);
+        return userManagementServiceInstance.login(loginBody).then((token) => {
+            Ok(response, token)
+        }).catch((error: any) => {
+            let errorMessage = "Error authenticating the user";
+            Utility.handleError(response, next, error, errorMessage);
+        });
     }
 
     public getRoles = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
+        return userManagementServiceInstance.getRoles().then((roles) => {
+            Ok(response, { data: roles });
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
 
-            //Call service to register the user
-            userManagementService.getRoles().then((roles) => {
-                Ok(response, { data: roles });
-            }).catch((error: any) => {
-                console.error('Error fetching the roles');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
     }
 
     public registerUser = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let registerUserBody = new RegisterUserDto(request.body);
-            //Call service to register the user
-            userManagementService.registerUser(registerUserBody).catch((error: any) => {
-                console.error('Error registering the user');
-                console.log(error);
-                next(error);
-            }).then((user) => {
-                Ok(response, { data: user });
-            });
-        } catch (error) {
-            next(error);
-        }
+        //Transform the body to DTO
+        let registerUserBody = new RegisterUserDto(request.body);
+        //Call service to register the user
+        return userManagementServiceInstance.registerUser(registerUserBody).catch((error: any) => {
+            let errorMessage = "Error registering the user";
+            Utility.handleError(response, next, error, errorMessage);
+        }).then((user) => {
+            Ok(response, { data: user });
+        });
+
     }
 
-    public createStation = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let station = new StationDto(request.body);
-            //Call service to register the user
-            userManagementService.createStation(station).then((user) => {
-                Ok(response, { data: user });
-            }).catch((error: any) => {
-                console.error('Error creating the station');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public createService = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let service = new ServiceDto(request.body);
-            //Call service to register the user
-            userManagementService.createService(service)
-                .then((service) => {
-                    Ok(response, { data: service });
-                }).catch((error: any) => {
-                    console.error('Error creating the service');
-                    console.error(error);
-                    next(error);
-                });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public createOrganization = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Model validation happens at the middleware.
-            //Transform the body to DTO
-            let organization = new OrganizationDto(request.body);
-            //Call service to register the user
-            userManagementService.createOrganization(organization).then((user) => {
-                Ok(response, { data: user });
-            }).catch((error: any) => {
-                console.error('Error creating the organization');
-                console.error(error);
-                next(error);
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public assignPOC = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let pocReqObj = new PocRequestDto(request.body);
-            //Call service to register the user
-            userManagementService.assignPocToOrg(pocReqObj).catch((error: any) => {
-                console.error('Error assigning the POC to the Org');
-                console.error(error);
-                next(error);
-            }).then((user) => {
-                Ok(response, { data: user });
-            });
-        } catch (error) {
-            next(error);
-        }
-    }
-
-    public assignPermissions = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            //Transform the body to DTO
-            let permissonObj = new RolesReqDto(request.body);
-            //Call service to register the user
-            userManagementService.assignUserPermission(permissonObj, request.userId).catch((error: any) => {
-                console.error('Error assigning the permission to the user');
-                console.error(error);
-                next(error);
+    public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementServiceInstance.updatePermissions(permissonObj, request.userId)
+            .catch((error: any) => {
+                let errorMessage = "Error assigning the permissions to the user";
+                Utility.handleError(response, next, error, errorMessage);
             }).then((flag) => {
                 Ok(response, { data: "Successful!" });
             });
-        } catch (error) {
-            next(error);
-        }
+
+    }
+
+    public revokePermissions = async (request: Request, response: express.Response, next: NextFunction) => {
+        //Transform the body to DTO
+        let permissonObj = new RolesReqDto(request.body);
+        return userManagementServiceInstance.revokeUserPermissions(permissonObj, request.userId).catch((error: any) => {
+            let errorMessage = 'Error revoking the permissions of the user';
+            Utility.handleError(response, next, error, errorMessage);
+        }).then((flag) => {
+            Ok(response, { data: "Successful!" });
+        });
+
     }
 }
 
