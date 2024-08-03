@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional } from "class-validator";
 import { FeatureCollection } from "geojson";
 import { Prop } from "nodets-ms-core/lib/models";
 import { QueryConfig } from "pg";
@@ -16,6 +16,7 @@ export class ServiceDto extends BaseDto {
     service_name!: string;
     @IsNotEmpty()
     @Prop("service_type")
+    @IsIn(['flex', 'pathways', 'osw'])
     service_type!: string;
     @IsOptional()
     @IsValidPolygon()

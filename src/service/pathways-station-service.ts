@@ -8,6 +8,9 @@ import { StationQueryParams } from "../model/params/station-get-query-params";
 import { StationUpdateDto } from "../model/dto/station-update-dto";
 import { Geometry, Feature } from "geojson";
 
+/*
+ * @deprecated This service is deprecated and will be removed in future versions.
+*/
 class PathwaysStationService implements IPathwaysStationService {
 
     async setStationStatus(stationId: string, status: boolean): Promise<boolean> {
