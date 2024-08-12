@@ -15,6 +15,7 @@ import { adminRestrictedRoles } from "../constants/admin-restricted-role-constan
 import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
+import { da } from "date-fns/locale";
 
 
 export class UserManagementService implements IUserManagement {
@@ -33,11 +34,13 @@ export class UserManagementService implements IUserManagement {
             const data = await result.json();
 
             if (result.status != undefined && result.status != 200)
-                throw new Error(data);
+                throw new HttpException(result.status, data);
 
             return data;
         } catch (error: any) {
             console.error(error);
+            if (error instanceof HttpException)
+                throw error;
             throw new Error("Error resetting the user credentials");
         }
     }

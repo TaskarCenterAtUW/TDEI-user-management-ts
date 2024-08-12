@@ -11,7 +11,7 @@ export interface IUserManagement {
      * Resets the user credentials
      * @param ResetCredentialsDto user credentials
      */
-    resetCredentials(ResetCredentialsDto: ResetCredentialsDto): unknown;
+    resetCredentials(ResetCredentialsDto: ResetCredentialsDto): Promise<boolean>;
     /**
      * Reissues the new access token in the case of valid refresh token input
      * @param refreshToken refresh token
