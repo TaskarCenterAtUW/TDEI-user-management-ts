@@ -9,13 +9,16 @@ import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-
 import { ProjectGroupUserDto } from "../model/dto/project-group-user-dto";
 import { ProjectGroupListResponse, PocDetails } from "../model/dto/poc-details-dto";
 import { Geometry, Feature } from "geojson";
+import format from "pg-format";
+import { DEFAULT_PROJECT_GROUP } from "../constants/role-constants";
 
 
 class ProjectGroupService implements IProjectGroupService {
 
     async setProjectGroupStatus(projectGroupId: string, status: boolean): Promise<boolean> {
+        //Default project group should not be deactivated
         const query = {
-            text: `UPDATE project_group set is_active = $1 WHERE project_group_id = $2`,
+            text: format(`UPDATE project_group set is_active = $1 WHERE project_group_id = $2  and name != %L`, DEFAULT_PROJECT_GROUP),
             values: [status, projectGroupId],
         }
         return await dbClient.query(query)
@@ -42,7 +45,11 @@ class ProjectGroupService implements IProjectGroupService {
     }
 
     async updateProjectGroup(projectgroup: ProjectGroupDto): Promise<boolean> {
-
+        //Check if the project group is default, if yes then do not allow to update the project group name
+        const defaultProjectGroupId = await this.getDefaultProjectGroupId();
+        if (defaultProjectGroupId == projectgroup.tdei_project_group_id) {
+            projectgroup.project_group_name = DEFAULT_PROJECT_GROUP;
+        }
         return await dbClient.query(projectgroup.getUpdateQuery())
             .then(res => {
                 return true;
@@ -53,6 +60,20 @@ class ProjectGroupService implements IProjectGroupService {
                 }
                 throw e;
             });
+    }
+
+    private async getDefaultProjectGroupId(): Promise<string> {
+        const query = {
+            text: format(`Select project_group_id from project_group where name = %L`, DEFAULT_PROJECT_GROUP),
+            values: [],
+        }
+        var result = await dbClient.query(query);
+        if (result.rows.length > 0) {
+            return result.rows[0].project_group_id;
+        }
+        else {
+            return "";
+        }
     }
 
     async getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListResponse[]> {

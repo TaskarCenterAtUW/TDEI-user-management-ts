@@ -4,8 +4,14 @@ import { UserProfile } from "../../model/dto/user-profile-dto";
 import { RoleDto } from "../../model/dto/roles-dto";
 import { LoginDto } from "../../model/dto/login-dto";
 import { ProjectGroupRoleDto } from "../../model/dto/project-group-role-dto";
+import { ResetCredentialsDto } from "../../model/dto/reset-credentials-dto";
 
 export interface IUserManagement {
+    /**
+     * Resets the user credentials
+     * @param ResetCredentialsDto user credentials
+     */
+    resetCredentials(ResetCredentialsDto: ResetCredentialsDto): unknown;
     /**
      * Reissues the new access token in the case of valid refresh token input
      * @param refreshToken refresh token

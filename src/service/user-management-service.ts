@@ -10,13 +10,37 @@ import { UserProfile } from "../model/dto/user-profile-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { RoleDto } from "../model/dto/roles-dto";
 import { LoginDto } from "../model/dto/login-dto";
-import { Role } from "../constants/role-constants";
+import { DEFAULT_PROJECT_GROUP, Role } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
 import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
+import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 
 
 export class UserManagementService implements IUserManagement {
+    /**
+     * Resets the user credentials
+     * @param ResetCredentialsDto user credentials
+     */
+    async resetCredentials(resetCredentialsDto: ResetCredentialsDto): Promise<boolean> {
+        try {
+            const result = await fetch(environment.resetCredentialsUrl as string, {
+                method: 'post',
+                body: JSON.stringify(resetCredentialsDto),
+                headers: { 'Content-Type': 'application/json' }
+            });
+
+            const data = await result.json();
+
+            if (result.status != undefined && result.status != 200)
+                throw new Error(data);
+
+            return data;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error("Error resetting the user credentials");
+        }
+    }
     /**
     * Reissues the new access token in the case of valid refresh token input
     * @param refreshToken refresh token
@@ -85,6 +109,14 @@ export class UserManagementService implements IUserManagement {
 
             const data = await result.json();
             userProfile = new UserProfile(data);
+
+            //Assign user with default role and permissions
+            let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
+            SELECT %L, project_group_id, role_id
+            FROM roles, project_group
+            WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
+            await dbClient.query(queryStr);
+
         } catch (error: any) {
             console.error(error);
             if (error instanceof HttpException)
@@ -101,7 +133,7 @@ export class UserManagementService implements IUserManagement {
         const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
-                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString(), Role.TDEI_USER.toString()].includes(f.name)).map(x => {
+                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString(), Role.TDEI_MEMBER.toString()].includes(f.name)).map(x => {
                     return new RoleDto(x);
                 });
                 return roleList;
@@ -223,6 +255,12 @@ export class UserManagementService implements IUserManagement {
                 throw new HttpException(400, "Admin restricted roles cannot be assigned");
         }
 
+        //System roles cannot be revoked, so add the default role if not exists
+        if (rolesReq.roles && rolesReq.roles.length > 0 && !rolesReq.roles.includes(Role.TDEI_MEMBER))
+            rolesReq.roles.push(Role.TDEI_MEMBER);
+        else if (rolesReq.roles.length == 0)
+            rolesReq.roles.push(Role.TDEI_MEMBER);
+
         //Get the role ids for role name provided
         let rolemap = await this.getRolesByNames(rolesReq.roles);
 
@@ -294,6 +332,9 @@ export class UserManagementService implements IUserManagement {
 
 
         rolesReq.roles.forEach(async (role) => {
+            //System roles cannot be revoked
+            if (role == Role.TDEI_MEMBER)
+                return;
             const query = {
                 text: 'DELETE FROM user_roles WHERE user_id = $1 AND project_group_id = $2 AND role_id = $3 ',
                 values: [userId, rolesReq.tdei_project_group_id, rolemap.get(role)],
