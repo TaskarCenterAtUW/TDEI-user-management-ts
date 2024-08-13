@@ -10,6 +10,7 @@ import { RolesReqDto } from "../../src/model/dto/roles-req-dto";
 import { ForeignKeyDbException } from "../../src/exceptions/db/database-exceptions";
 import HttpException from "../../src/exceptions/http/http-base-exception";
 import { ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
+import { ResetCredentialsDto } from "../../src/model/dto/reset-credentials-dto";
 
 // group test using describe
 describe("User Management Service Test", () => {
@@ -106,10 +107,14 @@ describe("User Management Service Test", () => {
                         apiKey: "apiKey"
                     }),
                 }));
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{});
                 //Act
                 let result = await userManagementServiceInstance.registerUser(newuser);
                 //Assert
                 expect(result.apiKey).toBe("apiKey");
+                expect(getDbSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When user already exists with same email, Expect to throw error", async () => {
@@ -785,6 +790,57 @@ describe("User Management Service Test", () => {
                 expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
             });
 
+        });
+    });
+
+    describe("Reset Credentials", () => {
+        describe("Functional", () => {
+            test("When requested with valid inputs, Expect to return boolean true response on success", async () => {
+                //Arrange
+                let resetdto = new ResetCredentialsDto({
+                    username: "firstname@tdei.com",
+                    password: "password"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(true),
+                }));
+
+                //Act
+                let result = await userManagementServiceInstance.resetCredentials(resetdto);
+                //Assert
+                expect(result).toBeTruthy();
+            });
+
+            test("When username not exists, Expect to throw error", async () => {
+                //Arrange
+                let resetdto = new ResetCredentialsDto({
+                    username: "firstname@tdei.com",
+                    password: "password"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 404,
+                    json: () => Promise.resolve("User does not exists"),
+                }));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.resetCredentials(resetdto)).rejects.toThrow(Error);
+            });
+
+            test("When password policy not satisfied, Expect to throw error", async () => {
+                //Arrange
+                let resetdto = new ResetCredentialsDto({
+                    username: "firstname@tdei.com",
+                    password: "test"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 400,
+                    json: () => Promise.resolve("Password policy not met"),
+                }));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.resetCredentials(resetdto)).rejects.toThrow(Error);
+            });
         });
     });
 });

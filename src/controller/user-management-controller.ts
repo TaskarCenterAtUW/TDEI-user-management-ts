@@ -11,6 +11,7 @@ import { LoginDto } from "../model/dto/login-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { Utility } from "../utility/utility";
 import jwt_decode from 'jwt-decode';
+import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 
 class UserManagementController implements IController {
     public path = '';
@@ -29,6 +30,32 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
+        this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), this.resetCredentials);
+    }
+
+    public resetCredentials = async (request: Request, response: express.Response, next: NextFunction) => {
+        try {
+            let reqBody = ResetCredentialsDto.from(request.body);
+            let authToken = Utility.extractToken(request);
+            var decoded: any = authToken != null ? jwt_decode(authToken) : undefined;
+            var isTdeiAdmin = false;
+
+            //Check if the user is TDEI Admin, "tdei-admin" is defined in Keycloak roles
+            if (decoded && decoded.realm_access.roles.includes("tdei-admin")) isTdeiAdmin = true;
+
+            //Check if the user is trying to reset the credentials of another user
+            if (!isTdeiAdmin && decoded && reqBody && decoded.preferred_username != reqBody.username) throw new HttpException(403, "Not authorized to reset the credentials");
+
+
+            let result = await userManagementServiceInstance.resetCredentials(reqBody);
+
+            return Ok(response, result);
+        }
+        catch (error) {
+            let errorMessage = "Error resetting the user credentials";
+            Utility.handleError(response, next, error, errorMessage);
+        }
+
     }
 
     public refreshToken = async (request: Request, response: express.Response, next: NextFunction) => {
