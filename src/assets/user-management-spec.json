@@ -1532,14 +1532,13 @@
             "ResetCredentialModel": {
                 "required": [
                     "password",
-                    "userId"
+                    "username"
                 ],
                 "type": "object",
                 "properties": {
-                    "userId": {
-                        "pattern": "^[a-f0-9]{8}(-[a-f0-9]{4}){3}-[a-f0-9]{12}$",
+                    "username": {
                         "type": "string",
-                        "description": "User Id."
+                        "description": "User name."
                     },
                     "password": {
                         "pattern": "^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\\-__+.]){1,}).{8,}$",
