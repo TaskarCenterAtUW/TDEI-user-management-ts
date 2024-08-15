@@ -5,4 +5,4 @@ export enum Role {
     TDEI_MEMBER = "member",
 }
 
-export const DEFAULT_PROJECT_GROUP = "Default";
+export const DEFAULT_PROJECT_GROUP = "TDEI Default";
