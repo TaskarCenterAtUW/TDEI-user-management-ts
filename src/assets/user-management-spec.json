@@ -1002,6 +1002,50 @@
                     }
                 }
             }
+        },
+        "/api/v1/reset-credentials": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Resets the user credential",
+                "description": "Resets the user credential.  Returns the boolean flag if the password is reset successfully.",
+                "operationId": "resetCredentials",
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ResetCredentialModel"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the boolean flag if the password is reset successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Input validation issue"
+                    },
+                    "403": {
+                        "description": "Not authorized to reset the password"
+                    },
+                    "404": {
+                        "description": "User not found."
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
         }
     },
     "components": {
@@ -1484,6 +1528,26 @@
                     "phone",
                     "roles"
                 ]
+            },
+            "ResetCredentialModel": {
+                "required": [
+                    "password",
+                    "username"
+                ],
+                "type": "object",
+                "properties": {
+                    "username": {
+                        "type": "string",
+                        "description": "User name."
+                    },
+                    "password": {
+                        "pattern": "^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\\-__+.]){1,}).{8,}$",
+                        "type": "string",
+                        "description": "password",
+                        "example": "Password@123"
+                    }
+                },
+                "description": "Describes a reset credential model."
             }
         },
         "securitySchemes": {
