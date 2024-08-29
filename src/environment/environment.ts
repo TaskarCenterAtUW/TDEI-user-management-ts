@@ -24,6 +24,7 @@ export const environment = {
     permissionUrl: `${process.env.AUTH_HOST}/api/v1/hasPermission`,
     authenticateUrl: `${process.env.AUTH_HOST}/api/v1/authenticate`,
     validateAccessTokenUrl: `${process.env.AUTH_HOST}/api/v1/validateAccessToken`,
-    refreshUrl: `${process.env.AUTH_HOST}/api/v1/refreshToken`
+    refreshUrl: `${process.env.AUTH_HOST}/api/v1/refreshToken`,
+    resetCredentialsUrl: `${process.env.AUTH_HOST}/api/v1/resetCredentials`,
 
 }

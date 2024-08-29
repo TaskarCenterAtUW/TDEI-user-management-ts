@@ -88,16 +88,28 @@ describe("Project Group Service Test", () => {
                     url: "test",
                     polygon: TestHelper.getPolygon()
                 });
+
+                let response2 = <QueryResult>{
+                    rows: [
+                        { project_group_id: "default_project_group_id" }
+                    ]
+                }
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2); // to get default project group id
+
                 let response = <QueryResult>{
                     rowCount: 1
                 }
                 const updateStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
+
                 //Act
                 //Assert
                 expect(await projectGroupService.updateProjectGroup(input)).toBe(true);
-                expect(updateStationSpy).toHaveBeenCalledTimes(1);
+                expect(updateStationSpy).toHaveBeenCalled();
+                expect(getDbSpy).toHaveBeenCalled();
             });
 
             test("When unique key exception occurs, Expect to throw DuplicateException", async () => {
@@ -110,13 +122,24 @@ describe("Project Group Service Test", () => {
                     polygon: undefined
                 });
 
+                let response2 = <QueryResult>{
+                    rows: [
+                        { project_group_id: "default_project_group_id" }
+                    ]
+                }
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2); // to get default project group id
+
                 const updateStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new UniqueKeyDbException("error"));
+
                 //Act
                 //Assert
                 await expect(projectGroupService.updateProjectGroup(input)).rejects.toThrow(DuplicateException);
-                expect(updateStationSpy).toHaveBeenCalledTimes(1);
+                expect(updateStationSpy).toHaveBeenCalled();
+                expect(getDbSpy).toHaveBeenCalled();
             });
 
             test("When database exception occurs, Expect to throw error", async () => {

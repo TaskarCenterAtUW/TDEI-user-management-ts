@@ -462,4 +462,52 @@ describe("User Management Controller Test", () => {
             });
         });
     });
+
+    describe("Reset Credentials", () => {
+        describe("Functional", () => {
+            test("When requested with valid input, Expect to return true response", async () => {
+                //Arrange
+                let req = getMockReq({ username: "firstname@tdei.com", password: "lastname" });
+                const { res, next } = getMockRes();
+
+                const spy = jest
+                    .spyOn(userManagementService, "resetCredentials")
+                    .mockResolvedValueOnce(Promise.resolve(true));
+                //Act
+                await userManagementController.resetCredentials(req, res, next);
+                //Assert
+                expect(spy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(true);
+            });
+
+            test("When username which does not exists, Expect to return HTTP status 404", async () => {
+                //Arrange
+                let req = getMockReq();
+                const { res, next } = getMockRes();
+                const spy = jest
+                    .spyOn(userManagementService, "resetCredentials")
+                    .mockRejectedValueOnce(new HttpException(404, "User not found"));
+                //Act
+                await userManagementController.resetCredentials(req, res, next);
+                //Assert
+                expect(spy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(404);
+            });
+
+            test("When password policy not satisfied, Expect to return HTTP status 400", async () => {
+                //Arrange
+                let req = getMockReq();
+                const { res, next } = getMockRes();
+                const spy = jest
+                    .spyOn(userManagementService, "resetCredentials")
+                    .mockRejectedValueOnce(new HttpException(400, "Password policy not satisfied"));
+                //Act
+                await userManagementController.resetCredentials(req, res, next);
+                //Assert
+                expect(spy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(400);
+            });
+        });
+    });
 });

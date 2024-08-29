@@ -1,5 +1,5 @@
 
-import express from "express";
+import express, { NextFunction, Request, Response } from "express";
 import cors from "cors";
 import bodyParser from "body-parser";
 import { IController } from "./controller/interface/controller-interface";
@@ -10,6 +10,7 @@ import { unhandledExceptionAndRejectionHandler } from "./middleware/unhandled-ex
 import swaggerUi from "swagger-ui-express";
 import dbClient from "./database/data-source";
 import swaggerDocument from "./assets/user-management-spec.json";
+import HttpException from "./exceptions/http/http-base-exception";
 // const swaggerDocument = require('./assets/user-management-spec.json');
 
 class App {
@@ -29,7 +30,16 @@ class App {
         this.initializeSwagger();
         dbClient.initializaDatabse();
         //Last middleware to be registered: error handler. 
-        this.app.use(errorHandler);
+        // this.app.use(errorHandler);
+        this.app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+            console.error(err);
+            if (err instanceof HttpException) {
+                res.status(err.status).send(err.message);
+            }
+            else {
+                res.status(500).send('Application error occured');
+            }
+        });
     }
 
     initializeSwagger() {
