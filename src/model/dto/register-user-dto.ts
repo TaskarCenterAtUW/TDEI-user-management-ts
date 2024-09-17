@@ -1,22 +1,27 @@
-import { IsEmail, IsNotEmpty, Matches } from "class-validator";
+import { IsEmail, IsNotEmpty, IsString, Length, Matches } from "class-validator";
 import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
 
 export class RegisterUserDto extends BaseDto {
     @Prop()
+    @Length(0, 255)
     firstName!: string;
     @Prop()
+    @Length(0, 255)
     lastName!: string;
     @IsNotEmpty()
     @IsEmail()
     @Prop()
+    @Length(0, 255)
     email!: string;
     @Prop()
+    @Length(0, 20)
     phone!: string;
     @IsNotEmpty()
-    @Matches('^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\-__+.]){1,}).{8,}$', "", {
-        message: `Password policy not satisfied. >8 characters length, atleast 1 letter in Upper Case, atleast 1 Special Character (!@#$&*()), atleast 1 numeral (0-9)
-`})
+    @IsString()
+    @Matches(/^(?=.*[A-Z])(?=.*\d)(?=.*[\W_]).{8,70}$/, {
+        message: 'Password must be 8-70 characters long, include at least one uppercase letter, one number, and one special character.',
+    })
     @Prop()
     password!: string;
 

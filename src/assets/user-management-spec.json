@@ -1541,7 +1541,7 @@
                         "description": "User name."
                     },
                     "password": {
-                        "pattern": "^(?=(.*[a-z]){1,})(?=(.*[A-Z]){1,})(?=(.*[0-9]){1,})(?=(.*[!@#$%^&*()\\-__+.]){1,}).{8,}$",
+                        "pattern": "/^(?=.*[A-Z])(?=.*\\d)(?=.*[\\W_]).{8,255}$",
                         "type": "string",
                         "description": "password",
                         "example": "Password@123"
