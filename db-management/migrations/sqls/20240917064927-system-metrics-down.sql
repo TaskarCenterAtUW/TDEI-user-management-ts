@@ -1,0 +1,1 @@
+DROP FUNCTION IF EXISTS tdei_fetch_dashboard_metrics();

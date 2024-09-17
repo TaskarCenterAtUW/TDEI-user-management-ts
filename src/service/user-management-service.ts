@@ -348,6 +348,22 @@ export class UserManagementService implements IUserManagement {
                 });
         });
     }
+
+    /**
+     * Fetches the system metrics
+     */
+    async getSystemMetrics(): Promise<any> {
+        try {
+            const query = {
+                text: 'SELECT * FROM tdei_fetch_dashboard_metrics()',
+            };
+            var result = await dbClient.query(query);
+            return result.rows[0].tdei_fetch_dashboard_metrics;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error("Error fetching the system metrics");
+        }
+    }
 }
 
 const userManagementServiceInstance: IUserManagement = new UserManagementService();
