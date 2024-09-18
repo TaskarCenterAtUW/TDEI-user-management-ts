@@ -510,4 +510,41 @@ describe("User Management Controller Test", () => {
             });
         });
     });
+
+    describe("getSystemMetrics", () => {
+        test("When requested, Expect to return system metrics", async () => {
+            // Arrange
+            const req = getMockReq();
+            const { res, next } = getMockRes();
+            const systemMetrics = { "totalUsers": 100 };
+            const getSystemMetricsSpy = jest
+                .spyOn(userManagementService, "getSystemMetrics")
+                .mockResolvedValueOnce(systemMetrics);
+
+            // Act
+            let resp = await userManagementController.getSystemMetrics(req, res, next);
+
+            // Assert
+            expect(getSystemMetricsSpy).toHaveBeenCalledTimes(1);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(systemMetrics);
+        });
+
+        test("When an error occurs, Expect to return HTTP status 500", async () => {
+            // Arrange
+            const req = getMockReq();
+            const { res, next } = getMockRes();
+            const errorMessage = "Error fetching the system metrics";
+            const getSystemMetricsSpy = jest
+                .spyOn(userManagementService, "getSystemMetrics")
+                .mockRejectedValueOnce(new Error(errorMessage));
+
+            // Act
+            await userManagementController.getSystemMetrics(req, res, next);
+
+            // Assert
+            expect(getSystemMetricsSpy).toHaveBeenCalledTimes(1);
+            expect(next).toHaveBeenCalledWith(new Error(errorMessage));
+        });
+    });
 });

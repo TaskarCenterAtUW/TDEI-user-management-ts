@@ -1046,6 +1046,42 @@
                     }
                 }
             }
+        },
+        "/api/v1/system-metrics": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the system metrics",
+                "description": "Gets the system metrics",
+                "operationId": "system-metrics",
+                "responses": {
+                    "200": {
+                        "description": "Successful response - Returns the system metrics.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "title": "SystemMetricsResponse",
+                                    "type": "object",
+                                    "$ref": "#/components/schemas/SystemMetrics",
+                                    "description": "Holds the response data"
+                                }
+                            }
+                        }
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
         }
     },
     "components": {
@@ -1169,6 +1205,45 @@
                     }
                 },
                 "description": "Describes a user registration details."
+            },
+            "SystemMetrics": {
+                "type": "object",
+                "properties": {
+                    "totalUsers": {
+                        "type": "number"
+                    },
+                    "totalServices": {
+                        "type": "number"
+                    },
+                    "totalProjectGroups": {
+                        "type": "number"
+                    },
+                    "servicesByType": {
+                        "type": "object",
+                        "properties": {
+                            "osw": {
+                                "type": "number"
+                            },
+                            "flex": {
+                                "type": "number"
+                            },
+                            "pathways": {
+                                "type": "number"
+                            }
+                        },
+                        "required": [
+                            "osw",
+                            "flex",
+                            "pathways"
+                        ]
+                    }
+                },
+                "required": [
+                    "totalUsers",
+                    "totalServices",
+                    "totalProjectGroups",
+                    "servicesByType"
+                ]
             },
             "Service": {
                 "required": [

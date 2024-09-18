@@ -7,6 +7,11 @@ import { ProjectGroupRoleDto } from "../../model/dto/project-group-role-dto";
 import { ResetCredentialsDto } from "../../model/dto/reset-credentials-dto";
 
 export interface IUserManagement {
+
+    /**
+     * Fetches the system metrics
+     */
+    getSystemMetrics(): Promise<any>;
     /**
      * Resets the user credentials
      * @param ResetCredentialsDto user credentials
