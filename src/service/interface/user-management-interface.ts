@@ -9,6 +9,10 @@ import { ResetCredentialsDto } from "../../model/dto/reset-credentials-dto";
 export interface IUserManagement {
 
     /**
+    * Fetches the data metrics
+    */
+    getDataMetrics(): Promise<any>;
+    /**
      * Fetches the system metrics
      */
     getSystemMetrics(): Promise<any>;

@@ -364,6 +364,22 @@ export class UserManagementService implements IUserManagement {
             throw new Error("Error fetching the system metrics");
         }
     }
+
+    /**
+    * Fetches the data metrics
+    */
+    async getDataMetrics(): Promise<any> {
+        try {
+            const query = {
+                text: 'SELECT * FROM content.tdei_fetch_data_metrics()',
+            };
+            var result = await dbClient.query(query);
+            return result.rows[0].tdei_fetch_data_metrics;
+        } catch (error: any) {
+            console.error(error);
+            throw new Error("Error fetching the data metrics");
+        }
+    }
 }
 
 const userManagementServiceInstance: IUserManagement = new UserManagementService();
