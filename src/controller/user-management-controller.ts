@@ -31,21 +31,6 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
         this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), this.resetCredentials);
-        this.router.get(`${this.path}/api/v1/system-metrics`, authorizationMiddleware([]), this.getSystemMetrics);
-    }
-
-    public getSystemMetrics = async (request: Request, response: express.Response, next: NextFunction) => {
-        try {
-            return userManagementServiceInstance.getSystemMetrics().then((result) => {
-                Ok(response, result);
-            }).catch((error: any) => {
-                let errorMessage = "Error fetching the system metrics";
-                Utility.handleError(response, next, error, errorMessage);
-            });
-        } catch (error) {
-            let errorMessage = "Error fetching the system metrics";
-            Utility.handleError(response, next, error, errorMessage);
-        }
     }
 
     public resetCredentials = async (request: Request, response: express.Response, next: NextFunction) => {
