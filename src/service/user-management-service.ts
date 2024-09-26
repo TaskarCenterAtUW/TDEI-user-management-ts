@@ -83,11 +83,16 @@ export class UserManagementService implements IUserManagement {
             const data = await result.json();
 
             if (result.status != undefined && result.status != 200)
-                throw new Error(data);
+                throw new HttpException(result.status, data);
 
             return data;
         } catch (error: any) {
-            console.error(error);
+            console.error("Error authenticating the user", error);
+            if (error instanceof HttpException) {
+                if (error.status == 403)
+                    throw error;
+                throw new UnAuthenticated();
+            }
             throw new UnAuthenticated();
         }
     }
