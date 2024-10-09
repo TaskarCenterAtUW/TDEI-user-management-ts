@@ -224,7 +224,7 @@ export class UserManagementService implements IUserManagement {
     async getUserProfile(userName: string): Promise<UserProfile> {
         //Fetch permissioned user profile from keycloak
         try {
-            let response = await fetch(`${environment.userProfileUrl as string}?userName=${userName}`)
+            let response = await fetch(`${environment.userProfileUrl as string}?userName=${encodeURIComponent(userName)}`)
             const data: any = await response.json();
             if (response.status != undefined && response.status != 200)
                 throw new Error();
