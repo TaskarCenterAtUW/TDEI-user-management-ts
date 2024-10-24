@@ -413,16 +413,16 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request."
-                    },
-                    "500": {
-                        "description": "Internal server error."
+                        "description": "Invalid request input parameters."
                     },
                     "401": {
-                        "description": "Unauthenticated request"
+                        "description": "Unauthenticated request. Check your access token or API-Key."
                     },
-                    "403": {
-                        "description": "Unauthorized request"
+                    "404": {
+                        "description": "tdei_project_group_id or tdei_service_id doesn't exist in the system."
+                    },
+                    "500": {
+                        "description": "An Internal server error occured."
                     }
                 },
                 "security": [
@@ -769,16 +769,16 @@
                         }
                     },
                     "400": {
-                        "description": "Invalid request."
-                    },
-                    "500": {
-                        "description": "Internal server error."
+                        "description": "Invalid request parameters."
                     },
                     "401": {
-                        "description": "Unauthenticated request"
+                        "description": "Unauthenticated request. Check your access token or API-key."
                     },
-                    "403": {
-                        "description": "Unauthorized request"
+                    "404": {
+                        "description": "tdei_project_group_id doesn't exist in the system."
+                    },
+                    "500": {
+                        "description": "An Internal server error occured."
                     }
                 },
                 "security": [

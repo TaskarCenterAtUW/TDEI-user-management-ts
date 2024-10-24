@@ -194,6 +194,10 @@ describe("Project Group Service Test", () => {
                     rows: [dbResult]
                 }
                 const getProjectGroupSpy = jest
+                    .spyOn(projectGroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(new ProjectGroupDto({}));
+
+                const projectGroupIdCheckSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
@@ -205,7 +209,8 @@ describe("Project Group Service Test", () => {
                     page_size: 10
                 }));
                 //Assert
-                expect(getProjectGroupSpy).toHaveBeenCalledTimes(1);
+                expect(projectGroupIdCheckSpy).toHaveBeenCalled();
+                expect(getProjectGroupSpy).toHaveBeenCalled();
                 expect(list[0]).toMatchObject(projectgroup);
             });
 

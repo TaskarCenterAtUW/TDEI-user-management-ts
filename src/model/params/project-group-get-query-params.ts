@@ -1,4 +1,4 @@
-import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional } from "class-validator";
+import { ArrayMaxSize, ArrayMinSize, IsArray, IsOptional, Length } from "class-validator";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 import { DynamicQueryObject, SqlORder } from "../../database/query-object";
 
@@ -8,13 +8,16 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsOptional()
     @Prop()
+    @Length(36, 36, {
+        message: 'tdei_project_group_id must be 36 characters long (UUID)',
+    })
     tdei_project_group_id: string | undefined;
     @IsOptional()
     @IsArray()
     @ArrayMinSize(4)
     @ArrayMaxSize(4)
     @Prop()
-    bbox: Array<number> = [];
+    bbox: Array<number> | undefined;
     @IsOptional()
     @Prop()
     page_no: number = 1;
@@ -55,7 +58,7 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
             queryObject.condition(` o.polygon && ST_MakeEnvelope($${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++},$${queryObject.paramCouter++}, 4326)`,
                 this.bbox);
         }
-        else if (this.bbox.length > 0 && this.bbox.length != 4) {
+        else if (this.bbox && this.bbox.length > 0 && this.bbox.length != 4) {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
         //Always pull active project group

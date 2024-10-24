@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsOptional } from "class-validator";
+import { IsNotEmpty, IsOptional, Length, MaxLength } from "class-validator";
 import { IsValidPolygon } from "../validators/polygon-validator";
 import { BaseDto } from "./base-dto";
 import { Prop } from "nodets-ms-core/lib/models";
@@ -7,16 +7,26 @@ import { FeatureCollection } from "geojson";
 
 export class ProjectGroupDto extends BaseDto {
     @Prop()
+    @Length(36, 36, {
+        message: 'tdei_project_group_id must be 36 characters long (UUID)',
+    })
+    @IsOptional()
     tdei_project_group_id: string = "0";
     @IsNotEmpty()
     @Prop()
+    @MaxLength(255)
     project_group_name!: string;
     @Prop()
+    @MaxLength(15)
+    @IsOptional()
     phone!: string;
     @Prop()
+    @MaxLength(255)
+    @IsOptional()
     url!: string;
     @IsNotEmpty()
     @Prop()
+    @MaxLength(255)
     address!: string;
     @IsOptional()
     @IsValidPolygon()
