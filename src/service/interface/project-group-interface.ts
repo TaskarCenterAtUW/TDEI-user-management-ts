@@ -10,4 +10,5 @@ export interface IProjectGroupService {
     updateProjectGroup(projectGroup: ProjectGroupDto): Promise<boolean>;
     getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListResponse[]>;
     setProjectGroupStatus(projectGroupId: string, status: boolean): Promise<boolean>;
+    getProjectGroupById(project_group_id: string): Promise<ProjectGroupDto>;
 }

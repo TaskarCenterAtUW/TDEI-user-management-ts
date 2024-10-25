@@ -1,4 +1,4 @@
-import { IsIn, IsNotEmpty, IsOptional } from "class-validator";
+import { IsIn, IsNotEmpty, IsOptional, Length, MaxLength } from "class-validator";
 import { FeatureCollection } from "geojson";
 import { Prop } from "nodets-ms-core/lib/models";
 import { QueryConfig } from "pg";
@@ -7,16 +7,23 @@ import { BaseDto } from "./base-dto";
 
 export class ServiceDto extends BaseDto {
     @Prop("tdei_service_id")
+    @Length(1, 36)
+    @IsOptional()
     tdei_service_id: string = "0";
     @IsNotEmpty()
     @Prop()
+    @Length(36, 36, {
+        message: 'tdei_project_group_id must be 36 characters long (UUID)',
+    })
     tdei_project_group_id!: string;
     @IsNotEmpty()
     @Prop("service_name")
+    @MaxLength(255)
     service_name!: string;
     @IsNotEmpty()
     @Prop("service_type")
     @IsIn(['flex', 'pathways', 'osw'])
+    @MaxLength(20)
     service_type!: string;
     @IsOptional()
     @IsValidPolygon()
