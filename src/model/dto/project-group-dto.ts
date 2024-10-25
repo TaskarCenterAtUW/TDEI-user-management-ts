@@ -11,7 +11,7 @@ export class ProjectGroupDto extends BaseDto {
         message: 'tdei_project_group_id must be 36 characters long (UUID)',
     })
     @IsOptional()
-    tdei_project_group_id: string = "0";
+    tdei_project_group_id: string | undefined;
     @IsNotEmpty()
     @Prop()
     @MaxLength(255)

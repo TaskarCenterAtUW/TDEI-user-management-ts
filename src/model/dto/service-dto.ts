@@ -7,9 +7,11 @@ import { BaseDto } from "./base-dto";
 
 export class ServiceDto extends BaseDto {
     @Prop("tdei_service_id")
-    @Length(1, 36)
+    @Length(36, 36, {
+        message: 'tdei_service_id must be 36 characters long (UUID)',
+    })
     @IsOptional()
-    tdei_service_id: string = "0";
+    tdei_service_id: string | undefined;
     @IsNotEmpty()
     @Prop()
     @Length(36, 36, {
