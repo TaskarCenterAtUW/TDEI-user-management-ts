@@ -7,6 +7,8 @@ import { QueryConfig } from "pg";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 import { Feature, Geometry } from "geojson";
+import projectgroupService from "./project-group-service";
+import HttpException from "../exceptions/http/http-base-exception";
 
 class FlexService implements IFlexService {
 
@@ -55,7 +57,32 @@ class FlexService implements IFlexService {
             });
     }
 
+    async getServiceById(project_group_id: string): Promise<ServiceDto> {
+        const query = {
+            text: "Select * from service where service_id = $1 limit 1",
+            values: [project_group_id],
+        }
+        var result = await dbClient.query(query);
+        if (result.rows.length > 0) {
+            let service = ServiceDto.from(result.rows[0]);
+            service.service_name = result.rows[0].name;
+            service.tdei_service_id = result.rows[0].service_id;
+            service.tdei_project_group_id = result.rows[0].owner_project_group;
+            return service;
+        }
+        throw new HttpException(404, "Service not found");
+    }
+
     async getService(params: ServiceQueryParams): Promise<ServiceDto[]> {
+        if (params.tdei_service_id) {
+            //check if the service exists
+            await this.getServiceById(params.tdei_service_id);
+        }
+        if (params.tdei_project_group_id) {
+            //check if the project group exists
+            await projectgroupService.getProjectGroupById(params.tdei_project_group_id);
+        }
+
         let queryObject = params.getQueryObject();
 
         let queryObj = <QueryConfig>{

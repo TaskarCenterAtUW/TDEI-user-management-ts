@@ -15,7 +15,6 @@ import { adminRestrictedRoles } from "../constants/admin-restricted-role-constan
 import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
-import { da } from "date-fns/locale";
 
 
 export class UserManagementService implements IUserManagement {

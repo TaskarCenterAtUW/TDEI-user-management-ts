@@ -2,6 +2,7 @@ import fetch from "node-fetch";
 import { environment } from "../environment/environment";
 import HttpException from "../exceptions/http/http-base-exception";
 import express, { NextFunction, Request } from "express";
+import { registerDecorator, ValidationArguments } from "class-validator";
 
 export class Utility {
 
@@ -116,4 +117,26 @@ export class Utility {
         }
         return secret;
     }
+}
+
+export function IsStringArrayLength(maxLength: number, message?: string) {
+    return function (object: Object, propertyName: string) {
+        registerDecorator({
+            name: 'isStringArrayLength',
+            target: object.constructor,
+            propertyName: propertyName,
+            options: {
+                message: message || `Each item in ${propertyName} must be a string of length at most ${maxLength} character.`,
+            },
+            validator: {
+                validate(value: any, args: ValidationArguments) {
+                    if (!Array.isArray(value)) {
+                        return false;
+                    }
+
+                    return value.every(item => typeof item === 'string' && item.length <= maxLength);
+                },
+            },
+        });
+    };
 }

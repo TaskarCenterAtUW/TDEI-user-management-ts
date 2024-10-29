@@ -1,4 +1,4 @@
-import { IsOptional } from "class-validator";
+import { IsOptional, Length } from "class-validator";
 import { AbstractDomainEntity, Prop } from "nodets-ms-core/lib/models";
 import { DynamicQueryObject, SqlORder } from "../../database/query-object";
 
@@ -8,6 +8,9 @@ export class ProjectGroupUserQueryParams extends AbstractDomainEntity {
     searchText: string | undefined;
     @IsOptional()
     @Prop()
+    @Length(36, 36, {
+        message: 'tdei_project_group_id must be 36 characters long (UUID)',
+    })
     tdei_project_group_id: string | undefined;
     @IsOptional()
     @Prop()

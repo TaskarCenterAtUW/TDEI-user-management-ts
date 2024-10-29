@@ -10,6 +10,7 @@ import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 import { Utility } from "../utility/utility";
 import { ValidationError, validate } from "class-validator";
+import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -22,7 +23,7 @@ class FlexServiceController implements IController {
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.put(`${this.path}/api/v1/service/:projectGroupId`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceUpdateDto), this.updateService);
-        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true, true), this.getService);
+        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true, true), queryValidationMiddleware(ServiceQueryParams), this.getService);
         this.router.delete(`${this.path}/api/v1/service/:projectGroupId/:serviceId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteService);
     }
 
