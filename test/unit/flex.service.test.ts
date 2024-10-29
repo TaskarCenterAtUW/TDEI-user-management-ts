@@ -93,7 +93,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
@@ -112,7 +112,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                     polygon: undefined
                 });
 
@@ -129,7 +129,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                 });
 
                 const updateServiceSpy = jest
