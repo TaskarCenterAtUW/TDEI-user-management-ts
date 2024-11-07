@@ -11,6 +11,7 @@ import { ProjectGroupListResponse, PocDetails } from "../model/dto/poc-details-d
 import { Geometry, Feature } from "geojson";
 import format from "pg-format";
 import { DEFAULT_PROJECT_GROUP } from "../constants/role-constants";
+import HttpException from "../exceptions/http/http-base-exception";
 
 
 class ProjectGroupService implements IProjectGroupService {
@@ -76,7 +77,26 @@ class ProjectGroupService implements IProjectGroupService {
         }
     }
 
+    async getProjectGroupById(project_group_id: string): Promise<ProjectGroupDto> {
+        const query = {
+            text: "Select * from project_group where project_group_id = $1",
+            values: [project_group_id],
+        }
+        var result = await dbClient.query(query);
+        if (result.rows.length > 0) {
+            let pg = ProjectGroupDto.from(result.rows[0]);
+            pg.tdei_project_group_id = result.rows[0].project_group_id;
+            return pg;
+        }
+        throw new HttpException(404, "Project Group not found");
+    }
+
     async getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListResponse[]> {
+        if (params.tdei_project_group_id) {
+            //Check if project group exists
+            await this.getProjectGroupById(params.tdei_project_group_id);
+        }
+
         let queryObject = params.getQueryObject();
         let queryObj = <QueryConfig>{
             text: queryObject.getQuery(),

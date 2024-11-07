@@ -16,20 +16,21 @@ function isGeoJsonFeatureCollection(obj: any): boolean {
 export class isPolygon implements ValidatorConstraintInterface {
     message = ["Not a valid polygon coordinates."];
     validate(featureCollection: FeatureCollection, args: ValidationArguments) {
+        let propertyName = args.property;
         if (!isGeoJsonFeatureCollection(featureCollection)) {
-            this.message = ["Please specify valid geojson."];
+            this.message = [`${propertyName}, Please specify valid geojson.`];
             return false;
         }
         else if (featureCollection.features.length > 1) {
-            this.message = ["Please specify only one polygon geometry feature."];
+            this.message = [`${propertyName}, Please specify only one polygon geometry feature.`];
             return false;
         }
         else if (featureCollection.features.length < 1) {
-            this.message = ["Please specify polygon geometry feature."];
+            this.message = [`${propertyName}, Please specify polygon geometry feature.`];
             return false;
         }
         else if (featureCollection.features[0].geometry.type != "Polygon") {
-            this.message = ["Please specify polygon geometry feature."];
+            this.message = [`${propertyName}, Please specify polygon geometry feature.`];
             return false;
         }
 
@@ -41,8 +42,8 @@ export class isPolygon implements ValidatorConstraintInterface {
         return valid;
     }
 
-    defaultMessage() {
-        return this.message[0].replace("at 0: ", "");
+    defaultMessage(args: ValidationArguments) {
+        return `${args.property}, ${this.message[0].replace("at 0: ", "")}`;
     }
 }
 

@@ -6,5 +6,6 @@ export interface IFlexService {
     createService(service: ServiceDto): Promise<String>;
     updateService(service: ServiceUpdateDto): Promise<boolean>;
     getService(params: ServiceQueryParams): Promise<ServiceDto[]>;
-    setServiceStatus(serviceId: string, status: boolean): Promise<boolean>
+    setServiceStatus(serviceId: string, status: boolean): Promise<boolean>;
+    getServiceById(project_group_id: string): Promise<ServiceDto>;
 }

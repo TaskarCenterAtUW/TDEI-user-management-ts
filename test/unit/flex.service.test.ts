@@ -7,6 +7,8 @@ import UniqueKeyDbException, { ForeignKeyDbException } from "../../src/exception
 import { ServiceUpdateDto } from "../../src/model/dto/service-update-dto";
 import { ServiceQueryParams } from "../../src/model/params/service-get-query-params";
 import { TestHelper } from "../common/test-helper";
+import projectGroupService from "../../src/service/project-group-service";
+import { ProjectGroupDto } from "../../src/model/dto/project-group-dto";
 
 // group test using describe
 describe("Flex Service Test", () => {
@@ -91,7 +93,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
@@ -110,7 +112,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                     polygon: undefined
                 });
 
@@ -127,7 +129,7 @@ describe("Flex Service Test", () => {
                 //Arrange
                 let input = new ServiceUpdateDto({
                     service_name: "test_service_name",
-                    service_id: "test_service_id",
+                    tdei_service_id: "test_service_id",
                 });
 
                 const updateServiceSpy = jest
@@ -165,6 +167,15 @@ describe("Flex Service Test", () => {
                     rowCount: 1,
                     rows: [dbResult]
                 }
+
+                const serviceIdCheckSpy = jest
+                    .spyOn(flexService, "getServiceById")
+                    .mockResolvedValueOnce(new ServiceDto({}));
+
+                const getProjectGroupSpy = jest
+                    .spyOn(projectGroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(new ProjectGroupDto({}));
+
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
@@ -179,7 +190,9 @@ describe("Flex Service Test", () => {
                     page_size: 10
                 }));
                 //Assert
-                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
+                expect(serviceIdCheckSpy).toHaveBeenCalled();
+                expect(getProjectGroupSpy).toHaveBeenCalled();
+                expect(updateServiceSpy).toHaveBeenCalled();
                 expect(list[0]).toMatchObject(service);
             });
 
