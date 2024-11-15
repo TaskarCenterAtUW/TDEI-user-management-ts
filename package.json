@@ -49,6 +49,7 @@
     "@types/cors": "^2.8.13",
     "@types/express": "^4.17.14",
     "@types/geojson": "^7946.0.10",
+    "@types/geojson-validation": "^1.0.3",
     "@types/jest": "^29.2.4",
     "@types/node": "^18.11.9",
     "@types/node-fetch": "^2.6.11",
