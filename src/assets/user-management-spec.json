@@ -394,6 +394,16 @@
                             "type": "string",
                             "default": 10
                         }
+                    },
+                    {
+                        "name": "show_inactive",
+                        "in": "query",
+                        "description": "Show inactive project groups",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
                     }
                 ],
                 "responses": {
@@ -533,7 +543,7 @@
             }
         },
         "/api/v1/service/{projectGroupId}/{serviceId}/active/{status}": {
-            "delete": {
+            "put": {
                 "tags": [
                     "Service"
                 ],
@@ -750,6 +760,16 @@
                             "type": "string",
                             "default": 10
                         }
+                    },
+                    {
+                        "name": "show_inactive",
+                        "in": "query",
+                        "description": "Show inactive project groups",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean",
+                            "default": false
+                        }
                     }
                 ],
                 "responses": {
@@ -960,7 +980,7 @@
             }
         },
         "/api/v1/project-group/{projectGroupId}/active/{status}": {
-            "delete": {
+            "put": {
                 "tags": [
                     "ProjectGroup"
                 ],
