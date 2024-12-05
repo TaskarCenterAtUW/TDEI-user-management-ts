@@ -44,6 +44,19 @@ class FlexService implements IFlexService {
     }
 
     async updateService(service: ServiceUpdateDto): Promise<boolean> {
+        const query = {
+            text: `Select is_active from service where service_id = $1 limit 1`,
+            values: [service.tdei_service_id],
+        }
+        var result = await dbClient.query(query);
+
+        if (result.rows.length == 0) {
+            throw new HttpException(404, "Service not found");
+        }
+
+        if (result.rows.length > 0 && !result.rows[0].is_active) {
+            throw new HttpException(400, "Update not allowed on inactive service");
+        }
 
         return await dbClient.query(service.getUpdateQuery())
             .then(res => {
@@ -57,10 +70,10 @@ class FlexService implements IFlexService {
             });
     }
 
-    async getServiceById(project_group_id: string): Promise<ServiceDto> {
+    async getServiceById(tdei_service_id: string): Promise<ServiceDto> {
         const query = {
             text: "Select * from service where service_id = $1 limit 1",
-            values: [project_group_id],
+            values: [tdei_service_id],
         }
         var result = await dbClient.query(query);
         if (result.rows.length > 0) {

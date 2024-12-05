@@ -46,6 +46,21 @@ class ProjectGroupService implements IProjectGroupService {
     }
 
     async updateProjectGroup(projectgroup: ProjectGroupDto): Promise<boolean> {
+
+        const query = {
+            text: `Select is_active from project_group where project_group_id = $1 limit 1`,
+            values: [projectgroup.tdei_project_group_id],
+        }
+        var result = await dbClient.query(query);
+
+        if (result.rows.length == 0) {
+            throw new HttpException(404, "Project group not found");
+        }
+
+        if (result.rows.length > 0 && !result.rows[0].is_active) {
+            throw new HttpException(400, "Update not allowed on inactive project group");
+        }
+
         //Check if the project group is default, if yes then do not allow to update the project group name
         const defaultProjectGroupId = await this.getDefaultProjectGroupId();
         if (defaultProjectGroupId == projectgroup.tdei_project_group_id) {
