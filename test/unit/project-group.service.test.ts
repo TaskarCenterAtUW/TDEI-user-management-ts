@@ -8,6 +8,7 @@ import { ProjectGroupQueryParams } from "../../src/model/params/project-group-ge
 import { TestHelper } from "../common/test-helper";
 import { ProjectGroupListResponse, PocDetails } from "../../src/model/dto/poc-details-dto";
 import { ProjectGroupUserQueryParams } from "../../src/model/params/project-group-user-query-params";
+import HttpException from "../../src/exceptions/http/http-base-exception";
 
 // group test using describe
 describe("Project Group Service Test", () => {
@@ -94,6 +95,15 @@ describe("Project Group Service Test", () => {
                         { project_group_id: "default_project_group_id" }
                     ]
                 }
+
+                let response3 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: true }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response3);
+
                 const getDbSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response2); // to get default project group id
@@ -127,6 +137,15 @@ describe("Project Group Service Test", () => {
                         { project_group_id: "default_project_group_id" }
                     ]
                 }
+
+                let response3 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: true }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response3);
+
                 const getDbSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response2); // to get default project group id
@@ -140,6 +159,41 @@ describe("Project Group Service Test", () => {
                 await expect(projectGroupService.updateProjectGroup(input)).rejects.toThrow(DuplicateException);
                 expect(updateStationSpy).toHaveBeenCalled();
                 expect(getDbSpy).toHaveBeenCalled();
+            });
+
+            test("When editing inactive project group, Expect to throw not allowed exception", async () => {
+                //Arrange
+                let input = new ProjectGroupDto({
+                    project_group_name: "project_group_name",
+                    phone: "9999999",
+                    address: "test",
+                    url: "test",
+                    polygon: undefined
+                });
+
+                let response2 = <QueryResult>{
+                    rows: [
+                        { project_group_id: "default_project_group_id" }
+                    ]
+                }
+
+                let response3 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: false }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response3);
+
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2); // to get default project group id
+
+
+                //Act
+                //Assert
+                await expect(projectGroupService.updateProjectGroup(input)).rejects.toThrow(HttpException);
+                expect(updateServiceCheckSpy).toHaveBeenCalled();
             });
 
             test("When database exception occurs, Expect to throw error", async () => {

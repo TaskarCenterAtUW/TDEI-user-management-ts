@@ -1,4 +1,4 @@
-import { DuplicateException, ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
+import { DuplicateException, ForeignKeyException, InputException } from "../../src/exceptions/http/http-exceptions";
 import flexService from "../../src/service/flex-service";
 import { ServiceDto } from "../../src/model/dto/service-dto";
 import dbClient from "../../src/database/data-source";
@@ -9,6 +9,8 @@ import { ServiceQueryParams } from "../../src/model/params/service-get-query-par
 import { TestHelper } from "../common/test-helper";
 import projectGroupService from "../../src/service/project-group-service";
 import { ProjectGroupDto } from "../../src/model/dto/project-group-dto";
+import { is } from "date-fns/locale";
+import HttpException from "../../src/exceptions/http/http-base-exception";
 
 // group test using describe
 describe("Flex Service Test", () => {
@@ -99,13 +101,43 @@ describe("Flex Service Test", () => {
                 let response = <QueryResult>{
                     rowCount: 1
                 }
+                let response2 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: true }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2);
+
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
                 //Act
                 //Assert
                 expect(await flexService.updateService(input)).toBe(true);
-                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
+                expect(updateServiceCheckSpy).toHaveBeenCalled();
+                expect(updateServiceSpy).toHaveBeenCalled();
+            });
+
+            test("When editing inactive service, Expect to return not allowed", async () => {
+                //Arrange
+                let input = new ServiceUpdateDto({
+                    service_name: "test_service_name",
+                    tdei_service_id: "test_service_id",
+                    polygon: undefined
+                });
+                let response2 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: false }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2);
+
+                //Act
+                //Assert
+                await expect(flexService.updateService(input)).rejects.toThrow(HttpException);
+                expect(updateServiceCheckSpy).toHaveBeenCalled();
             });
 
             test("When unique key exception thrown, Expect to return DuplicateException", async () => {
@@ -115,14 +147,21 @@ describe("Flex Service Test", () => {
                     tdei_service_id: "test_service_id",
                     polygon: undefined
                 });
-
+                let response2 = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ is_active: true }]
+                }
+                const updateServiceCheckSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response2);
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new UniqueKeyDbException("Duplicate service name"));
                 //Act
                 //Assert
                 await expect(flexService.updateService(input)).rejects.toThrow(DuplicateException);
-                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
+                expect(updateServiceSpy).toHaveBeenCalled();
+                expect(updateServiceCheckSpy).toHaveBeenCalled();
             });
 
             test("When database exception thrown, Expect to throw error", async () => {
