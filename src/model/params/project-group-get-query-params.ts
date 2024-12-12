@@ -24,6 +24,9 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     page_size: number = 10;
+    @IsOptional()
+    @Prop()
+    show_inactive!: boolean;
 
     constructor(init?: Partial<ProjectGroupQueryParams>) {
         super();
@@ -61,8 +64,16 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
         else if (this.bbox && this.bbox.length > 0 && this.bbox.length != 4) {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
-        //Always pull active project group
-        queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
+        // //Always pull active project group
+        // queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
+        if (this.show_inactive != undefined && String(this.show_inactive).toLowerCase() == 'true') {
+            queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, false);
+        }
+        else {
+            //Always pull active project group
+            queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
+        }
+
         queryObject.buildGroupRaw("group by o.project_group_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
 
         return queryObject;
