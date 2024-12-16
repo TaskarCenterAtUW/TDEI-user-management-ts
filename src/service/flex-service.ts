@@ -27,6 +27,20 @@ class FlexService implements IFlexService {
     }
 
     async createService(service: ServiceDto): Promise<String> {
+        const query = {
+            text: `Select is_active, owner_project_group from service where owner_project_group = $1 and name=$2 limit 1`,
+            values: [service.tdei_project_group_id, service.service_name],
+        }
+        var result = await dbClient.query(query);
+
+        if (result.rows.length > 0 && !result.rows[0].is_active) {
+            let message = `A service by the name of "${service.service_name}" is a deactivated service that already exists within the domain of project group. To proceed, either reactivate the service, or choose a different name for a new service.`;
+            throw new DuplicateException(message);
+        }
+        else if (result.rows.length > 0 && result.rows[0].is_active) {
+            let message = `A service by the name of "${service.service_name}" already exists within the domain of project group. To proceed, choose a different name for a new service.`;
+            throw new DuplicateException(message);
+        }
 
         return await dbClient.query(service.getInsertQuery())
             .then(res => {
@@ -34,7 +48,9 @@ class FlexService implements IFlexService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(service.service_name);
+                    let message = `A service by the name of "${service.service_name}" already exists within the domain of project group. 
+                    To proceed, choose a different name for a new service.`;
+                    throw new DuplicateException(message);
                 }
                 else if (e instanceof ForeignKeyDbException) {
                     throw new ForeignKeyException((e as ForeignKeyDbException).message);
@@ -64,7 +80,9 @@ class FlexService implements IFlexService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(service.service_name);
+                    let message = `A service by the name of "${service.service_name}" already exists within the domain of project group. 
+                    To proceed, choose a different name for a service.`;
+                    throw new DuplicateException(message);
                 }
                 throw e;
             });

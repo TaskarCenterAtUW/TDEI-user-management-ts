@@ -3,7 +3,7 @@ import { Response } from "express";
 
 export class DuplicateException extends HttpException {
     constructor(name: string) {
-        super(400, `Input with value '${name}' already exists.`);
+        super(400, `${name}`);
     }
 }
 

@@ -25,17 +25,24 @@ describe("Flex Service Test", () => {
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
+                    rows: <any>[]
+                }
+                const checkServiceSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+                let response2 = <QueryResult>{
                     rows: [
                         { service_id: "new_service_id" }
                     ]
                 }
                 const createServiceSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockResolvedValueOnce(response);
+                    .mockResolvedValueOnce(response2);
                 //Act
                 //Assert
                 expect(await flexService.createService(input)).toBe("new_service_id");
-                expect(createServiceSpy).toHaveBeenCalledTimes(1);
+                expect(checkServiceSpy).toHaveBeenCalled();
+                expect(createServiceSpy).toHaveBeenCalled();
             });
 
             test("When unique key exception thrown, Expect to return DuplicateException", async () => {
@@ -46,13 +53,20 @@ describe("Flex Service Test", () => {
                     polygon: undefined
                 });
 
-                const createServiceSpy = jest
+                let response = <QueryResult>{
+                    rows: [{
+                        is_active: false,
+                        owner_project_group: "test_tdei_project_group_id"
+                    }]
+                }
+                const checkServiceSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockRejectedValueOnce(new UniqueKeyDbException("Duplicate service name"));
+                    .mockResolvedValueOnce(response);
+
                 //Act
                 //Assert
                 await expect(flexService.createService(input)).rejects.toThrow(DuplicateException);
-                expect(createServiceSpy).toHaveBeenCalledTimes(1);
+                expect(checkServiceSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When foreign key exception thrown, Expect to return ForeignKeyException", async () => {
@@ -62,13 +76,20 @@ describe("Flex Service Test", () => {
                     tdei_project_group_id: "test_tdei_project_group_id",
                 });
 
+                let response = <QueryResult>{
+                    rows: <any>[]
+                }
+                const checkServiceSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
                 const createServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new ForeignKeyDbException("Contraint error"));
                 //Act
                 //Assert
                 await expect(flexService.createService(input)).rejects.toThrow(ForeignKeyException);
-                expect(createServiceSpy).toHaveBeenCalledTimes(1);
+                expect(createServiceSpy).toHaveBeenCalled();
             });
 
             test("When database exception thrown, Expect to throw error", async () => {
@@ -78,13 +99,20 @@ describe("Flex Service Test", () => {
                     tdei_project_group_id: "test_tdei_project_group_id",
                 });
 
+                let response = <QueryResult>{
+                    rows: <any>[]
+                }
+                const checkServiceSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
                 const createServiceSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("DB error", 1, "error"));
                 //Act
                 //Assert
                 await expect(flexService.createService(input)).rejects.toThrow(Error);
-                expect(createServiceSpy).toHaveBeenCalledTimes(1);
+                expect(createServiceSpy).toHaveBeenCalled();
             });
         });
     });

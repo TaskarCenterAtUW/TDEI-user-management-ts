@@ -25,17 +25,25 @@ describe("Project Group Service Test", () => {
                     polygon: TestHelper.getPolygon()
                 });
                 let response = <QueryResult>{
+                    rows: <any>[]
+                }
+                const checkPgSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
+                let response2 = <QueryResult>{
                     rows: [
                         { project_group_id: "new_project_group_id" }
                     ]
                 }
                 const createStationSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockResolvedValueOnce(response);
+                    .mockResolvedValueOnce(response2);
                 //Act
                 //Assert
                 expect(await projectGroupService.createProjectGroup(input)).toBe("new_project_group_id");
-                expect(createStationSpy).toHaveBeenCalledTimes(1);
+                expect(checkPgSpy).toHaveBeenCalled();
+                expect(createStationSpy).toHaveBeenCalled();
             });
 
             test("When unique key exception occurs, Expect to throw DuplicateException", async () => {
@@ -48,13 +56,21 @@ describe("Project Group Service Test", () => {
                     polygon: undefined
                 });
 
-                const createStationSpy = jest
+                let response = <QueryResult>{
+                    rows: [{
+                        is_active: false,
+                        name: "project_group_name"
+                    }]
+                }
+                const checkPgSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockRejectedValueOnce(new UniqueKeyDbException("error"));
+                    .mockResolvedValueOnce(response);
+
+
                 //Act
                 //Assert
                 await expect(projectGroupService.createProjectGroup(input)).rejects.toThrow(DuplicateException);
-                expect(createStationSpy).toHaveBeenCalledTimes(1);
+                expect(checkPgSpy).toHaveBeenCalled();
             });
 
             test("When database exception occurs, Expect to throw error", async () => {
@@ -67,13 +83,22 @@ describe("Project Group Service Test", () => {
                     polygon: TestHelper.getPolygon()
                 });
 
+                let response = <QueryResult>{
+                    rows: <any>[]
+                }
+                const checkPgSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
+
                 const createStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
                 await expect(projectGroupService.createProjectGroup(input)).rejects.toThrow(Error);
-                expect(createStationSpy).toHaveBeenCalledTimes(1);
+                expect(checkPgSpy).toHaveBeenCalled();
+                expect(createStationSpy).toHaveBeenCalled();
             });
         });
     });
