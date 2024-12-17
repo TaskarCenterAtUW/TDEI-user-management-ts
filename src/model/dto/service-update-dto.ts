@@ -33,7 +33,7 @@ export class ServiceUpdateDto extends BaseDto {
     */
     verifyInput(): { valid: boolean, message: string } {
         if (!this.tdei_service_id || this.tdei_service_id == "0")
-            return { valid: false, message: "Station Id not provided." };
+            return { valid: false, message: "Service Id not provided." };
 
         //default true
         return { valid: true, message: "" };

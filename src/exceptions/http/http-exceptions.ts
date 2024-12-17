@@ -1,8 +1,9 @@
 import HttpException from "./http-base-exception";
+import { Response } from "express";
 
 export class DuplicateException extends HttpException {
     constructor(name: string) {
-        super(400, `Input with value '${name}' already exists.`);
+        super(400, `${name}`);
     }
 }
 
@@ -36,6 +37,11 @@ export class NoDataUpdatedException extends HttpException {
     }
 }
 
-
+export class InputException extends HttpException {
+    constructor(message: string, response?: Response) {
+        response?.status(400).send(message);
+        super(400, message);
+    }
+}
 
 
