@@ -30,7 +30,7 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
-        this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), this.resetCredentials);
+        this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), validationMiddleware(ResetCredentialsDto), this.resetCredentials);
     }
 
     public resetCredentials = async (request: Request, response: express.Response, next: NextFunction) => {
