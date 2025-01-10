@@ -40,7 +40,7 @@ export class ProjectGroupUserQueryParams extends AbstractDomainEntity {
         queryObject.buildOrder("ue.first_name", SqlORder.ASC);
         //Add conditions
         if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` ue.first_name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
+            queryObject.condition(` (ue.first_name ILIKE $${queryObject.paramCouter} OR ue.last_name ILIKE $${queryObject.paramCouter} OR ue.username ILIKE $${queryObject.paramCouter++})`, this.searchText + '%');
         }
         if (this.tdei_project_group_id != undefined && this.tdei_project_group_id.length != 0) {
             queryObject.condition(` ur.project_group_id = $${queryObject.paramCouter++} `, this.tdei_project_group_id);

@@ -35,6 +35,9 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     page_size: number = 10;
+    @IsOptional()
+    @Prop()
+    show_inactive!: boolean;
 
     constructor(init?: Partial<ServiceQueryParams>) {
         super();
@@ -51,6 +54,14 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
         //Add conditions
+        if (this.show_inactive != undefined && String(this.show_inactive).toLowerCase() == 'true') {
+            queryObject.condition(` is_active = $${queryObject.paramCouter++} `, false);
+        }
+        else {
+            //Always pull active project group
+            queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
+        }
+
         if (this.service_type != undefined && this.service_type.length != 0 && this.service_type != "all") {
             queryObject.condition(` service_type = $${queryObject.paramCouter++} `, this.service_type);
         }
@@ -71,7 +82,7 @@ export class ServiceQueryParams extends AbstractDomainEntity {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
         //Always pull active project group
-        queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
+        // queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
 
         return queryObject;
     }

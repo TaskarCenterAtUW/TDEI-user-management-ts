@@ -10,6 +10,7 @@ import { ProjectGroupQueryParams } from "../model/params/project-group-get-query
 import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-query-params";
 import { Utility } from "../utility/utility";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
+import { listRequestValidation } from "../middleware/list-request-validation-middleware";
 
 class ProjectGroupController implements IController {
     public path = '';
@@ -22,9 +23,9 @@ class ProjectGroupController implements IController {
     public intializeRoutes() {
         this.router.put(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.updateProjectGroup);
         this.router.post(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.createProjectGroup);
-        this.router.get(`${this.path}/api/v1/project-group`, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
+        this.router.get(`${this.path}/api/v1/project-group`, listRequestValidation, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
         this.router.get(`${this.path}/api/v1/project-group/:projectGroupId/users`, authorizationMiddleware([]), this.getProjectGroupUsers);
-        this.router.delete(`${this.path}/api/v1/project-group/:projectGroupId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteProjectGroup);
+        this.router.put(`${this.path}/api/v1/project-group/:projectGroupId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteProjectGroup);
     }
 
     public deleteProjectGroup = async (request: Request, response: express.Response, next: NextFunction) => {

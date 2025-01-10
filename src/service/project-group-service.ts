@@ -33,19 +33,50 @@ class ProjectGroupService implements IProjectGroupService {
 
     async createProjectGroup(projectgroup: ProjectGroupDto): Promise<String> {
 
+        const query = {
+            text: `Select is_active, name from project_group where name=$1 limit 1`,
+            values: [projectgroup.project_group_name],
+        }
+        var result = await dbClient.query(query);
+
+        if (result.rows.length > 0 && !result.rows[0].is_active) {
+            let message = `A project group by the name of "${projectgroup.project_group_name}" is a deactivated project group that already exists within the system. To proceed, either reactivate the project group, or choose a different name for a new project group.`;
+            throw new DuplicateException(message);
+        }
+        else if (result.rows.length > 0 && result.rows[0].is_active) {
+            let message = `A project group by the name of "${projectgroup.project_group_name}" already exists within the system. To proceed, choose a different name for a new project group.`;
+            throw new DuplicateException(message);
+        }
+
         return await dbClient.query(projectgroup.getInsertQuery())
             .then(res => {
                 return res.rows[0].project_group_id;
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(projectgroup.project_group_name);
+                    let message = `A project group by the name of "${projectgroup.project_group_name}" already exists within the system. To proceed, choose a different name for a new project group.`;
+                    throw new DuplicateException(message);
                 }
                 throw e;
             });
     }
 
     async updateProjectGroup(projectgroup: ProjectGroupDto): Promise<boolean> {
+
+        const query = {
+            text: `Select is_active from project_group where project_group_id = $1 limit 1`,
+            values: [projectgroup.tdei_project_group_id],
+        }
+        var result = await dbClient.query(query);
+
+        if (result.rows.length == 0) {
+            throw new HttpException(404, "Project group not found");
+        }
+
+        if (result.rows.length > 0 && !result.rows[0].is_active) {
+            throw new HttpException(400, "Update not allowed on inactive project group");
+        }
+
         //Check if the project group is default, if yes then do not allow to update the project group name
         const defaultProjectGroupId = await this.getDefaultProjectGroupId();
         if (defaultProjectGroupId == projectgroup.tdei_project_group_id) {
@@ -57,7 +88,8 @@ class ProjectGroupService implements IProjectGroupService {
             })
             .catch(e => {
                 if (e instanceof UniqueKeyDbException) {
-                    throw new DuplicateException(projectgroup.project_group_name);
+                    let message = `A project group by the name of "${projectgroup.project_group_name}" already exists within the system. To proceed, choose a different name for a project group.`;
+                    throw new DuplicateException(message);
                 }
                 throw e;
             });
