@@ -111,6 +111,11 @@ export class UserManagementService implements IUserManagement {
             if (result.status != undefined && result.status == 409)
                 throw new HttpException(409, "User already exists with email " + user.email);
 
+            if (result.status != undefined && result.status == 400) {
+                const data = await result.json();
+                throw new HttpException(400, `${data.message}, ${data.errors?.join(',')}`);
+            }
+
             if (result.status != undefined && result.status != 200)
                 throw new Error();
 
