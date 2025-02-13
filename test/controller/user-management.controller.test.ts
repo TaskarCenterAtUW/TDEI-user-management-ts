@@ -510,4 +510,34 @@ describe("User Management Controller Test", () => {
             });
         });
     });
+
+    describe("Download users", () => {
+        it('should download users', async () => {
+            const req = getMockReq();
+            const { res, next } = getMockRes();
+            const usersCsv = 'name, email, roles';
+
+            const spy = jest
+                .spyOn(userManagementService, 'downloadUsers')
+                .mockResolvedValueOnce(usersCsv);
+
+            await userManagementController.downloadUsers(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.setHeader).toHaveBeenCalledWith('Content-Type', 'text/csv');
+            expect(res.setHeader).toHaveBeenCalledWith('Content-Disposition', 'attachment; filename=tdei-users.csv');
+            expect(res.send).toHaveBeenCalledWith(usersCsv);
+        });
+        it('when sql error occured, download users should throw error', async () => {
+            let req = getMockReq();
+            const { res, next } = getMockRes();
+            const usersCsv = 'name,email,roles';
+            const spy = jest
+                .spyOn(userManagementService, "downloadUsers")
+                .mockRejectedValueOnce(new HttpException(500, "Error fetching the tdei users"));
+            await userManagementController.downloadUsers(req, res, next);
+            expect(spy).toHaveBeenCalledTimes(1);
+            expect(next).toBeCalledWith(new HttpException(500, "Error fetching the tdei users"));
+        });
+    });
 });

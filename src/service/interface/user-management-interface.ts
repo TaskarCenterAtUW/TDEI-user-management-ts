@@ -46,7 +46,7 @@ export interface IUserManagement {
      * @param page_size page size
      * @returns List of User project groups with roles
      */
-    getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number): Promise<ProjectGroupRoleDto[]>;
+    getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number, searchText: string): Promise<ProjectGroupRoleDto[]>;
     /**
      * Revokes the user permissions
      * @param rolesReq roles to be revoked
@@ -61,4 +61,10 @@ export interface IUserManagement {
      * @returns 
      */
     getUserProfile(userName: string): Promise<UserProfile>;
+
+    /**
+     * Fetches all the users in the system with unique roles
+     * @returns 
+     */
+    downloadUsers(): Promise<string>
 }
