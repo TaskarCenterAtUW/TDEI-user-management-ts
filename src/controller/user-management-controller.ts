@@ -114,7 +114,10 @@ class UserManagementController implements IController {
 
             if (decoded && decoded.sub != userId) throw new HttpException(403, "Not authorized.");
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "20");
+            //TODO:: Hot fix need to be removed later. Fixing default page size to 20 if page size is less than 20
+            if (page_size < 20) page_size = 20;
+
             let searchText = request.query.searchText?.toString() ?? "";
 
             return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size, searchText).then((result) => {
