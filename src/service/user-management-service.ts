@@ -191,7 +191,7 @@ export class UserManagementService implements IUserManagement {
      * @param page_size page size
      * @returns List of User project groups with roles
      */
-    async getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number): Promise<ProjectGroupRoleDto[]> {
+    async getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number, searchText: string = ''): Promise<ProjectGroupRoleDto[]> {
         let projectGroupRoleList: ProjectGroupRoleDto[] = [];
 
         //Set defaults if not provided
@@ -200,9 +200,15 @@ export class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
-        var sql = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
+        let searchQuery = '';
+        if (searchText && searchText.length > 0) {
+            searchQuery = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L AND o.name ILIKE %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, searchText + '%', take, skip);
+        }
+        else {
+            searchQuery = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
+        }
 
-        return await dbClient.query(sql)
+        return await dbClient.query(searchQuery)
             .then(res => {
                 res.rows.forEach(x => {
                     let projectGroupRole: ProjectGroupRoleDto = new ProjectGroupRoleDto();
@@ -356,6 +362,44 @@ export class UserManagementService implements IUserManagement {
                     throw e;
                 });
         });
+    }
+
+
+    /**
+     * Fetches all the users in the system with unique roles
+     * @returns 
+     */
+    async downloadUsers(): Promise<string> {
+        const query = `
+        SELECT 
+        ue.first_name ||  ' ' ||  coalesce(ue.last_name,'') as name, 
+        ue.username AS email, 
+        ur.role_names AS roles
+        FROM keycloak.user_entity ue
+        INNER JOIN keycloak.realm r ON ue.realm_id = r.id
+        INNER JOIN (
+            SELECT 
+                ur.user_id, 
+                STRING_AGG(DISTINCT ro.name, '|') AS role_names
+            FROM public.user_roles ur
+            INNER JOIN public.roles ro ON ur.role_id = ro.role_id
+            GROUP BY ur.user_id
+        ) ur ON ue.id = ur.user_id
+        WHERE r.name = 'tdei' and service_account_client_link is null
+            ORDER BY ue.first_name, ue.last_name;
+        `;
+        const result = await dbClient.query(query);
+        // Create CSV header
+        const header = 'Name,Email,Roles\n';
+
+        // Create CSV rows
+        const rows = result.rows.map(user => {
+            return `${user.name},${user.email},${user.roles}`;
+        }).join('\n');
+
+        // Combine header and rows
+        const csvContent = header + rows;
+        return csvContent;
     }
 }
 

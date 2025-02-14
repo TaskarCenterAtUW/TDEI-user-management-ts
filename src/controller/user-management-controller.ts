@@ -31,6 +31,20 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
         this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), validationMiddleware(ResetCredentialsDto), this.resetCredentials);
+        this.router.get(`${this.path}/api/v1/users/download`, authorizationMiddleware([Role.TDEI_ADMIN]), this.downloadUsers);
+    }
+
+    public downloadUsers = async (request: Request, response: express.Response, next: NextFunction) => {
+        return userManagementServiceInstance.downloadUsers().then((users) => {
+            response.setHeader('Content-Type', 'text/csv');
+            response.setHeader('Content-Disposition', 'attachment; filename=tdei-users.csv');
+            response.status(200);
+            response.send(users);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the tdei users";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+
     }
 
     public resetCredentials = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -100,9 +114,13 @@ class UserManagementController implements IController {
 
             if (decoded && decoded.sub != userId) throw new HttpException(403, "Not authorized.");
             let page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+            let page_size = Number.parseInt(request.query.page_size?.toString() ?? "20");
+            //TODO:: Hot fix need to be removed later. Fixing default page size to 20 if page size is less than 20
+            if (page_size < 20) page_size = 20;
 
-            return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size).then((result) => {
+            let searchText = request.query.searchText?.toString() ?? "";
+
+            return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size, searchText).then((result) => {
                 Ok(response, result);
             }).catch((error: any) => {
                 let errorMessage = "Error fetching the user project group & roles";

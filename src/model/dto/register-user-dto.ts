@@ -3,7 +3,7 @@ import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
 
 export class RegisterUserDto extends BaseDto {
-    @IsOptional()
+    @IsNotEmpty()
     @Prop()
     @MaxLength(255)
     firstName!: string;
