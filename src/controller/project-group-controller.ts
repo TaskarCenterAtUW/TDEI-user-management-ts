@@ -24,7 +24,7 @@ class ProjectGroupController implements IController {
         this.router.put(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.updateProjectGroup);
         this.router.post(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.createProjectGroup);
         this.router.get(`${this.path}/api/v1/project-group`, listRequestValidation, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
-        this.router.get(`${this.path}/api/v1/project-group/:projectGroupId/users`, authorizationMiddleware([]), this.getProjectGroupUsers);
+        this.router.get(`${this.path}/api/v1/project-group/:projectGroupId/users`, authorizationMiddleware([Role.TDEI_ADMIN, Role.POC], true), this.getProjectGroupUsers);
         this.router.put(`${this.path}/api/v1/project-group/:projectGroupId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteProjectGroup);
     }
 
