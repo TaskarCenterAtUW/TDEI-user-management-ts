@@ -108,7 +108,7 @@ VALUES
 ('flex_data_generator', 'Flex Data generator can publish dataset for the project group'),
 ('tdei_admin', 'TDEI super admin'),
 ('poc', 'Point of contact of project group'),
-('tdei_user', 'User of the TDEI system'),
+('member', 'User of the TDEI system'),
 ('pathways_data_generator', 'Pathways Data generator can publish dataset for the project group'),
 ('osw_data_generator', 'OSW Data generator can publish dataset for the project group');
 
