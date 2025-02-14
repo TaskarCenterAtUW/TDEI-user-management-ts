@@ -8,7 +8,7 @@ export class RolesReqDto extends BaseDto {
     @Prop()
     @Length(36, 36, {
         message: 'tdei_project_group_id must be 36 characters long (UUID)',
-    }) 
+    })
     tdei_project_group_id!: string;
     @IsNotEmpty()
     @Prop()
@@ -16,8 +16,6 @@ export class RolesReqDto extends BaseDto {
     user_name!: string;
     @IsArray()
     @Prop()
-    @ArrayNotEmpty()
-    @IsStringArrayLength(255)
     roles!: string[];
 
     constructor(init?: Partial<RolesReqDto>) {
