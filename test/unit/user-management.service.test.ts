@@ -777,6 +777,29 @@ describe("User Management Service Test", () => {
                 expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
             });
 
+            test("When requested with project name search, Expect to return list of user project groups with roles and specified project name", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1, //effected row
+                    rows: [
+                        {
+                            project_group_name: "project_group_name",
+                            project_group_id: "project_group_id",
+                            roles: [Role.DATA_GENERATOR]
+                        }
+                    ]
+                }
+                const getUserProjectGroupRolesSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+                //Act
+                let result = await userService.getUserProjectGroupsWithRoles("user_id", 1, 10, "sample_project_name");
+                //Assert
+                expect(result[0].project_group_name).toBe("project_group_name");
+                expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
+            });
+
             test("When database error occured, Expect to throw error", async () => {
                 //Arrange
                 let userService = new UserManagementService();
@@ -841,6 +864,52 @@ describe("User Management Service Test", () => {
                 //Assert
                 await expect(userManagementServiceInstance.resetCredentials(resetdto)).rejects.toThrow(Error);
             });
+        });
+    });
+
+    describe('downloadUsers', () => {
+        it('should return CSV content with user data', async () => {
+            const mockQueryResult: any = {
+                rows: [
+                    { name: 'John Doe', email: 'john.doe@example.com', roles: 'admin|user' },
+                    { name: 'Jane Smith', email: 'jane.smith@example.com', roles: 'user' }
+                ]
+            };
+            const getUserProjectGroupRolesSpy = jest
+                .spyOn(dbClient, "query")
+                .mockResolvedValueOnce(mockQueryResult);
+
+            const expectedCsvContent = 'Name,Email,Roles\nJohn Doe,john.doe@example.com,admin|user\nJane Smith,jane.smith@example.com,user';
+
+            const result = await userManagementServiceInstance.downloadUsers();
+
+            expect(result).toBe(expectedCsvContent);
+            expect(dbClient.query).toHaveBeenCalledWith(expect.any(String));
+        });
+
+        it('should handle empty result set', async () => {
+            const mockQueryResult: any = { rows: [] };
+
+            const getUserProjectGroupRolesSpy = jest
+                .spyOn(dbClient, "query")
+                .mockResolvedValueOnce(mockQueryResult);
+
+
+            const expectedCsvContent = 'Name,Email,Roles\n';
+
+            const result = await userManagementServiceInstance.downloadUsers();
+
+            expect(result).toBe(expectedCsvContent);
+            expect(dbClient.query).toHaveBeenCalledWith(expect.any(String));
+        });
+
+        it('should throw an error if the query fails', async () => {
+            const getUserProjectGroupRolesSpy = jest
+                .spyOn(dbClient, "query")
+                .mockRejectedValueOnce(new Error('Database error'));
+
+            await expect(userManagementServiceInstance.downloadUsers()).rejects.toThrow('Database error');
+            expect(dbClient.query).toHaveBeenCalledWith(expect.any(String));
         });
     });
 });
