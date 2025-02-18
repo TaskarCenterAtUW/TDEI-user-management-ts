@@ -24,7 +24,7 @@ class UserManagementController implements IController {
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
-        // this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
+        this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([], false, true), this.projectGroupRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
