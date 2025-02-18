@@ -1,7 +1,6 @@
-import { ArrayNotEmpty, IsArray, IsIn, IsNotEmpty, Length, MaxLength, Validate } from "class-validator";
+import { IsArray, IsNotEmpty, Length, MaxLength } from "class-validator";
 import { Prop } from "nodets-ms-core/lib/models";
 import { BaseDto } from "./base-dto";
-import { IsStringArrayLength } from "../../utility/utility";
 
 export class RolesReqDto extends BaseDto {
     @IsNotEmpty()
