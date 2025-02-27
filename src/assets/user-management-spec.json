@@ -633,7 +633,7 @@
                     "User Management"
                 ],
                 "summary": "Associates a user with the project group and permissions in the TDEI system",
-                "description": "Associates a user with the project group and permissions in the TDEI system. Returns the boolean flag true.",
+                "description": "Associates a user with the project group and permissions in the TDEI system. Returns the boolean flag true. Empty permissions array will remove a user from Project Group.",
                 "operationId": "permission",
                 "requestBody": {
                     "content": {

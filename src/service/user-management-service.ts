@@ -15,6 +15,7 @@ import { adminRestrictedRoles } from "../constants/admin-restricted-role-constan
 import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
+import projectgroupService from "./project-group-service";
 
 
 export class UserManagementService implements IUserManagement {
@@ -145,7 +146,7 @@ export class UserManagementService implements IUserManagement {
         const query = 'SELECT name, description FROM Roles';
         return await dbClient.query(query)
             .then(res => {
-                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString(), Role.TDEI_MEMBER.toString()].includes(f.name)).map(x => {
+                let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString()].includes(f.name)).map(x => {
                     return new RoleDto(x);
                 });
                 return roleList;
@@ -156,6 +157,8 @@ export class UserManagementService implements IUserManagement {
     }
 
     private async getRolesByNames(roles: string[]): Promise<Map<string, string>> {
+        if (roles.length == 0)
+            return new Map<string, string>();
         let roleMap = new Map<string, string>();
         var sql = format('SELECT role_id, name FROM roles WHERE name IN (%L)', roles);
 
@@ -253,6 +256,8 @@ export class UserManagementService implements IUserManagement {
      * @returns boolean flag
      */
     async updatePermissions(rolesReq: RolesReqDto, requestingUserId: string): Promise<boolean> {
+        //Remove empty roles
+        rolesReq.roles = rolesReq.roles.filter(x => x.trim() !== '');
 
         //Fetch permissioned user profile from keycloak
         let userProfile = await this.getUserProfile(rolesReq.user_name);
@@ -273,11 +278,11 @@ export class UserManagementService implements IUserManagement {
                 throw new HttpException(400, "Admin restricted roles cannot be assigned");
         }
 
-        //System roles cannot be revoked, so add the default role if not exists
-        if (rolesReq.roles && rolesReq.roles.length > 0 && !rolesReq.roles.includes(Role.TDEI_MEMBER))
-            rolesReq.roles.push(Role.TDEI_MEMBER);
-        else if (rolesReq.roles.length == 0)
-            rolesReq.roles.push(Role.TDEI_MEMBER);
+        // If no roles provided, then remove the user from the project group and return
+        if (rolesReq.roles.length == 0) {
+            await this.removeUserFromProjectGroup(rolesReq.tdei_project_group_id, userId, isAdmin);
+            return true;
+        }
 
         //Get the role ids for role name provided
         let rolemap = await this.getRolesByNames(rolesReq.roles);
@@ -321,19 +326,23 @@ export class UserManagementService implements IUserManagement {
         let isAdmin = userRoles.findIndex(x => x == Role.TDEI_ADMIN) != -1;
 
         if (!isAdmin) {
-            //Check POC role if exists, as it is restricted to Admin only
+            //Check tdei_admin role if exists, as it is restricted to Admin only
             if (rolesReq.roles.findIndex(x => adminRestrictedRoles.indexOf(x.toLocaleLowerCase()) != -1) != -1)
                 throw new HttpException(400, "Admin restricted roles cannot be revoked.");
         }
 
         if (rolesReq.roles.length > 0)
-            await this.removeRoles(rolesReq, userId);
+            await this.removeRoles(rolesReq, userId, isAdmin);
         else
-            await this.removeUserFromProjectGroup(rolesReq.tdei_project_group_id, userId);
+            await this.removeUserFromProjectGroup(rolesReq.tdei_project_group_id, userId, isAdmin);
         return true;
     }
 
-    private async removeUserFromProjectGroup(project_group_id: string, userId: string) {
+    private async removeUserFromProjectGroup(project_group_id: string, userId: string, isAdmin: boolean) {
+        const projGrp = await projectgroupService.getProjectGroupById(project_group_id);
+        if (projGrp.project_group_name == DEFAULT_PROJECT_GROUP && !isAdmin)
+            throw new HttpException(403, "Default project group permissions can be revoked only by Admin.");
+
         const query = {
             text: 'DELETE FROM user_roles WHERE user_id = $1 AND project_group_id = $2',
             values: [userId, project_group_id],
@@ -344,15 +353,16 @@ export class UserManagementService implements IUserManagement {
             });
     }
 
-    private async removeRoles(rolesReq: RolesReqDto, userId: string) {
+    private async removeRoles(rolesReq: RolesReqDto, userId: string, isAdmin: boolean) {
         //Get the role ids for role name provided
         let rolemap = await this.getRolesByNames(rolesReq.roles);
 
+        const projGrp = await projectgroupService.getProjectGroupById(rolesReq.tdei_project_group_id);
+        if (projGrp.project_group_name == DEFAULT_PROJECT_GROUP && !isAdmin)
+            throw new HttpException(403, "Default project group permissions can be revoked only by Admin.");
+
 
         rolesReq.roles.forEach(async (role) => {
-            //System roles cannot be revoked
-            if (role == Role.TDEI_MEMBER)
-                return;
             const query = {
                 text: 'DELETE FROM user_roles WHERE user_id = $1 AND project_group_id = $2 AND role_id = $3 ',
                 values: [userId, rolesReq.tdei_project_group_id, rolemap.get(role)],
