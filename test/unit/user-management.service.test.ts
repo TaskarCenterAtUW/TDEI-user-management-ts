@@ -11,6 +11,7 @@ import { ForeignKeyDbException } from "../../src/exceptions/db/database-exceptio
 import HttpException from "../../src/exceptions/http/http-base-exception";
 import { ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
 import { ResetCredentialsDto } from "../../src/model/dto/reset-credentials-dto";
+import projectgroupService from "../../src/service/project-group-service";
 
 // group test using describe
 describe("User Management Service Test", () => {
@@ -612,10 +613,32 @@ describe("User Management Service Test", () => {
                 const updateStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
+                const pgGrpSpy = jest
+                    .spyOn(projectgroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(<any>{ project_group_name: "PG Grp", tdei_project_group_id: "tdei_project_group_id" });
+
                 //Act
-                await userService["removeUserFromProjectGroup"]("project_group_Id", "user_id");
+                await userService["removeUserFromProjectGroup"]("project_group_Id", "user_id", false);
                 //Assert
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
+                expect(pgGrpSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("Non admin When requested to remove user from TDEI default group, Expect to throw error", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1 //effected row
+                }
+                const pgGrpSpy = jest
+                    .spyOn(projectgroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(<any>{ project_group_name: "TDEI Default", tdei_project_group_id: "tdei_project_group_id" });
+
+                //Act
+
+                //Assert
+                await expect(userService["removeUserFromProjectGroup"]("project_group_Id", "user_id", false)).rejects.toThrow(new HttpException(400, "Default project group permissions can be revoked only by Admin."));
+                expect(pgGrpSpy).toHaveBeenCalledTimes(1);
             });
 
             test("When database error occured, Expect to throw error", async () => {
@@ -626,7 +649,7 @@ describe("User Management Service Test", () => {
                     .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
-                await expect(userService["removeUserFromProjectGroup"]("project_group_Id", "user_id")).rejects.toThrow(Error);
+                await expect(userService["removeUserFromProjectGroup"]("project_group_Id", "user_id", false)).rejects.toThrow(Error);
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
             });
 
@@ -655,14 +678,49 @@ describe("User Management Service Test", () => {
                 const updateStationSpy = jest
                     .spyOn(dbClient, "query")
                     .mockResolvedValueOnce(response);
+                const pgGrpSpy = jest
+                    .spyOn(projectgroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(<any>{ project_group_name: "PG Grp", tdei_project_group_id: "tdei_project_group_id" });
                 const getRolesByNameSpy = jest
                     .spyOn(UserManagementService.prototype as any, "getRolesByNames")
                     .mockResolvedValueOnce(dbRoles);
                 //Act
-                await userService["removeRoles"](input, "user_id");
+                await userService["removeRoles"](input, "user_id", false);
                 //Assert
                 expect(updateStationSpy).toHaveBeenCalledTimes(1);
                 expect(getRolesByNameSpy).toHaveBeenCalledTimes(1);
+                expect(pgGrpSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("Non admin , when requested to remove roles from TDEI default group, Expect to throw error", async () => {
+                //Arrange
+                let input = new RolesReqDto({
+                    user_name: "user_name",
+                    roles: [Role.TDEI_ADMIN]
+                });
+
+                let dbRoles = new Map<string, string>();
+                dbRoles.set(Role.DATA_GENERATOR, "101");
+                dbRoles.set(Role.POC, "102");
+                dbRoles.set(Role.TDEI_ADMIN, "103");
+
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1 //effected row,
+                }
+                const pgGrpSpy = jest
+                    .spyOn(projectgroupService, "getProjectGroupById")
+                    .mockResolvedValueOnce(<any>{ project_group_name: "TDEI Default", tdei_project_group_id: "tdei_project_group_id" });
+                const getRolesByNameSpy = jest
+                    .spyOn(UserManagementService.prototype as any, "getRolesByNames")
+                    .mockResolvedValueOnce(dbRoles);
+                //Act
+
+                //Assert
+                await expect(userService["removeRoles"](input, "user_id", false)).rejects.toThrow(new HttpException(400, "Default project group permissions can be revoked only by Admin."));
+
+                expect(getRolesByNameSpy).toHaveBeenCalledTimes(1);
+                expect(pgGrpSpy).toHaveBeenCalledTimes(1);
             });
         });
     });
