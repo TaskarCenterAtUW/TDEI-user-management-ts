@@ -368,6 +368,38 @@ describe("User Management Controller Test", () => {
                 expect(res.send).toBeCalledWith(response);
             });
 
+            test("When provided username with + sign, Expect to return user profile details", async () => {
+                //Arrange
+                let req = getMockReq({ query: <any>{ "user_name": "test+user" } });
+                const { res, next } = getMockRes();
+                let response = new UserProfile({ username: "test+user" });
+                const getUserProfileSpy = jest
+                    .spyOn(userManagementService, "getUserProfile")
+                    .mockResolvedValueOnce(response);
+                //Act
+                await userManagementController.getUserProfile(req, res, next);
+                //Assert
+                expect(getUserProfileSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(response);
+            });
+
+            test("When provided username with encoded user_name, Expect to return user profile details", async () => {
+                //Arrange
+                let req = getMockReq({ query: <any>{ "user_name": "test%2Bdev%40test.com" } });//test+dev@test.com
+                const { res, next } = getMockRes();
+                let response = new UserProfile({ username: "test+dev@test.com" });
+                const getUserProfileSpy = jest
+                    .spyOn(userManagementService, "getUserProfile")
+                    .mockResolvedValueOnce(response);
+                //Act
+                await userManagementController.getUserProfile(req, res, next);
+                //Assert
+                expect(getUserProfileSpy).toHaveBeenCalledTimes(1);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(response);
+            });
+
             test("When not provided user_name, Expect to return HTTP status 400", async () => {
                 //Arrange
                 let req = getMockReq();
