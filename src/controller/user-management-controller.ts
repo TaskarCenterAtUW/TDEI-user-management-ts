@@ -92,6 +92,10 @@ class UserManagementController implements IController {
             let user_name = request.query.user_name;
             if (user_name == undefined || user_name == null) throw new HttpException(400, "user_name query param missing");
 
+            const rawQuery = request.originalUrl.split("?")[1] || "";
+            const match = rawQuery.match(/user_name=([^&]*)/);
+            user_name = match ? match[1] : "";
+            user_name = decodeURIComponent(user_name);
             return userManagementServiceInstance.getUserProfile(user_name as string).then((result) => {
                 Ok(response, result);
             }).catch((error: any) => {
