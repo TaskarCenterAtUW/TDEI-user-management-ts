@@ -12,6 +12,11 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
 
         let authToken = Utility.extractToken(req);
 
+        if (roles.length > 0 && authToken == null) {
+            next(new Forbidden());
+            return;
+        }
+
         if (authToken == null) {
 
             if (allowInraCom) {
