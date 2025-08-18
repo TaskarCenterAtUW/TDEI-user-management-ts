@@ -1,0 +1,1 @@
+DROP COLUMN IF EXISTS data_viewer_config;

@@ -11,6 +11,7 @@ import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-
 import { Utility } from "../utility/utility";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
 import { listRequestValidation } from "../middleware/list-request-validation-middleware";
+import { DatasetViewerDto } from "../model/dto/dataset-viewer-dto";
 
 class ProjectGroupController implements IController {
     public path = '';
@@ -26,6 +27,26 @@ class ProjectGroupController implements IController {
         this.router.get(`${this.path}/api/v1/project-group`, listRequestValidation, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
         this.router.get(`${this.path}/api/v1/project-group/:projectGroupId/users`, authorizationMiddleware([Role.TDEI_ADMIN, Role.POC], true), this.getProjectGroupUsers);
         this.router.put(`${this.path}/api/v1/project-group/:projectGroupId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteProjectGroup);
+        this.router.put(`${this.path}/api/v1/project-group/:projectGroupId/dataset-viewer`, authorizationMiddleware([Role.TDEI_ADMIN, Role.POC], true), validationMiddleware(DatasetViewerDto), this.putDatasetViewer);
+    }
+
+    /**
+     * Gets the dataset viewer configuration for a project group
+     * @param req - The request object
+     * @param res - The response object
+     * @param next - The next middleware function
+     */
+    putDatasetViewer(req: Request, res: express.Response, next: NextFunction) {
+        let projectGroupId = req.params.projectGroupId;
+        let datasetViewerConfig = DatasetViewerDto.from(req.body);
+
+        return projectGroupService.updateDatasetViewerConfig(projectGroupId, datasetViewerConfig)
+            .then((result) => {
+                Ok(res, result);
+            }).catch((error: any) => {
+                let errorMessage = "Error updating the dataset viewer config.";
+                Utility.handleError(res, next, error, errorMessage);
+            });
     }
 
     public deleteProjectGroup = async (request: Request, response: express.Response, next: NextFunction) => {
