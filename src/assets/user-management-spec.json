@@ -1066,6 +1066,17 @@
                 "summary": "Updates the project group data viewer preferences",
                 "description": "Updates the project group data viewer preferences.",
                 "operationId": "updateDataViewer",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "The ID of the project group to update.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
                 "requestBody": {
                     "content": {
                         "application/json": {
