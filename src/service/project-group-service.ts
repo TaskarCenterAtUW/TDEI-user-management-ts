@@ -12,9 +12,33 @@ import { Geometry, Feature } from "geojson";
 import format from "pg-format";
 import { DEFAULT_PROJECT_GROUP } from "../constants/role-constants";
 import HttpException from "../exceptions/http/http-base-exception";
-
+import { DatasetViewerDto } from "../model/dto/dataset-viewer-dto";
 
 class ProjectGroupService implements IProjectGroupService {
+
+    /**
+     * Updates the dataset viewer configuration for a project group
+     * @param projectGroupId - The ID of the project group
+     * @param config - The dataset viewer configuration
+     * @returns A promise that resolves to true if the update was successful
+     */
+    async updateDatasetViewerConfig(projectGroupId: string, config: DatasetViewerDto): Promise<boolean> {
+        // Assume there is a dataset_viewer_config table with columns: project_group_id, config (jsonb)
+
+        //Check project group id exists
+        if (projectGroupId) {
+            await this.getProjectGroupById(projectGroupId);
+        }
+
+        let query = config.getUpdateDatasetViewerQuery(projectGroupId);
+
+        try {
+            await dbClient.query(query);
+            return true;
+        } catch (e) {
+            throw e;
+        }
+    }
 
     async setProjectGroupStatus(projectGroupId: string, status: boolean): Promise<boolean> {
         //Default project group should not be deactivated
@@ -141,6 +165,7 @@ class ProjectGroupService implements IProjectGroupService {
                     let projectgroup = ProjectGroupListResponse.from(x);
                     projectgroup.tdei_project_group_id = x.project_group_id;
                     projectgroup.project_group_name = x.name;
+                    projectgroup.data_viewer_config = DatasetViewerDto.from(x.data_viewer_config);
                     if (projectgroup.polygon) {
                         var polygon = JSON.parse(x.polygon) as Geometry;
                         projectgroup.polygon = {
