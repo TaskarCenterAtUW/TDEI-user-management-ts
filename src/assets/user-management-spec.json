@@ -1059,7 +1059,7 @@
             }
         },
         "/api/v1/project-group/{projectGroupId}/dataset-viewer": {
-            "put": {
+            "post": {
                 "tags": [
                     "ProjectGroup"
                 ],
