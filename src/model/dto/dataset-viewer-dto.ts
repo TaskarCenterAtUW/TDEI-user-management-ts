@@ -18,7 +18,7 @@ export class FeedbackTurnaroundTime {
 
     @IsNotEmpty()
     @IsEnum(TimeUnit)
-    unit!: TimeUnit;
+    units!: TimeUnit;
 }
 
 export class DatasetViewerDto extends BaseDto {
