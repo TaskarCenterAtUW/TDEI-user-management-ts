@@ -11,11 +11,13 @@ export enum TimeUnit {
     YEARS = "years"
 }
 
-export class FeedbackTurnaroundTime {
+export class FeedbackTurnaroundTime extends BaseDto {
+    @Prop()
     @IsNotEmpty()
     @IsNumber()
     number!: number;
 
+    @Prop()
     @IsNotEmpty()
     @IsEnum(TimeUnit)
     units!: TimeUnit;
@@ -39,8 +41,12 @@ export class DatasetViewerDto extends BaseDto {
     }
 
     async validateRequestInput() {
-        const dto = plainToInstance(this.constructor as new () => DatasetViewerDto, this);
-        let errors = await validate(dto);
+        // Ensure nested object exists
+        // if (!this.feedback_turnaround_time) {
+        //     this.feedback_turnaround_time = new FeedbackTurnaroundTime();
+        // }
+        // const dto = plainToInstance(this.constructor as new () => DatasetViewerDto, this);
+        let errors = await validate(this);
         if (errors.length > 0) {
             console.log('Input validation failed');
             let message = errors

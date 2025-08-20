@@ -774,6 +774,15 @@
                         }
                     },
                     {
+                        "name": "data_viewer_allowed",
+                        "in": "query",
+                        "description": "<strong>Data viewer allowed:</strong> Filters project groups based on whether data viewer access is allowed. Uses a boolean value.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
                         "name": "page_no",
                         "in": "query",
                         "description": "Page number to fetch",
