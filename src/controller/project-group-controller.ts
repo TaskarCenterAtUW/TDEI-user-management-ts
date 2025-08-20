@@ -11,7 +11,7 @@ import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-
 import { Utility } from "../utility/utility";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
 import { listRequestValidation } from "../middleware/list-request-validation-middleware";
-import { DatasetViewerDto } from "../model/dto/dataset-viewer-dto";
+import { DatasetViewerDto, FeedbackTurnaroundTime } from "../model/dto/dataset-viewer-dto";
 
 class ProjectGroupController implements IController {
     public path = '';
@@ -40,6 +40,8 @@ class ProjectGroupController implements IController {
         try {
             let projectGroupId = req.params.projectGroupId;
             let datasetViewerConfig = DatasetViewerDto.from(req.body);
+            datasetViewerConfig.feedback_turnaround_time = FeedbackTurnaroundTime.from(datasetViewerConfig.feedback_turnaround_time);
+
             await datasetViewerConfig.validateRequestInput();
             const result = await projectGroupService.updateDatasetViewerConfig(projectGroupId, datasetViewerConfig);
             Ok(res, result);

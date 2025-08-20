@@ -27,6 +27,9 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     show_inactive!: boolean;
+    @Prop()
+    @IsOptional()
+    data_viewer_allowed: boolean | undefined;
 
     constructor(init?: Partial<ProjectGroupQueryParams>) {
         super();
@@ -73,9 +76,35 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
             //Always pull active project group
             queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
         }
+        if (this.data_viewer_allowed != undefined) {
+            let dataViewerAllowed = this.toBoolean(this.data_viewer_allowed);
+            if (dataViewerAllowed) {
+                queryObject.condition(
+                    `o.data_viewer_config IS NOT NULL
+                AND (o.data_viewer_config::json ->> 'dataset_viewer_allowed') IS NOT NULL
+                AND (o.data_viewer_config::json ->> 'dataset_viewer_allowed')::boolean = $${queryObject.paramCouter++}`,
+                    this.data_viewer_allowed
+                );
+            } else {
+                queryObject.condition(
+                    `o.data_viewer_config IS NOT NULL
+                AND ( (o.data_viewer_config::json ->> 'dataset_viewer_allowed') IS NULL
+                OR (o.data_viewer_config::json ->> 'dataset_viewer_allowed')::boolean = $${queryObject.paramCouter++})`,
+                    this.data_viewer_allowed
+                );
+            }
+        }
 
         queryObject.buildGroupRaw("group by o.project_group_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
 
         return queryObject;
+    }
+
+    toBoolean(value: any): boolean {
+        if (typeof value === "boolean") return value;
+        if (typeof value === "string") {
+            return value.toLowerCase() === "true";
+        }
+        return Boolean(value); // fallback: null/undefined -> false, numbers -> truthy/falsy
     }
 }
