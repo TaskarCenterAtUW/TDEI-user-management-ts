@@ -1242,6 +1242,10 @@
                             "type": "string",
                             "description": "Role associated with project group."
                         }
+                    },
+                    "data_viewer_config": {
+                        "$ref": "#/components/schemas/data_viewer",
+                        "description": "Configuration settings for the dataset viewer."
                     }
                 },
                 "description": "User associated project groups and roles."
@@ -1565,33 +1569,7 @@
                         }
                     },
                     "data_viewer": {
-                        "type": "object",
-                        "properties": {
-                            "dataset_viewer_allowed": {
-                                "type": "boolean",
-                                "default": false,
-                                "description": "Flag to indicate to allow all datasets within the project group to be viewed on the dataset viewer."
-                            },
-                            "feedback_turnaround_time": {
-                                "type": "object",
-                                "description": "Feedback turnaround time for the project group.",
-                                "properties": {
-                                    "number": {
-                                        "type": "integer",
-                                        "description": "Number of days for feedback turnaround time."
-                                    },
-                                    "units": {
-                                        "type": "string",
-                                        "enum": [
-                                            "days",
-                                            "months",
-                                            "years"
-                                        ],
-                                        "description": "Unit of time for feedback turnaround time."
-                                    }
-                                }
-                            }
-                        },
+                        "$ref": "#/components/schemas/data_viewer",
                         "description": "Describes an Project group."
                     }
                 }

@@ -205,10 +205,10 @@ export class UserManagementService implements IUserManagement {
 
         let searchQuery = '';
         if (searchText && searchText.length > 0) {
-            searchQuery = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L AND o.name ILIKE %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, searchText + '%', take, skip);
+            searchQuery = format('SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L AND o.name ILIKE %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, searchText + '%', take, skip);
         }
         else {
-            searchQuery = format('SELECT o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
+            searchQuery = format('SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
         }
 
         return await dbClient.query(searchQuery)
@@ -218,7 +218,7 @@ export class UserManagementService implements IUserManagement {
                     projectGroupRole.project_group_name = x.project_group_name;
                     projectGroupRole.tdei_project_group_id = x.project_group_id;
                     projectGroupRole.roles = x.roles;
-
+                    projectGroupRole.data_viewer_config = x.data_viewer_config;
                     projectGroupRoleList.push(projectGroupRole);
                 });
                 return projectGroupRoleList;
