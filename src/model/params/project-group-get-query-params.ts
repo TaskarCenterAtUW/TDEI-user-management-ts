@@ -27,6 +27,9 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
     @IsOptional()
     @Prop()
     show_inactive!: boolean;
+    @Prop()
+    @IsOptional()
+    data_viewer_allowed: boolean | undefined;
 
     constructor(init?: Partial<ProjectGroupQueryParams>) {
         super();
@@ -43,7 +46,7 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
         COALESCE(json_agg(json_build_object('email', ue.email, 'username', ue.username, 'first_name', 
                                    ue.first_name,'last_name', ue.last_name,'enabled', ue.enabled) 
                 ) FILTER (WHERE ue.username IS NOT NULL), '[]')
-         as userDetails 
+         as userDetails, o.data_viewer_config 
         from project_group o         
         left join user_roles ur on o.project_group_id = ur.project_group_id and ur.role_id = (select role_id from roles where name='poc' limit 1)       
         left join keycloak.user_entity ue on ur.user_id = ue.id AND ue.enabled = true         
@@ -73,9 +76,35 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
             //Always pull active project group
             queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
         }
+        if (this.data_viewer_allowed != undefined) {
+            let dataViewerAllowed = this.toBoolean(this.data_viewer_allowed);
+            if (dataViewerAllowed) {
+                queryObject.condition(
+                    `o.data_viewer_config IS NOT NULL
+                AND (o.data_viewer_config::json ->> 'dataset_viewer_allowed') IS NOT NULL
+                AND (o.data_viewer_config::json ->> 'dataset_viewer_allowed')::boolean = $${queryObject.paramCouter++}`,
+                    this.data_viewer_allowed
+                );
+            } else {
+                queryObject.condition(
+                    `o.data_viewer_config IS NOT NULL
+                AND ( (o.data_viewer_config::json ->> 'dataset_viewer_allowed') IS NULL
+                OR (o.data_viewer_config::json ->> 'dataset_viewer_allowed')::boolean = $${queryObject.paramCouter++})`,
+                    this.data_viewer_allowed
+                );
+            }
+        }
 
         queryObject.buildGroupRaw("group by o.project_group_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
 
         return queryObject;
+    }
+
+    toBoolean(value: any): boolean {
+        if (typeof value === "boolean") return value;
+        if (typeof value === "string") {
+            return value.toLowerCase() === "true";
+        }
+        return Boolean(value); // fallback: null/undefined -> false, numbers -> truthy/falsy
     }
 }

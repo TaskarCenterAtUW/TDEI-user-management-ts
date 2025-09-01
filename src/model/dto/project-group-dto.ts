@@ -4,6 +4,7 @@ import { BaseDto } from "./base-dto";
 import { Prop } from "nodets-ms-core/lib/models";
 import { QueryConfig } from "pg";
 import { FeatureCollection } from "geojson";
+import { DatasetViewerDto } from "./dataset-viewer-dto";
 
 export class ProjectGroupDto extends BaseDto {
     @Prop()
@@ -32,6 +33,9 @@ export class ProjectGroupDto extends BaseDto {
     @IsValidPolygon()
     @Prop()
     polygon!: FeatureCollection;
+    @IsOptional()
+    @Prop()
+    data_viewer_config!: DatasetViewerDto;
 
     constructor(init?: Partial<ProjectGroupDto>) {
         super();
