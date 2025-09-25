@@ -1,16 +1,16 @@
-import { RequestHandler } from 'express';
+import {RequestHandler} from 'express';
 import HttpException from '../exceptions/http/http-base-exception';
-import fetch, { Response } from 'node-fetch';
+import fetch, {Response} from 'node-fetch';
 import jwt_decode from 'jwt-decode';
-import { Forbidden, UnAuthenticated } from '../exceptions/http/http-exceptions';
-import { UserProfile } from '../model/dto/user-profile-dto';
-import { Utility } from '../utility/utility';
-import { environment } from '../environment/environment';
+import {Forbidden, UnAuthenticated} from '../exceptions/http/http-exceptions';
+import {UserProfile} from '../model/dto/user-profile-dto';
+import {Utility} from '../utility/utility';
+import {environment} from '../environment/environment';
 
 function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean, allowInraCom?: boolean): RequestHandler {
     return async (req, res, next) => {
 
-        let authToken = Utility.extractToken(req);
+        const authToken = Utility.extractToken(req);
 
         if (roles.length > 0 && authToken == null) {
             next(new Forbidden());
@@ -21,9 +21,9 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
 
             if (allowInraCom) {
                 //Check if intranet communication
-                let secretToken = Utility.extractSecret(req);
+                const secretToken = Utility.extractSecret(req);
                 if (secretToken != null) {
-                    let isValidated = await Utility.verifySecret(secretToken);
+                    const isValidated = await Utility.verifySecret(secretToken);
                     if (isValidated) {
                         next(); return;
                     }
@@ -31,9 +31,9 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
             }
             if (Utility.extractApiKey(req) != null) {
                 //Check if intranet communication
-                let apiKey = Utility.extractApiKey(req);
+                const apiKey = Utility.extractApiKey(req);
                 if (apiKey != null) {
-                    let isValidated = await Utility.verifyApiKey(apiKey);
+                    const isValidated = await Utility.verifyApiKey(apiKey);
                     if (isValidated) {
                         next(); return;
                     }
@@ -46,20 +46,19 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
         else {
 
             try {
-                var userProfile = await validateAccessToken(authToken);
                 //Set request context
-                req.userProfile = userProfile;
+                req.userProfile = await validateAccessToken(authToken);
 
                 if (roles.length > 0) {
-                    var decoded: any = jwt_decode(authToken);
+                    const decoded: any = jwt_decode(authToken);
 
-                    var url = new URL(environment.permissionUrl as string);
-                    let params = new URLSearchParams();
+                    const url = new URL(environment.permissionUrl as string);
+                    const params = new URLSearchParams();
                     params.append("userId", decoded.sub);
                     //Set request context
                     req.userId = decoded.sub;
                     if (validateProjectGroup) {
-                        let projectGroup_id = req.params.projectGroupId ? req.params.projectGroupId : req.body.tdei_project_group_id;
+                        const projectGroup_id = req.params.projectGroupId ? req.params.projectGroupId : req.body.tdei_project_group_id;
                         params.append("projectGroupId", projectGroup_id);
                     }
 
@@ -73,7 +72,7 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
                         throw new Error();
                     }
                     else {
-                        var satisfied: boolean = await resp.json();
+                        const satisfied: boolean = await resp.json();
                         if (satisfied) {
                             next();
                             return;
@@ -97,7 +96,7 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
     };
 }
 
-async function validateAccessToken(token: String): Promise<UserProfile> {
+async function validateAccessToken(token: string): Promise<UserProfile> {
     let userProfile = new UserProfile();
     try {
         const result = await fetch(environment.validateAccessTokenUrl as string, {
