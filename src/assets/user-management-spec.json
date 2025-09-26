@@ -774,6 +774,15 @@
                         }
                     },
                     {
+                        "name": "data_viewer_allowed",
+                        "in": "query",
+                        "description": "<strong>Data viewer allowed:</strong> Filters project groups based on whether data viewer access is allowed. Uses a boolean value.",
+                        "required": false,
+                        "schema": {
+                            "type": "boolean"
+                        }
+                    },
+                    {
                         "name": "page_no",
                         "in": "query",
                         "description": "Page number to fetch",
@@ -1058,6 +1067,51 @@
                 }
             }
         },
+        "/api/v1/project-group/{projectGroupId}/dataset-viewer": {
+            "post": {
+                "tags": [
+                    "ProjectGroup"
+                ],
+                "summary": "Updates the project group data viewer preferences",
+                "description": "Updates the project group data viewer preferences.",
+                "operationId": "updateDataViewer",
+                "parameters": [
+                    {
+                        "name": "projectGroupId",
+                        "in": "path",
+                        "description": "The ID of the project group to update.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/data_viewer"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Project group data viewer preferences updated successfully."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "An server error occurred."
+                    }
+                }
+            }
+        },
         "/api/v1/reset-credentials": {
             "post": {
                 "tags": [
@@ -1188,6 +1242,10 @@
                             "type": "string",
                             "description": "Role associated with project group."
                         }
+                    },
+                    "data_viewer_config": {
+                        "$ref": "#/components/schemas/data_viewer",
+                        "description": "Configuration settings for the dataset viewer."
                     }
                 },
                 "description": "User associated project groups and roles."
@@ -1441,6 +1499,40 @@
                 },
                 "description": "Describes an Project Group."
             },
+            "data_viewer": {
+                "type": "object",
+                "properties": {
+                    "dataset_viewer_allowed": {
+                        "type": "boolean",
+                        "default": false,
+                        "description": "Flag to indicate to allow all datasets within the project group to be viewed on the dataset viewer."
+                    },
+                    "feedback_turnaround_time": {
+                        "required": [
+                            "number",
+                            "units"
+                        ],
+                        "type": "object",
+                        "description": "Feedback turnaround time for the project group.",
+                        "properties": {
+                            "number": {
+                                "type": "integer",
+                                "description": "Number of days for feedback turnaround time."
+                            },
+                            "units": {
+                                "type": "string",
+                                "enum": [
+                                    "days",
+                                    "months",
+                                    "years"
+                                ],
+                                "description": "Unit of time for feedback turnaround time."
+                            }
+                        }
+                    }
+                },
+                "description": "Describes an Project group."
+            },
             "ProjectGroupList": {
                 "type": "object",
                 "properties": {
@@ -1475,9 +1567,12 @@
                             "$ref": "#/components/schemas/POC",
                             "description": "POC details"
                         }
+                    },
+                    "data_viewer": {
+                        "$ref": "#/components/schemas/data_viewer",
+                        "description": "Describes an Project group."
                     }
-                },
-                "description": "Describes an Project group."
+                }
             },
             "POC": {
                 "type": "object",
