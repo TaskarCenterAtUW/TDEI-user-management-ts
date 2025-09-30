@@ -7,6 +7,7 @@ var fs = require('fs');
 var path = require('path');
 var Promise;
 
+
 exports.setup = (options, seedLink) => {
   dbm = options.dbmigrate;
   type = dbm.dataType;
