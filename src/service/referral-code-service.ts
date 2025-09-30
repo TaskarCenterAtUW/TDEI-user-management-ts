@@ -84,7 +84,7 @@ class ReferralCodeService implements IReferralCodeService {
         }
     }
 
-    async updateReferralCode(projectGroupId: string, codeId: string, referralCode: ReferralCodeDto, userId: string): Promise<ReferralCodeDto> {
+    async updateReferralCode(projectGroupId: string, codeId: string, referralCodeModel: ReferralCodeDto, userId: string): Promise<ReferralCodeDto> {
         if (!userId) {
             throw new HttpException(400, "User context missing for updating referral code");
         }
@@ -92,9 +92,9 @@ class ReferralCodeService implements IReferralCodeService {
             throw new HttpException(400, "Referral code id is required");
         }
 
-        await this.checkReferralCodeExists({ codeId, projectGroupId });
+        await this.checkReferralCodeExists({ codeId });
 
-        const normalized = this.normalizeReferralCodeInput(referralCode);
+        const normalized = this.normalizeReferralCodeInput(referralCodeModel);
 
         const existingCode = await this.checkReferralCodeExists({ code: normalized.code });
         if (existingCode && existingCode.id !== codeId) {
@@ -137,7 +137,7 @@ class ReferralCodeService implements IReferralCodeService {
         }
         catch (error) {
             if (error instanceof UniqueKeyDbException) {
-                throw new DuplicateException(`Referral code '${referralCode.code}' already exists.`);
+                throw new DuplicateException(`Referral code '${referralCodeModel.code}' already exists.`);
             }
             throw error;
         }
@@ -169,11 +169,9 @@ class ReferralCodeService implements IReferralCodeService {
 
     private async checkReferralCodeExists({
                                               codeId,
-                                              projectGroupId,
                                               code,
                                           }: {
         codeId?: string;
-        projectGroupId?: string;
         code?: string;
     }): Promise<{ id: string; is_active: boolean } | null> {
         let index = 1;
@@ -183,11 +181,6 @@ class ReferralCodeService implements IReferralCodeService {
         if (codeId) {
             conditions.push(`id = $${index++}`);
             values.push(codeId);
-        }
-
-        if (projectGroupId) {
-            conditions.push(`project_group_id = $${index++}`);
-            values.push(projectGroupId);
         }
 
         if (code) {
