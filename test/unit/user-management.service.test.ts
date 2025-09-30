@@ -13,6 +13,11 @@ import { ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
 import { ResetCredentialsDto } from "../../src/model/dto/reset-credentials-dto";
 import projectgroupService from "../../src/service/project-group-service";
 
+beforeEach(() => {
+    jest.clearAllMocks();
+    fetchMock.resetMocks();
+});
+
 // group test using describe
 describe("User Management Service Test", () => {
 
@@ -118,6 +123,53 @@ describe("User Management Service Test", () => {
                 expect(getDbSpy).toHaveBeenCalledTimes(1);
             });
 
+            test("When requested with promo code, Expect to return user profile response on success with instruction url (optional) and token ", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "PROMO123"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<UserProfile>{
+                        firstName: "firstname",
+                        lastName: "lastname",
+                        email: "email",
+                        phone: "phone",
+                        id: "id",
+                        username: "email",
+                        emailVerified: true,
+                        apiKey: "apiKey",
+                        instructions_url: "http://example.com/instructions",
+                        token: "token"
+                    }),
+                }));
+                const getDbPromoSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [{ code: 'PROMO123' }] });
+                const getDbRoleByNamesSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [{ role_id: 'role_id_1', name: Role.TDEI_MEMBER }] });
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{});
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                //Act
+                let result = await userManagementServiceInstance.registerUser(newuser);
+                //Assert
+                // expect(result.apiKey).toBe("apiKey");
+                expect(getDbPromoSpy).toHaveBeenCalled();
+                expect(getDbSpy).toHaveBeenCalled();
+                expect(getLoginSpy).toHaveBeenCalled();
+                expect(getDbRoleByNamesSpy).toHaveBeenCalled();
+            });
+
             test("When user already exists with same email, Expect to throw error", async () => {
                 //Arrange
                 let newuser = new RegisterUserDto({
@@ -130,6 +182,25 @@ describe("User Management Service Test", () => {
                 fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
                     status: 409,
                     json: () => Promise.resolve("Error registering user"),
+                }));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.registerUser(newuser)).rejects.toThrow(Error);
+            });
+
+            test("When promo code is invalid, Expect to throw error", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "INVALIDCODE"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 410,
+                    json: () => Promise.resolve("Invalid/Expired referral code"),
                 }));
                 //Act
                 //Assert

@@ -16,6 +16,7 @@ import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 import projectgroupService from "./project-group-service";
+import { ReferralCodeDto } from "../model/dto/referral-code-dto";
 
 
 export class UserManagementService implements IUserManagement {
@@ -103,7 +104,20 @@ export class UserManagementService implements IUserManagement {
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
         try {
-            const result: Response = await fetch(environment.registerUserUrl as string, {
+            let referralCodeDetails: ReferralCodeDto | undefined = undefined;
+            //Check if referral code is valid
+            if (user.code && user.code.length > 0) {
+                let referralCodeQuery = format('SELECT * FROM promo_referrals WHERE UPPER(code) = %L AND is_active = true AND valid_from <= NOW() AND valid_to >= NOW() limit 1', user.code.toUpperCase());
+
+                const referralCodeResult = await dbClient.query(referralCodeQuery);
+                if (referralCodeResult.rows.length == 0) {
+                    throw new HttpException(410, "Invalid/Expired referral code");
+                }
+                referralCodeDetails = ReferralCodeDto.from(referralCodeResult.rows[0]);
+            }
+
+
+            const result: Response = await fetch(environment.registerUserUrl, {
                 method: 'post',
                 body: JSON.stringify(user),
                 headers: { 'Content-Type': 'application/json' }
@@ -123,12 +137,32 @@ export class UserManagementService implements IUserManagement {
             const data = await result.json();
             userProfile = new UserProfile(data);
 
-            //Assign user with default role and permissions
-            let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
-            SELECT %L, project_group_id, role_id
-            FROM roles, project_group
-            WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
-            await dbClient.query(queryStr);
+            //If referral code is valid, then assign the user to the project group associated with referral code with TDEI member role
+            //Else assign the user to default project group with TDEI member role
+            if (referralCodeDetails) {
+                const rolesDetails = await this.getRolesByNames([Role.TDEI_MEMBER]);
+                const role_id = rolesDetails.get(Role.TDEI_MEMBER);
+                let addRoleProjectQuery = format(`INSERT INTO user_roles (user_id, project_group_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING`, [[userProfile.id, referralCodeDetails.project_group_id, role_id]]);
+                await dbClient.query(addRoleProjectQuery);
+
+                //Update the instructions url in the user profile if exists
+                userProfile.instructions_url = referralCodeDetails.instructions_url;
+                //Generate the auth token and assign refresh token to user profile
+                const loginDto = new LoginDto();
+                loginDto.username = user.email;
+                loginDto.password = user.password;
+                const authResponse = await this.login(loginDto);
+                userProfile.token = authResponse.refresh_token;
+
+            }
+            else {
+                //Assign user with default role and permissions
+                let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
+                                        SELECT %L, project_group_id, role_id
+                                        FROM roles, project_group
+                                        WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
+                await dbClient.query(queryStr);
+            }
 
         } catch (error: any) {
             console.error(error);
