@@ -107,7 +107,8 @@ export class UserManagementService implements IUserManagement {
             let referralCodeDetails: ReferralCodeDto | undefined = undefined;
             //Check if referral code is valid
             if (user.code && user.code.length > 0) {
-                let referralCodeQuery = format('SELECT * FROM promo_referrals WHERE UPPER(code) = %L AND is_active = true AND valid_from <= NOW() AND valid_to >= NOW() limit 1', user.code.toUpperCase());
+                //valid_to can be null for indefinite validity
+                let referralCodeQuery = format('SELECT * FROM promo_referrals WHERE UPPER(code) = %L AND is_active = true AND valid_from <= NOW() AND (valid_to >= NOW() OR valid_to IS NULL) limit 1', user.code.toUpperCase());
 
                 const referralCodeResult = await dbClient.query(referralCodeQuery);
                 if (referralCodeResult.rows.length == 0) {
