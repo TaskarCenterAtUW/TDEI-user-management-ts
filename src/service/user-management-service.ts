@@ -103,11 +103,12 @@ export class UserManagementService implements IUserManagement {
      */
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
+        let promo_code_exists = false;
         try {
             let referralCodeDetails: ReferralCodeDto | undefined = undefined;
             //Check if referral code is valid
             if (user.code && user.code.length > 0) {
-                //valid_to can be null for indefinite validity
+                promo_code_exists = true;
                 let referralCodeQuery = format('SELECT * FROM promo_referrals WHERE UPPER(code) = %L AND is_active = true AND valid_from <= NOW() AND (valid_to >= NOW() OR valid_to IS NULL) limit 1', user.code.toUpperCase());
 
                 const referralCodeResult = await dbClient.query(referralCodeQuery);
@@ -124,30 +125,46 @@ export class UserManagementService implements IUserManagement {
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            if (result.status != undefined && result.status == 409)
-                throw new HttpException(409, "User already exists with email " + user.email);
-
-            if (result.status != undefined && result.status == 400) {
-                const data = await result.json();
-                throw new HttpException(400, `${data.message}, ${data.errors?.join(',')}`);
+            if (result.status === undefined) {
+                console.error("Invalid response from user registration service", result);
+                throw new Error("Error registering the user");
             }
 
-            if (result.status != undefined && result.status != 200)
-                throw new Error();
-
-            const data = await result.json();
-            userProfile = new UserProfile(data);
+            switch (result.status) {
+                case 200: {
+                    const data = await result.json();
+                    userProfile = new UserProfile(data);
+                    break;
+                }
+                case 400: {
+                    const data = await result.json();
+                    throw new HttpException(400, `${data.message}, ${data.errors?.join(',')}`);
+                }
+                case 409: {
+                    if (!promo_code_exists) {
+                        throw new HttpException(409, `User already exists with email ${user.email}`);
+                    } else {
+                        // Promo code exists, fetch user profile
+                        const data = await this.getUserProfile(user.email);
+                        userProfile = data;
+                    }
+                    break;
+                }
+                default: {
+                    throw new Error(`Error registering the user`);
+                }
+            }
 
             //If referral code is valid, then assign the user to the project group associated with referral code with TDEI member role
             //Else assign the user to default project group with TDEI member role
-            if (referralCodeDetails) {
+            if (promo_code_exists) {
                 const rolesDetails = await this.getRolesByNames([Role.TDEI_MEMBER]);
                 const role_id = rolesDetails.get(Role.TDEI_MEMBER);
-                let addRoleProjectQuery = format(`INSERT INTO user_roles (user_id, project_group_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING`, [[userProfile.id, referralCodeDetails.project_group_id, role_id]]);
+                let addRoleProjectQuery = format(`INSERT INTO user_roles (user_id, project_group_id, role_id) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING`, [[userProfile.id, referralCodeDetails!.project_group_id, role_id]]);
                 await dbClient.query(addRoleProjectQuery);
 
                 //Update the instructions url in the user profile if exists
-                userProfile.instructions_url = referralCodeDetails.instructions_url;
+                userProfile.instructions_url = referralCodeDetails!.instructions_url;
                 //Generate the auth token and assign refresh token to user profile
                 const loginDto = new LoginDto();
                 loginDto.username = user.email;

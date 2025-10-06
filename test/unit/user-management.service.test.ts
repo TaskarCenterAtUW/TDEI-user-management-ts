@@ -233,7 +233,67 @@ describe("User Management Service Test", () => {
                 expect(getDbRoleByNamesSpy).toHaveBeenCalled();
             });
 
-            test("When user already exists with same email, Expect to throw error", async () => {
+            test("When registered user requested with promo code do not throw error, Expect to return user profile response on success with instruction url (optional) and token ", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "PROMO123"
+                });
+                //User already registered, so user service returns 409
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 409
+                }));
+                //Fetch userprofile for the registered user
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<UserProfile>{
+                        firstName: "firstname",
+                        lastName: "lastname",
+                        email: "email",
+                        phone: "phone",
+                        id: "id",
+                        username: "email",
+                        emailVerified: true,
+                        apiKey: "apiKey",
+                        instructions_url: "http://example.com/instructions",
+                        token: "token"
+                    }),
+                }));
+                const referralCodeRow = {
+                    code: 'PROMO123',
+                    is_active: true,
+                    valid_from: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+                    valid_to: null,
+                    project_group_id: "pgid",
+                    instructions_url: "http://example.com/instructions"
+                };
+                const getDbPromoSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [referralCodeRow] });
+                const getDbRoleByNamesSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [{ role_id: 'role_id_1', name: Role.TDEI_MEMBER }] });
+                const getDbSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{});
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                //Act
+                let result = await userManagementServiceInstance.registerUser(newuser);
+                //Assert
+                // expect(result.apiKey).toBe("apiKey");
+                expect(getDbPromoSpy).toHaveBeenCalled();
+                expect(getDbSpy).toHaveBeenCalled();
+                expect(getLoginSpy).toHaveBeenCalled();
+                expect(getDbRoleByNamesSpy).toHaveBeenCalled();
+            });
+
+            test("When registered user requests with promo code, Expect to throw error", async () => {
                 //Arrange
                 let newuser = new RegisterUserDto({
                     firstName: "firstname",
