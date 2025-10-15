@@ -1,11 +1,11 @@
-import {RequestHandler} from 'express';
+import { RequestHandler } from 'express';
 import HttpException from '../exceptions/http/http-base-exception';
-import fetch, {Response} from 'node-fetch';
+import fetch, { Response } from 'node-fetch';
 import jwt_decode from 'jwt-decode';
-import {Forbidden, UnAuthenticated} from '../exceptions/http/http-exceptions';
-import {UserProfile} from '../model/dto/user-profile-dto';
-import {Utility} from '../utility/utility';
-import {environment} from '../environment/environment';
+import { Forbidden, UnAuthenticated } from '../exceptions/http/http-exceptions';
+import { UserProfile } from '../model/dto/user-profile-dto';
+import { Utility } from '../utility/utility';
+import { environment } from '../environment/environment';
 
 function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean, allowInraCom?: boolean): RequestHandler {
     return async (req, res, next) => {
@@ -96,7 +96,7 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
     };
 }
 
-async function validateAccessToken(token: string): Promise<UserProfile> {
+export async function validateAccessToken(token: string): Promise<UserProfile> {
     let userProfile = new UserProfile();
     try {
         const result = await fetch(environment.validateAccessTokenUrl as string, {

@@ -5,8 +5,31 @@ import { RoleDto } from "../../model/dto/roles-dto";
 import { LoginDto } from "../../model/dto/login-dto";
 import { ProjectGroupRoleDto } from "../../model/dto/project-group-role-dto";
 import { ResetCredentialsDto } from "../../model/dto/reset-credentials-dto";
+import { ReferralCodeDto } from "../../model/dto/referral-code-dto";
 
 export interface IUserManagement {
+
+    /**
+     * Applies the referral code to the user
+     * @param userId User ID
+     * @param referralCode Referral code
+     * @returns boolean flag
+     */
+    applyReferralCode(userId: string, referralCode: string): Promise<boolean>;
+
+    /**
+     * Fetches the referral code details
+     * @param referralCode Referral code
+     * @returns Referral code details
+     */
+    getReferralCodeDetails(referralCode: string): Promise<ReferralCodeDto>;
+    /**
+     * Authenticates the user with referral code
+     * @param loginModel User credentials
+     * @param referralCode Referral code
+     * @returns Access token
+     */
+    loginWithReferralCode(loginModel: LoginDto, referralCode: string): Promise<any>;
     /**
      * Resets the user credentials
      * @param ResetCredentialsDto user credentials

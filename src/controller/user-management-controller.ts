@@ -5,13 +5,15 @@ import { RegisterUserDto } from "../model/dto/register-user-dto";
 import { BadRequest, Ok } from "../model/http/http-responses";
 import userManagementServiceInstance from "../service/user-management-service";
 import { IController } from "./interface/controller-interface";
-import authorizationMiddleware from "../middleware/authorization-middleware";
+import authorizationMiddleware, { validateAccessToken } from "../middleware/authorization-middleware";
 import { Role } from "../constants/role-constants";
 import { LoginDto } from "../model/dto/login-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { Utility } from "../utility/utility";
 import jwt_decode from 'jwt-decode';
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
+import { ReferralCodeDto } from "../model/dto/referral-code-dto";
+import { ReferralCodeLiteDto } from "../model/dto/referral-code-light-dto";
 
 class UserManagementController implements IController {
     public path = '';
@@ -28,10 +30,42 @@ class UserManagementController implements IController {
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([], false, true), this.projectGroupRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
+        this.router.post(`${this.path}/api/v1/authenticate/:referral_code`, validationMiddleware(LoginDto), this.loginwithReferralCode);
+        this.router.get(`${this.path}/api/v1/referral-codes/:referral_code`, this.getReferralCodeDetails);
+        this.router.post(`${this.path}/api/v1/referral-codes/apply/:referral_code`, this.applyReferralCode);
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
         this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), validationMiddleware(ResetCredentialsDto), this.resetCredentials);
         this.router.get(`${this.path}/api/v1/users/download`, authorizationMiddleware([Role.TDEI_ADMIN]), this.downloadUsers);
+    }
+
+    public validateAccessToken = async (token: string) => {
+        return await validateAccessToken(token);
+    }
+
+    public applyReferralCode = async (request: Request, response: express.Response, next: NextFunction) => {
+        let referral_code = request.params.referral_code;
+        let authToken = Utility.extractToken(request);
+        let user_profile = await this.validateAccessToken(authToken!);
+
+        return userManagementServiceInstance.applyReferralCode(user_profile.id, referral_code).then((result) => {
+            Ok(response, result);
+        }).catch((error: any) => {
+            let errorMessage = "Error applying the referral code";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public getReferralCodeDetails = async (request: Request, response: express.Response, next: NextFunction) => {
+        let referral_code = request.params.referral_code;
+
+        return userManagementServiceInstance.getReferralCodeDetails(referral_code).then((details: ReferralCodeDto) => {
+            let referralCodeLite = new ReferralCodeLiteDto(details);
+            Ok(response, referralCodeLite);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the referral code details";
+            Utility.handleError(response, next, error, errorMessage);
+        });
     }
 
     public downloadUsers = async (request: Request, response: express.Response, next: NextFunction) => {
@@ -167,6 +201,17 @@ class UserManagementController implements IController {
             Ok(response, { data: user });
         });
 
+    }
+
+    public loginwithReferralCode = async (request: Request, response: express.Response, next: NextFunction) => {
+        let loginBody = LoginDto.from(request.body);
+
+        return userManagementServiceInstance.loginWithReferralCode(loginBody, request.params.referral_code).then((details) => {
+            Ok(response, details);
+        }).catch((error: any) => {
+            let errorMessage = "Error authenticating the user";
+            Utility.handleError(response, next, error, errorMessage);
+        });
     }
 
     public updatePermissions = async (request: Request, response: express.Response, next: NextFunction) => {

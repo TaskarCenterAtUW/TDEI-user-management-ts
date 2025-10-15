@@ -77,6 +77,10 @@ export class ReferralCodeDto extends BaseDto {
     @IsBoolean()
     is_active?: boolean;
 
+    @Prop()
+    @MaxLength(2048)
+    redirect_url!: string;
+
     constructor(init?: Partial<ReferralCodeDto>) {
         super();
         Object.assign(this, init);

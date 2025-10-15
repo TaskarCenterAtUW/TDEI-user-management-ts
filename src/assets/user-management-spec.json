@@ -77,6 +77,143 @@
                 }
             }
         },
+        "/api/v1/authenticate/{referral_code}": {
+            "post": {
+                "tags": [
+                    "Auth"
+                ],
+                "summary": "Authenticates the user to the TDEI system with referral code",
+                "description": "Authenticates the user to the TDEI system with referral code.  Returns token and promo details.",
+                "operationId": "authenticateWithReferralCode",
+                "parameters": [
+                    {
+                        "name": "referral_code",
+                        "in": "path",
+                        "description": "Referral code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/Login"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "401": {
+                        "description": "User not found or invalid credentials."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns the access token object.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReferralLoginResponse"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
+        "/api/v1/referral-codes/{referral_code}": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets the referral code details",
+                "description": "Gets the referral code details.",
+                "operationId": "getReferralCodeDetails",
+                "parameters": [
+                    {
+                        "name": "referral_code",
+                        "in": "path",
+                        "description": "Referral code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns true if referral code applied successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/ReferralCodeLiteResponse"
+                                }
+                            }
+                        }
+                    },
+                    "410": {
+                        "description": "Referral code is expired or inactive."
+                    },
+                    "500": {
+                        "description": "An Internal server error occured."
+                    }
+                },
+                "security": []
+            }
+        },
+        "/api/v1/referral-codes/apply/{referral_code}": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Applies the referral code to the user",
+                "description": "Applies the referral code to the user.",
+                "operationId": "applyReferralCode",
+                "parameters": [
+                    {
+                        "name": "referral_code",
+                        "in": "path",
+                        "description": "Referral code",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "401": {
+                        "description": "User not found or invalid credentials."
+                    },
+                    "410": {
+                        "description": "Referral code is expired or inactive."
+                    },
+                    "200": {
+                        "description": "Successful response - Returns true if referral code applied successfully.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "boolean"
+                                }
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                }
+            }
+        },
         "/api/v1/user-profile": {
             "get": {
                 "tags": [
@@ -1480,6 +1617,37 @@
     },
     "components": {
         "schemas": {
+            "ReferralLoginResponse": {
+                "type": "object",
+                "properties": {
+                    "token": {
+                        "type": "object",
+                        "properties": {
+                            "access_token": {
+                                "type": "string"
+                            },
+                            "expires_in": {
+                                "type": "integer"
+                            },
+                            "refresh_expires_in": {
+                                "type": "integer"
+                            },
+                            "refresh_token": {
+                                "type": "string"
+                            }
+                        },
+                        "description": "Describes a user registration details."
+                    },
+                    "instructions_url": {
+                        "type": "string",
+                        "description": "URL with instructions for next steps after referral login successful."
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "description": "URL to redirect the user after login."
+                    }
+                }
+            },
             "Token": {
                 "type": "object",
                 "properties": {
@@ -2050,18 +2218,14 @@
                         "description": "Referral or promo code value."
                     },
                     "valid_to": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "date-time",
                         "description": "End date/time for limited time codes."
                     },
                     "instructions_url": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "uri",
                         "description": "URL for post-registration instructions."
                     },
@@ -2086,15 +2250,18 @@
                         "description": "Timestamp when the code was last updated."
                     },
                     "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "description": "Additional information about the referral code."
                     },
                     "is_active": {
                         "type": "boolean",
                         "description": "Indicates whether the referral code is active."
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "URL to redirect user after applying the code."
                     }
                 },
                 "description": "Describes a referral or promo code."
@@ -2130,27 +2297,26 @@
                         "description": "Referral or promo code value."
                     },
                     "valid_to": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "date-time",
                         "description": "End date/time for limited time codes."
                     },
                     "instructions_url": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "uri",
                         "description": "URL for post-registration instructions."
                     },
                     "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "description": "Additional information about the referral code."
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "URL to redirect user after applying the code."
                     }
                 },
                 "description": "Request body for creating a referral or promo code."
@@ -2192,27 +2358,26 @@
                         "description": "Referral or promo code value."
                     },
                     "valid_to": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "date-time",
                         "description": "End date/time for limited time codes."
                     },
                     "instructions_url": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "format": "uri",
                         "description": "URL for post-registration instructions."
                     },
                     "description": {
-                        "type": [
-                            "string",
-                            "null"
-                        ],
+                        "type": "string",
+                        "nullable": true,
                         "description": "Additional information about the referral code."
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "URL to redirect user after applying the code."
                     }
                 },
                 "description": "Request body for updating a referral or promo code."
@@ -2254,6 +2419,56 @@
                     }
                 },
                 "description": "Paginated response for referral codes."
+            },
+            "ReferralCodeLiteResponse": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Display name for the referral code."
+                    },
+                    "type": {
+                        "type": "integer",
+                        "enum": [
+                            1,
+                            2
+                        ],
+                        "description": "Type of referral code. 1 = always available, 2 = limited time."
+                    },
+                    "valid_from": {
+                        "type": "string",
+                        "format": "date-time",
+                        "description": "Start date/time from which the code is valid."
+                    },
+                    "code": {
+                        "type": "string",
+                        "description": "Referral or promo code value."
+                    },
+                    "valid_to": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "date-time",
+                        "description": "End date/time for limited time codes."
+                    },
+                    "instructions_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "description": "URL for post-registration instructions."
+                    },
+                    "description": {
+                        "type": "string",
+                        "nullable": true,
+                        "description": "Additional information about the referral code."
+                    },
+                    "redirect_url": {
+                        "type": "string",
+                        "nullable": true,
+                        "format": "uri",
+                        "description": "URL to redirect user after applying the code."
+                    }
+                },
+                "description": "Request body for updating a referral or promo code."
             }
         },
         "securitySchemes": {
