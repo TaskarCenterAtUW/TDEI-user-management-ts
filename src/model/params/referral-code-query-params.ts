@@ -58,6 +58,7 @@ export class ReferralCodeQueryParams extends AbstractDomainEntity {
             "updated_at",
             "description",
             "is_active",
+            "redirect_url"
         ]);
         this.applyFilters(queryObject, projectGroupId);
         queryObject.buildOrder("created_at", SqlORder.DESC);
