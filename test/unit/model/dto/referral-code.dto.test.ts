@@ -62,6 +62,7 @@ describe("ReferralCodeDto validation", () => {
             created_at: "2025-09-01T00:00:00Z",
             updated_at: "2025-09-15T00:00:00Z",
             is_active: true,
+            redirect_url: "https://example.com/welcome",
         });
 
         const errors = await validate(dto);

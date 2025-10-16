@@ -56,9 +56,9 @@ class ReferralCodeService implements IReferralCodeService {
 
         const query = {
             text: `INSERT INTO promo_referrals
-                   (name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, description, is_active)
-                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true)
-                       RETURNING id, name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, created_at, updated_at, description, is_active`,
+                   (name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, description, is_active, redirect_url)
+                   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, true, $10)
+                       RETURNING id, name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, created_at, updated_at, description, is_active, redirect_url`,
             values: [
                 normalized.name,
                 normalized.type,
@@ -69,6 +69,7 @@ class ReferralCodeService implements IReferralCodeService {
                 normalized.project_group_id,
                 normalized.user_id,
                 normalized.description ?? null,
+                normalized.redirect_url ?? null
             ],
         };
 
@@ -111,9 +112,10 @@ class ReferralCodeService implements IReferralCodeService {
                        instructions_url = $6,
                        description = $7,
                        updated_at = now(),
-                       user_id = $8
+                       user_id = $8,
+                       redirect_url = $11
                    WHERE id = $9 AND project_group_id = $10 AND is_active = true
-                       RETURNING id, name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, created_at, updated_at, description, is_active`,
+                       RETURNING id, name, type, valid_from, code, valid_to, instructions_url, project_group_id, user_id, created_at, updated_at, description, is_active, redirect_url`,
             values: [
                 normalized.name,
                 normalized.type,
@@ -125,6 +127,7 @@ class ReferralCodeService implements IReferralCodeService {
                 userId,
                 codeId,
                 projectGroupId,
+                normalized.redirect_url ?? null
             ],
         };
 
@@ -168,9 +171,9 @@ class ReferralCodeService implements IReferralCodeService {
     }
 
     private async checkReferralCodeExists({
-                                              codeId,
-                                              code,
-                                          }: {
+        codeId,
+        code,
+    }: {
         codeId?: string;
         code?: string;
     }): Promise<{ id: string; is_active: boolean } | null> {
