@@ -147,6 +147,7 @@ describe("ReferralCodeService", () => {
                 updated_at: "2025-09-01T00:00:00Z",
                 description: "Great promo",
                 is_active: true,
+                redirect_url: null
             };
 
             const querySpy = jest
@@ -182,6 +183,7 @@ describe("ReferralCodeService", () => {
                     "proj",
                     "user",
                     "Great promo",
+                    null
                 ],
             }));
             expect(result).toBeInstanceOf(ReferralCodeDto);
@@ -277,6 +279,7 @@ describe("ReferralCodeService", () => {
                 updated_at: "2025-09-01T00:00:00Z",
                 description: null,
                 is_active: true,
+                redirect_url: null
             };
 
             const querySpy = jest
@@ -312,6 +315,7 @@ describe("ReferralCodeService", () => {
                     "proj",
                     "user",
                     null,
+                    null
                 ],
             }));
         });
@@ -362,6 +366,7 @@ describe("ReferralCodeService", () => {
                 updated_at: "2025-09-02T00:00:00Z",
                 description: null,
                 is_active: true,
+                redirect_url: null,
             };
             const updateResult: QueryResult = {
                 rows: [updatedRow],
@@ -399,6 +404,7 @@ describe("ReferralCodeService", () => {
                     "user",
                     "code-id",
                     "proj",
+                    null
                 ],
             }));
             expect(result).toBeInstanceOf(ReferralCodeDto);
