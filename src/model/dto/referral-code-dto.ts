@@ -78,7 +78,7 @@ export class ReferralCodeDto extends BaseDto {
     is_active?: boolean;
 
     @Prop()
-    @IsNotEmpty()
+    @IsOptional()
     @MaxLength(2048)
     redirect_url!: string;
 
