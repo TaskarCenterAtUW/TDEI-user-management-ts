@@ -29,6 +29,9 @@ export class RegisterUserDto extends BaseDto {
     )
     @Prop()
     password!: string;
+    @IsOptional()
+    @Prop()
+    code!: string;
 
     constructor(init?: Partial<RegisterUserDto>) {
         super();
