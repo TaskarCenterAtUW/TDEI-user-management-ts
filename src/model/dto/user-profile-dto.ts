@@ -7,6 +7,9 @@ export class UserProfile {
     emailVerified!: boolean
     username!: string
     apiKey!: string;
+    instructions_url!: string | null | undefined;
+    redirect_url!: string | null | undefined;
+    token!: string;
     constructor(init?: Partial<UserProfile>) {
         Object.assign(this, init);
     }

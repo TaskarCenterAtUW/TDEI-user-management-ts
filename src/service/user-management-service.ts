@@ -16,9 +16,37 @@ import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 import projectgroupService from "./project-group-service";
+import { ReferralCodeDto } from "../model/dto/referral-code-dto";
+import jwtDecode from "jwt-decode";
 
 
 export class UserManagementService implements IUserManagement {
+
+    /**
+     * Authenticates the user with referral code
+     * @param loginModel User credentials
+     * @param referralCode Promo code
+     * @returns Access token
+     */
+    async loginWithReferralCode(loginModel: LoginDto, referralCode: string): Promise<any> {
+        try {
+            let token = await this.login(loginModel);
+            let jwt_decode: any = jwtDecode(token.access_token);
+            await this.applyReferralCode(jwt_decode.sub, referralCode);
+            let referralCodeDetails = await this.getReferralCodeDetails(referralCode);
+            return { token, redirect_url: referralCodeDetails.redirect_url ?? "", instructions_url: referralCodeDetails.instructions_url ?? "" };
+        } catch (error: any) {
+            console.error("Error authenticating the user", error);
+            if (error instanceof HttpException) {
+                if (error.status == 403)
+                    throw error;
+                if (error.status == 410)
+                    throw error;
+                throw new UnAuthenticated();
+            }
+            throw new UnAuthenticated();
+        }
+    }
     /**
      * Resets the user credentials
      * @param ResetCredentialsDto user credentials
@@ -102,33 +130,63 @@ export class UserManagementService implements IUserManagement {
      */
     async registerUser(user: RegisterUserDto): Promise<UserProfile> {
         let userProfile = new UserProfile();
+        let referral_code_exists = false;
         try {
-            const result: Response = await fetch(environment.registerUserUrl as string, {
+            let referralCodeDetails: ReferralCodeDto | undefined = undefined;
+            //Check if referral code is valid
+            if (user.code && user.code.length > 0) {
+                referral_code_exists = true;
+                referralCodeDetails = await this.getReferralCodeDetails(user.code);
+            }
+
+            const result: Response = await fetch(environment.registerUserUrl, {
                 method: 'post',
                 body: JSON.stringify(user),
                 headers: { 'Content-Type': 'application/json' }
             });
 
-            if (result.status != undefined && result.status == 409)
-                throw new HttpException(409, "User already exists with email " + user.email);
-
-            if (result.status != undefined && result.status == 400) {
-                const data = await result.json();
-                throw new HttpException(400, `${data.message}, ${data.errors?.join(',')}`);
+            if (result.status === undefined) {
+                console.error("Invalid response from user registration service", result);
+                throw new Error("Error registering the user");
             }
 
-            if (result.status != undefined && result.status != 200)
-                throw new Error();
+            switch (result.status) {
+                case 200: {
+                    const data = await result.json();
+                    userProfile = new UserProfile(data);
+                    break;
+                }
+                case 400: {
+                    const data = await result.json();
+                    throw new HttpException(400, `${data.message}, ${data.errors?.join(',')}`);
+                }
+                case 409: {
+                    throw new HttpException(409, `User already exists with email ${user.email}`);
+                }
+                default: {
+                    throw new Error(`Error registering the user`);
+                }
+            }
 
-            const data = await result.json();
-            userProfile = new UserProfile(data);
-
-            //Assign user with default role and permissions
-            let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
-            SELECT %L, project_group_id, role_id
-            FROM roles, project_group
-            WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
-            await dbClient.query(queryStr);
+            //If referral code is valid, then assign the user to the project group associated with referral code with TDEI member role
+            //Else assign the user to default project group with TDEI member role
+            if (referral_code_exists) {
+                await this.applyReferralCode(userProfile.id, user.code!);
+                //Update the instructions url in the user profile if exists
+                userProfile.instructions_url = referralCodeDetails!.instructions_url;
+                userProfile.redirect_url = referralCodeDetails!.redirect_url;
+                //Generate the auth token and assign refresh token to user profile
+                const authResponse = await this.login(LoginDto.from({ username: user.email, password: user.password }));
+                userProfile.token = authResponse.refresh_token;
+            }
+            else {
+                //Assign user with default role and permissions
+                let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
+                                        SELECT %L, project_group_id, role_id
+                                        FROM roles, project_group
+                                        WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
+                await dbClient.query(queryStr);
+            }
 
         } catch (error: any) {
             console.error(error);
@@ -137,6 +195,42 @@ export class UserManagementService implements IUserManagement {
             throw new Error("Error registering the user");
         }
         return userProfile;
+    }
+
+    async applyReferralCode(userId: string, referralCode: string): Promise<boolean> {
+        try {
+            let referralCodeDetails = await this.getReferralCodeDetails(referralCode);
+            //Assign the user to the project group associated with referral code with TDEI member role
+            const rolesDetails = await this.getRolesByNames([Role.TDEI_MEMBER]);
+            const role_id = rolesDetails.get(Role.TDEI_MEMBER);
+            let addRoleProjectQuery = format(`INSERT INTO user_roles (user_id, project_group_id, role_id, referral_code) VALUES %L ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING`, [[userId, referralCodeDetails.project_group_id, role_id, referralCode]]);
+            await dbClient.query(addRoleProjectQuery);
+            return true;
+        } catch (error: any) {
+            console.error(error);
+            if (error instanceof HttpException)
+                throw error;
+            throw new Error("Error applying the referral code");
+        }
+    }
+
+    async getReferralCodeDetails(referralCode: string): Promise<ReferralCodeDto> {
+        let referralCodeDetails: ReferralCodeDto;
+        try {
+            let referralCodeQuery = format('SELECT * FROM promo_referrals WHERE UPPER(code) = %L AND is_active = true AND valid_from <= NOW() AND (valid_to >= NOW() OR valid_to IS NULL) limit 1', referralCode.toUpperCase());
+
+            const referralCodeResult = await dbClient.query(referralCodeQuery);
+            if (referralCodeResult.rows.length == 0) {
+                throw new HttpException(410, "Invalid/Expired referral code");
+            }
+            referralCodeDetails = ReferralCodeDto.from(referralCodeResult.rows[0]);
+        } catch (error: any) {
+            console.error(error);
+            if (error instanceof HttpException)
+                throw error;
+            throw new Error("Error fetching the referral code details");
+        }
+        return referralCodeDetails;
     }
     /**
      * Gets the TDEI system roles.

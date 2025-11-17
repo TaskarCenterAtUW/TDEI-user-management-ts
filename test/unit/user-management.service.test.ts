@@ -12,6 +12,16 @@ import HttpException from "../../src/exceptions/http/http-base-exception";
 import { ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
 import { ResetCredentialsDto } from "../../src/model/dto/reset-credentials-dto";
 import projectgroupService from "../../src/service/project-group-service";
+jest.mock('jwt-decode', () => jest.fn(() => ({
+    sub: "mocked-user"
+})));
+import jwtDecode from "jwt-decode";
+import { ReferralCodeDto } from "../../src/model/dto/referral-code-dto";
+
+beforeEach(() => {
+    jest.clearAllMocks();
+    fetchMock.resetMocks();
+});
 
 // group test using describe
 describe("User Management Service Test", () => {
@@ -84,6 +94,111 @@ describe("User Management Service Test", () => {
         });
     });
 
+    describe("Login with referral code", () => {
+        describe("Functional", () => {
+            test("When requested with valid credentials and referral code, Expect to return  token with referral response", async () => {
+                //Arrange
+                let creds = new LoginDto({
+                    username: "username",
+                    password: "password"
+                });
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce({ access_token: "access_token", refresh_token: "refresh_token" } as any);
+                const getApplyReferralSpy = jest
+                    .spyOn(userManagementServiceInstance, "applyReferralCode")
+                    .mockResolvedValueOnce(true);
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(userManagementServiceInstance, "getReferralCodeDetails")
+                    .mockResolvedValueOnce({ instructions_url: "instructions_url", redirect_url: "redirect_url" } as any);
+
+                //Act
+                let result = await userManagementServiceInstance.loginWithReferralCode(creds, "REFERRALCODE");
+                //Assert
+                expect(result.token).toBeDefined();
+                expect(result.redirect_url).toBe("redirect_url");
+                expect(result.instructions_url).toBe("instructions_url");
+                expect(getLoginSpy).toHaveBeenCalledTimes(1);
+                expect(getApplyReferralSpy).toHaveBeenCalledTimes(1);
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("When error in login, Expect to throw error", async () => {
+                //Arrange
+                let creds = new LoginDto({
+                    username: "username",
+                    password: "password"
+                });
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockRejectedValueOnce(new HttpException(401, "Invalid credentials"));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.loginWithReferralCode(creds, "REFERRALCODE")).rejects.toThrow(Error);
+                expect(getLoginSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("Invalid login credentials, Expect to throw error", async () => {
+                //Arrange
+                let creds = new LoginDto({
+                    username: "username",
+                    password: "wrongpassword"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 401,
+                    json: () => Promise.resolve("Invalid credentials"),
+                }));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.loginWithReferralCode(creds, "REFERRALCODE")).rejects.toThrow(Error);
+            });
+
+            test("When error applying referral code, Expect to throw error", async () => {
+                //Arrange
+                let creds = new LoginDto({
+                    username: "username",
+                    password: "password"
+                });
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce({ access_token: "access_token", refresh_token: "refresh_token" } as any);
+                const getApplyReferralSpy = jest
+                    .spyOn(userManagementServiceInstance, "applyReferralCode")
+                    .mockRejectedValueOnce(new HttpException(400, "Error applying referral code"));
+
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.loginWithReferralCode(creds, "REFERRALCODE")).rejects.toThrow(Error);
+                expect(getLoginSpy).toHaveBeenCalledTimes(1);
+                expect(getApplyReferralSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("When error fetching referral code details, Expect to throw error", async () => {
+                //Arrange
+                let creds = new LoginDto({
+                    username: "username",
+                    password: "password"
+                });
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce({ access_token: "access_token", refresh_token: "refresh_token" } as any);
+                const getApplyReferralSpy = jest
+                    .spyOn(userManagementServiceInstance, "applyReferralCode")
+                    .mockResolvedValueOnce(true);
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(userManagementServiceInstance, "getReferralCodeDetails")
+                    .mockRejectedValueOnce(new HttpException(404, "Referral code not found"));
+
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.loginWithReferralCode(creds, "REFERRALCODE")).rejects.toThrow(Error);
+                expect(getLoginSpy).toHaveBeenCalledTimes(1);
+                expect(getApplyReferralSpy).toHaveBeenCalledTimes(1);
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+            });
+        });
+    });
+
     describe("Register User", () => {
         describe("Functional", () => {
             test("When requested, Expect to return user profile response on success", async () => {
@@ -118,7 +233,108 @@ describe("User Management Service Test", () => {
                 expect(getDbSpy).toHaveBeenCalledTimes(1);
             });
 
-            test("When user already exists with same email, Expect to throw error", async () => {
+            test("When requested with promo code, Expect to return user profile response on success with instruction url (optional) and token ", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "PROMO123"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<UserProfile>{
+                        firstName: "firstname",
+                        lastName: "lastname",
+                        email: "email",
+                        phone: "phone",
+                        id: "id",
+                        username: "email",
+                        emailVerified: true,
+                        apiKey: "apiKey"
+                    }),
+                }));
+                const referralCodeRow = {
+                    code: 'PROMO123',
+                    is_active: true,
+                    valid_from: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+                    valid_to: new Date(Date.now() + 1000 * 60 * 60).toISOString(),
+                    project_group_id: "pgid",
+                    instructions_url: "http://example.com/instructions",
+                    redirect_url: "http://example.com/redirect"
+                };
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(userManagementServiceInstance, "getReferralCodeDetails")
+                    .mockResolvedValueOnce(new ReferralCodeDto(referralCodeRow));
+                const applyReferralCodeSpy = jest
+                    .spyOn(userManagementServiceInstance, "applyReferralCode")
+                    .mockResolvedValueOnce(true);
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                //Act
+                let result = await userManagementServiceInstance.registerUser(newuser);
+                //Assert
+                // expect(result.apiKey).toBe("apiKey");
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalled();
+                expect(applyReferralCodeSpy).toHaveBeenCalled();
+                expect(getLoginSpy).toHaveBeenCalled();
+            });
+
+            test("When requested with promo code no expiry, Expect to return user profile response on success with instruction url (optional) and token ", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "PROMO123"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<UserProfile>{
+                        firstName: "firstname",
+                        lastName: "lastname",
+                        email: "email",
+                        phone: "phone",
+                        id: "id",
+                        username: "email",
+                        emailVerified: true,
+                        apiKey: "apiKey",
+                        instructions_url: "http://example.com/instructions",
+                        token: "token"
+                    }),
+                }));
+                const referralCodeRow = {
+                    code: 'PROMO123',
+                    is_active: true,
+                    valid_from: new Date(Date.now() - 1000 * 60 * 60).toISOString(),
+                    valid_to: null,
+                    project_group_id: "pgid",
+                    instructions_url: "http://example.com/instructions"
+                };
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(userManagementServiceInstance, "getReferralCodeDetails")
+                    .mockResolvedValueOnce(new ReferralCodeDto(referralCodeRow));
+                const applyReferralCodeSpy = jest
+                    .spyOn(userManagementServiceInstance, "applyReferralCode")
+                    .mockResolvedValueOnce(true);
+                const getLoginSpy = jest
+                    .spyOn(userManagementServiceInstance, "login")
+                    .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                //Act
+                let result = await userManagementServiceInstance.registerUser(newuser);
+                //Assert
+                // expect(result.apiKey).toBe("apiKey");
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalled();
+                expect(applyReferralCodeSpy).toHaveBeenCalled();
+                expect(getLoginSpy).toHaveBeenCalled();
+            });
+
+            test("When registered user requests with promo code, Expect to throw user already registered error", async () => {
                 //Arrange
                 let newuser = new RegisterUserDto({
                     firstName: "firstname",
@@ -130,6 +346,25 @@ describe("User Management Service Test", () => {
                 fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
                     status: 409,
                     json: () => Promise.resolve("Error registering user"),
+                }));
+                //Act
+                //Assert
+                await expect(userManagementServiceInstance.registerUser(newuser)).rejects.toThrow(Error);
+            });
+
+            test("When promo code is invalid, Expect to throw error", async () => {
+                //Arrange
+                let newuser = new RegisterUserDto({
+                    firstName: "firstname",
+                    lastName: "lastname",
+                    email: "email",
+                    phone: "phone",
+                    password: "password",
+                    code: "INVALIDCODE"
+                });
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 410,
+                    json: () => Promise.resolve("Invalid/Expired referral code"),
                 }));
                 //Act
                 //Assert
@@ -968,6 +1203,113 @@ describe("User Management Service Test", () => {
 
             await expect(userManagementServiceInstance.downloadUsers()).rejects.toThrow('Database error');
             expect(dbClient.query).toHaveBeenCalledWith(expect.any(String));
+        });
+    });
+
+    describe("Get Referral Code Details", () => {
+        describe("Functional", () => {
+            test("When requested with valid referral code, Expect to return ReferralCodeDto", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1, //effected row
+                    rows: [
+                        {
+                            code: "referral_code",
+                            redirect_url: "redirect_url",
+                            instructions_url: "instructions_url",
+                            expiry_date: new Date(),
+                            created_by: "created_by",
+                            created_at: new Date()
+                        }
+                    ]
+                }
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+                //Act
+                let result: any = await userService.getReferralCodeDetails("referral_code");
+                //Assert
+                expect(result.code).toBe("referral_code");
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("When requested with invalid/expired referral code, Expect to throw HttpException", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <any>{
+                    rowCount: 0, //effected row
+                    rows: []
+                }
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+                //Act
+                //Assert
+                await expect(userService.getReferralCodeDetails("referral_code")).rejects.toThrow(new HttpException(410, "Invalid/Expired referral code"));
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("When database error occured, Expect to throw error", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockRejectedValueOnce(new Error());
+                //Act
+                //Assert
+                await expect(userService.getReferralCodeDetails("referral_code")).rejects.toThrow(Error);
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+            });
+
+        });
+    });
+
+    describe("Apply Referral Code", () => {
+        describe("Functional", () => {
+            test("When requested with valid inputs, Expect to return boolean true on success", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1 //effected row
+                }
+                const applyReferralCodeSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
+                const getReferralCodeDetailsSpy = jest
+                    .spyOn(userService, "getReferralCodeDetails")
+                    .mockResolvedValueOnce(new ReferralCodeDto({
+                        code: "referral_code",
+                        redirect_url: "redirect_url",
+                        instructions_url: "instructions_url"
+                    }));
+                const getRolesByNamesSpy = jest
+                    .spyOn(UserManagementService.prototype as any, "getRolesByNames")
+                    .mockResolvedValueOnce(new Map<string, string>().set(Role.TDEI_MEMBER, "101"));
+                //Act
+                let result = await userService.applyReferralCode("referral_code", "user_id");
+                //Assert
+                expect(result).toBeTruthy();
+                expect(applyReferralCodeSpy).toHaveBeenCalledTimes(1);
+                expect(getReferralCodeDetailsSpy).toHaveBeenCalledTimes(1);
+                expect(getRolesByNamesSpy).toHaveBeenCalledTimes(1);
+            });
+
+            test("When database error occured, Expect to throw error", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+
+                const applyReferralCodeSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockRejectedValueOnce(new Error());
+                //Act
+                //Assert
+                await expect(userService.applyReferralCode("referral_code", "user_id")).rejects.toThrow(Error);
+                expect(applyReferralCodeSpy).toHaveBeenCalledTimes(1);
+            });
+
         });
     });
 });
