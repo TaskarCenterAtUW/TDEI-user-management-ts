@@ -179,14 +179,14 @@ export class UserManagementService implements IUserManagement {
                 const authResponse = await this.login(LoginDto.from({ username: user.email, password: user.password }));
                 userProfile.token = authResponse.refresh_token;
             }
-            else {
-                //Assign user with default role and permissions
-                let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
+            // else {
+            //Assign user with default role and permissions
+            let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
                                         SELECT %L, project_group_id, role_id
                                         FROM roles, project_group
                                         WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
-                await dbClient.query(queryStr);
-            }
+            await dbClient.query(queryStr);
+            // }
 
         } catch (error: any) {
             console.error(error);
