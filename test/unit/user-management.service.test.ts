@@ -274,6 +274,9 @@ describe("User Management Service Test", () => {
                 const getLoginSpy = jest
                     .spyOn(userManagementServiceInstance, "login")
                     .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                const addDefaultGrpSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{});
                 //Act
                 let result = await userManagementServiceInstance.registerUser(newuser);
                 //Assert
@@ -281,6 +284,7 @@ describe("User Management Service Test", () => {
                 expect(getReferralCodeDetailsSpy).toHaveBeenCalled();
                 expect(applyReferralCodeSpy).toHaveBeenCalled();
                 expect(getLoginSpy).toHaveBeenCalled();
+                expect(addDefaultGrpSpy).toHaveBeenCalled();
             });
 
             test("When requested with promo code no expiry, Expect to return user profile response on success with instruction url (optional) and token ", async () => {
@@ -325,6 +329,9 @@ describe("User Management Service Test", () => {
                 const getLoginSpy = jest
                     .spyOn(userManagementServiceInstance, "login")
                     .mockResolvedValueOnce(<any>{ refresh_token: "refresh_token", access_token: "access_token" });
+                const addDefaultGrpSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{});
                 //Act
                 let result = await userManagementServiceInstance.registerUser(newuser);
                 //Assert
@@ -332,6 +339,7 @@ describe("User Management Service Test", () => {
                 expect(getReferralCodeDetailsSpy).toHaveBeenCalled();
                 expect(applyReferralCodeSpy).toHaveBeenCalled();
                 expect(getLoginSpy).toHaveBeenCalled();
+                expect(addDefaultGrpSpy).toHaveBeenCalled();
             });
 
             test("When registered user requests with promo code, Expect to throw user already registered error", async () => {
