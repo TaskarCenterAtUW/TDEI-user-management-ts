@@ -184,7 +184,8 @@ export class UserManagementService implements IUserManagement {
             let queryStr = format(`INSERT INTO user_roles (user_id, project_group_id, role_id)
                                         SELECT %L, project_group_id, role_id
                                         FROM roles, project_group
-                                        WHERE roles.name = %L AND project_group.name = %L`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
+                                        WHERE roles.name = %L AND project_group.name = %L
+                                        ON CONFLICT ON CONSTRAINT unq_user_role_project_group DO NOTHING`, userProfile.id, Role.TDEI_MEMBER, DEFAULT_PROJECT_GROUP);
             await dbClient.query(queryStr);
             // }
 
