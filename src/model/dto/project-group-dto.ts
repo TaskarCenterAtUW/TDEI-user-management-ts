@@ -65,7 +65,7 @@ export class ProjectGroupDto extends BaseDto {
     getUpdateQuery(): QueryConfig {
         let polygonExists = this.polygon ? true : false;
         const queryObject = {
-            text: `UPDATE project_group set name = $1, phone = $2, url = $3, address = $4 ${polygonExists ? ', polygon = ST_GeomFromGeoJSON($6) ' : ''} WHERE project_group_id = $5`,
+            text: `UPDATE project_group set updated_at = NOW(), name = $1, phone = $2, url = $3, address = $4 ${polygonExists ? ', polygon = ST_GeomFromGeoJSON($6) ' : ''} WHERE project_group_id = $5`,
             values: [this.project_group_name, this.phone, this.url, this.address, this.tdei_project_group_id],
         }
         if (polygonExists) {

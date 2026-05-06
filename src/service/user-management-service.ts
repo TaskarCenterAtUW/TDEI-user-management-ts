@@ -287,9 +287,16 @@ export class UserManagementService implements IUserManagement {
      * @param userId user id 
      * @param page_no page number
      * @param page_size page size
+     * @param sortBy sort by (created_at | name)
      * @returns List of User project groups with roles
      */
-    async getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number, searchText: string = ''): Promise<ProjectGroupRoleDto[]> {
+    async getUserProjectGroupsWithRoles(
+        userId: string,
+        page_no: number,
+        page_size: number,
+        searchText: string = '',
+        sortBy: string = 'created_at'
+    ): Promise<ProjectGroupRoleDto[]> {
         let projectGroupRoleList: ProjectGroupRoleDto[] = [];
 
         //Set defaults if not provided
@@ -298,12 +305,35 @@ export class UserManagementService implements IUserManagement {
         let skip = page_no == 1 ? 0 : (page_no - 1) * page_size;
         let take = page_size > 50 ? 50 : page_size;
 
+        const normalizedSortBy = (sortBy ?? '').toString().trim().toLowerCase();
+        const orderByClause =
+            normalizedSortBy === 'name'
+                ? 'o.name ASC'
+                : 'o.created_at DESC';
+
         let searchQuery = '';
         if (searchText && searchText.length > 0) {
-            searchQuery = format('SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L AND o.name ILIKE %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, searchText + '%', take, skip);
+            searchQuery =
+                format(
+                    'SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, o.created_at, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L AND o.name ILIKE %L GROUP BY o.name,o.project_group_id,o.created_at ORDER BY ' +
+                    orderByClause +
+                    ' LIMIT %L OFFSET %L',
+                    userId,
+                    searchText + '%',
+                    take,
+                    skip
+                );
         }
         else {
-            searchQuery = format('SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id LIMIT %L OFFSET %L', userId, take, skip);
+            searchQuery =
+                format(
+                    'SELECT o.data_viewer_config, o.name as project_group_name, o.project_group_id, o.created_at, ARRAY_AGG(r.name) as roles FROM user_roles ur INNER JOIN roles r on r.role_id = ur.role_id INNER JOIN project_group o on ur.project_group_id = o.project_group_id AND o.is_active = true WHERE user_id = %L GROUP BY o.name,o.project_group_id,o.created_at ORDER BY ' +
+                    orderByClause +
+                    ' LIMIT %L OFFSET %L',
+                    userId,
+                    take,
+                    skip
+                );
         }
 
         return await dbClient.query(searchQuery)
