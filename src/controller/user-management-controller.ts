@@ -155,7 +155,7 @@ class UserManagementController implements IController {
             let page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
 
             let searchText = request.query.searchText?.toString() ?? "";
-            let sort_by = request.query.sort_by?.toString() ?? "created_at";
+            let sort_by = request.query.sort_by?.toString() ?? "name";
 
             return userManagementServiceInstance.getUserProjectGroupsWithRoles(userId.toString(), page_no, page_size, searchText, sort_by).then((result) => {
                 Ok(response, result);
