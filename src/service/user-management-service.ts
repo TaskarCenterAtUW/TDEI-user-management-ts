@@ -295,7 +295,7 @@ export class UserManagementService implements IUserManagement {
         page_no: number,
         page_size: number,
         searchText: string = '',
-        sortBy: string = 'name'
+        sortBy: string = 'created_at'
     ): Promise<ProjectGroupRoleDto[]> {
         let projectGroupRoleList: ProjectGroupRoleDto[] = [];
 
