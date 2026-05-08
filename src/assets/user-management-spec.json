@@ -374,6 +374,20 @@
                         }
                     },
                     {
+                        "name": "sort_by",
+                        "in": "query",
+                        "description": "Sort by project group name (default) ascending or created_at descending.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "default": "name",
+                            "enum": [
+                                "created_at",
+                                "name"
+                            ]
+                        }
+                    },
+                    {
                         "name": "page_no",
                         "in": "query",
                         "description": "Page number to fetch",

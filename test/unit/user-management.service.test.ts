@@ -1078,6 +1078,58 @@ describe("User Management Service Test", () => {
                 expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
             });
 
+            test("When sort_by not provided, Expect query to default sort by created_at desc", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1,
+                    rows: [
+                        {
+                            project_group_name: "project_group_name",
+                            project_group_id: "project_group_id",
+                            roles: [Role.DATA_GENERATOR]
+                        }
+                    ]
+                }
+                const getUserProjectGroupRolesSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
+                //Act
+                await userService.getUserProjectGroupsWithRoles("user_id", 1, 10);
+
+                //Assert
+                expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
+                const sql = getUserProjectGroupRolesSpy.mock.calls[0][0] as string;
+                expect(sql).toContain("ORDER BY o.created_at DESC");
+            });
+
+            test("When sort_by=name, Expect query to sort by name asc", async () => {
+                //Arrange
+                let userService = new UserManagementService();
+                let response = <QueryResult>{
+                    rowCount: 1,
+                    rows: [
+                        {
+                            project_group_name: "project_group_name",
+                            project_group_id: "project_group_id",
+                            roles: [Role.DATA_GENERATOR]
+                        }
+                    ]
+                }
+                const getUserProjectGroupRolesSpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(response);
+
+                //Act
+                await userService.getUserProjectGroupsWithRoles("user_id", 1, 10, "", "name");
+
+                //Assert
+                expect(getUserProjectGroupRolesSpy).toHaveBeenCalledTimes(1);
+                const sql = getUserProjectGroupRolesSpy.mock.calls[0][0] as string;
+                expect(sql).toContain("ORDER BY o.name ASC");
+            });
+
             test("When requested with project name search, Expect to return list of user project groups with roles and specified project name", async () => {
                 //Arrange
                 let userService = new UserManagementService();

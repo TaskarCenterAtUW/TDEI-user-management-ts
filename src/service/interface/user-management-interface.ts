@@ -67,9 +67,17 @@ export interface IUserManagement {
      * @param userId user id 
      * @param page_no page number
      * @param page_size page size
+     * @param searchText Optional search text
+     * @param sortBy Optional sort by (created_at | name)
      * @returns List of User project groups with roles
      */
-    getUserProjectGroupsWithRoles(userId: string, page_no: number, page_size: number, searchText: string): Promise<ProjectGroupRoleDto[]>;
+    getUserProjectGroupsWithRoles(
+        userId: string,
+        page_no: number,
+        page_size: number,
+        searchText?: string,
+        sortBy?: string
+    ): Promise<ProjectGroupRoleDto[]>;
     /**
      * Revokes the user permissions
      * @param rolesReq roles to be revoked
