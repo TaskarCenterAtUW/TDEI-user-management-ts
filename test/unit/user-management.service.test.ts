@@ -28,7 +28,7 @@ describe("User Management Service Test", () => {
 
     describe("Refresh Token", () => {
         describe("Functional", () => {
-            test("When requested, Expect to return refreshed access token", async () => {
+            test("When requested without client id, Expect to return refreshed access token and omit client_id from body", async () => {
                 //Arrange
                 fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
                     status: 200,
@@ -41,6 +41,45 @@ describe("User Management Service Test", () => {
                 let result = await userManagementServiceInstance.refreshToken("test_token");
                 //Assert
                 expect(result.access_token).toBe("access_token");
+                expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+                    refreshToken: "test_token"
+                });
+            });
+
+            test("When requested with client id, Expect to include client_id in body", async () => {
+                //Arrange
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<any>{
+                        access_token: "access_token",
+                        refresh_token: "refresh_token"
+                    }),
+                }));
+                //Act
+                let result = await userManagementServiceInstance.refreshToken("test_token", "tdei-web-client");
+                //Assert
+                expect(result.access_token).toBe("access_token");
+                expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+                    refreshToken: "test_token",
+                    client_id: "tdei-web-client"
+                });
+            });
+
+            test("When client id is null, Expect to omit client_id from body", async () => {
+                //Arrange
+                fetchMock.mockResolvedValueOnce(Promise.resolve(<any>{
+                    status: 200,
+                    json: () => Promise.resolve(<any>{
+                        access_token: "access_token",
+                        refresh_token: "refresh_token"
+                    }),
+                }));
+                //Act
+                await userManagementServiceInstance.refreshToken("test_token", null);
+                //Assert
+                expect(JSON.parse(fetchMock.mock.calls[0][1]?.body as string)).toEqual({
+                    refreshToken: "test_token"
+                });
             });
 
             test("When error refreshing token, Expect to throw error", async () => {

@@ -111,8 +111,9 @@ class UserManagementController implements IController {
             BadRequest(response);
 
         let token = request.headers.refresh_token?.toString();
+        let clientId = request.headers.client_id?.toString();
 
-        return userManagementServiceInstance.refreshToken(token ?? "").then((token) => {
+        return userManagementServiceInstance.refreshToken(token ?? "", clientId).then((token) => {
             Ok(response, token)
         }).catch((error: Error) => {
             let errorMessage = "Error refreshing the user token";
