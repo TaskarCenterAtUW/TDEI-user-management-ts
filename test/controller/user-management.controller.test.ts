@@ -145,6 +145,25 @@ describe("User Management Controller Test", () => {
                 await userManagementController.refreshToken(req, res, next);
                 //Assert
                 expect(refreshTokenSpy).toHaveBeenCalledTimes(1);
+                expect(refreshTokenSpy).toHaveBeenCalledWith("test_token", undefined);
+                expect(res.status).toHaveBeenCalledWith(200);
+                expect(res.send).toBeCalledWith(response);
+            });
+
+            test("When client_id provided in header, Expect to pass client id to service", async () => {
+                //Arrange
+                let req = getMockReq({
+                    headers: <any>{ "refresh_token": "test_token", "client_id": "tdei-web-client" }
+                });
+                const { res, next } = getMockRes();
+                let response = { access_token: "test_token" };
+                const refreshTokenSpy = jest
+                    .spyOn(userManagementService, "refreshToken")
+                    .mockResolvedValueOnce(response);
+                //Act
+                await userManagementController.refreshToken(req, res, next);
+                //Assert
+                expect(refreshTokenSpy).toHaveBeenCalledWith("test_token", "tdei-web-client");
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.send).toBeCalledWith(response);
             });
