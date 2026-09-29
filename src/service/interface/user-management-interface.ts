@@ -38,8 +38,9 @@ export interface IUserManagement {
     /**
      * Reissues the new access token in the case of valid refresh token input
      * @param refreshToken refresh token
+     * @param clientId optional client id
      */
-    refreshToken(refreshToken: string): Promise<any>;
+    refreshToken(refreshToken: string, clientId?: string | null): Promise<any>;
     /**
      * Creates new user in TDEI system
      * @param user user details model

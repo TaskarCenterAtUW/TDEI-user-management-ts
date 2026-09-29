@@ -75,12 +75,18 @@ export class UserManagementService implements IUserManagement {
     /**
     * Reissues the new access token in the case of valid refresh token input
     * @param refreshToken refresh token
+    * @param clientId optional client id
     */
-    async refreshToken(refreshToken: string): Promise<any> {
+    async refreshToken(refreshToken: string, clientId?: string | null): Promise<any> {
         try {
+            const body: { refreshToken: string; client_id?: string } = { refreshToken: refreshToken };
+            if (clientId != null) {
+                body.client_id = clientId;
+            }
+
             const result = await fetch(environment.refreshUrl as string, {
                 method: 'post',
-                body: JSON.stringify(refreshToken),
+                body: JSON.stringify(body),
                 headers: { 'Content-Type': 'application/json' }
             });
 

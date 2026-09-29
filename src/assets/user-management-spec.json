@@ -270,7 +270,7 @@
                     "Auth"
                 ],
                 "summary": "Refresh the user token",
-                "description": "Refresh the user token",
+                "description": "Refresh the user token. Optionally provide a client_id header.",
                 "operationId": "refresh-token",
                 "parameters": [
                     {
@@ -280,6 +280,16 @@
                         "required": true,
                         "schema": {
                             "type": "string"
+                        }
+                    },
+                    {
+                        "name": "client_id",
+                        "in": "header",
+                        "description": "Optional client id. When omitted, client_id is not forwarded to the auth service.",
+                        "required": false,
+                        "schema": {
+                            "type": "string",
+                            "example": "tdei-web-client"
                         }
                     }
                 ],
