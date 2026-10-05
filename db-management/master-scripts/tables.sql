@@ -26,8 +26,9 @@ CREATE TABLE IF NOT EXISTS public.roles
     role_id integer NOT NULL GENERATED ALWAYS AS IDENTITY ( INCREMENT 1 START 201 MINVALUE 1 MAXVALUE 2147483647 CACHE 1 ),
     name character varying(100) COLLATE pg_catalog."default" NOT NULL,
     description character varying(500) COLLATE pg_catalog."default",
+    client_id character varying(255) COLLATE pg_catalog."default" NOT NULL DEFAULT 'tdei-gateway',
     CONSTRAINT roles_pkey PRIMARY KEY (role_id),
-    CONSTRAINT unq_roles UNIQUE (name)
+    CONSTRAINT unq_roles UNIQUE (client_id, name)
 )
 
 
