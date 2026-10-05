@@ -3,10 +3,13 @@ import userManagementServiceInstance, { UserManagementService } from "../../src/
 import { LoginDto } from "../../src/model/dto/login-dto";
 import { RegisterUserDto } from "../../src/model/dto/register-user-dto";
 import { UserProfile } from "../../src/model/dto/user-profile-dto";
-import { Role } from "../../src/constants/role-constants";
+import { ChatbotAppRole, Role } from "../../src/constants/role-constants";
 import { DatabaseError, QueryResult } from "pg";
 import dbClient from "../../src/database/data-source";
 import { RolesReqDto } from "../../src/model/dto/roles-req-dto";
+import { ApplicationRolesReqDto } from "../../src/model/dto/application-roles-req-dto";
+import { ApplicationDto } from "../../src/model/dto/application-dto";
+import keycloakAdminClient from "../../src/service/keycloak-admin-client";
 import { ForeignKeyDbException } from "../../src/exceptions/db/database-exceptions";
 import HttpException from "../../src/exceptions/http/http-base-exception";
 import { ForeignKeyException } from "../../src/exceptions/http/http-exceptions";
@@ -1256,6 +1259,210 @@ describe("User Management Service Test", () => {
                 //Assert
                 await expect(userManagementServiceInstance.resetCredentials(resetdto)).rejects.toThrow(Error);
             });
+        });
+    });
+
+    describe("Application Roles", () => {
+        const userId = "11111111-1111-1111-1111-111111111111";
+        const clientId = "tdei-chat";
+        const osConnect = new ApplicationDto({
+            realm: "tdei",
+            clientId,
+            name: "TDEI Chat",
+            description: "",
+        });
+
+        test("When adding chatbot_manager, Expect to insert only that application role", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(keycloakAdminClient, "getApplication").mockResolvedValueOnce(osConnect);
+            const querySpy = jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ id: userId }] })
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ name: ChatbotAppRole.CHATBOT_MANAGER }] })
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [] as any[] });
+
+            const result = await userService.addApplicationRoles(clientId, new ApplicationRolesReqDto({
+                userId,
+                roles: [ChatbotAppRole.CHATBOT_MANAGER]
+            }));
+
+            expect(result).toBeTruthy();
+            const insert = querySpy.mock.calls[2][0] as { text: string; values: unknown[] };
+            expect(insert.text).toContain("INSERT INTO user_application_role");
+            expect(insert.text).toContain("ON CONFLICT");
+            expect(insert.text).not.toContain("JOIN application");
+            expect(insert.values).toEqual([userId, clientId, [ChatbotAppRole.CHATBOT_MANAGER]]);
+        });
+
+        test("When removing chatbot_manager, Expect to delete only that application role", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(keycloakAdminClient, "getApplication").mockResolvedValueOnce(osConnect);
+            const querySpy = jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ id: userId }] })
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ name: ChatbotAppRole.CHATBOT_MANAGER }] })
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 0, rows: [] as any[] });
+
+            const result = await userService.removeApplicationRoles(clientId, new ApplicationRolesReqDto({
+                userId,
+                roles: [ChatbotAppRole.CHATBOT_MANAGER]
+            }));
+
+            expect(result).toBeTruthy();
+            const deletion = querySpy.mock.calls[2][0] as { text: string; values: unknown[] };
+            expect(deletion.text).toContain("DELETE FROM user_application_role");
+            expect(deletion.values).toEqual([userId, clientId, [ChatbotAppRole.CHATBOT_MANAGER]]);
+        });
+
+        test("When a role is not defined for the application, Expect to throw HttpException", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(keycloakAdminClient, "getApplication").mockResolvedValueOnce(osConnect);
+            jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ id: userId }] })
+                .mockResolvedValueOnce(<QueryResult><unknown>{ rowCount: 0, rows: [] });
+
+            await expect(userService.addApplicationRoles(clientId, new ApplicationRolesReqDto({
+                userId,
+                roles: [Role.POC]
+            }))).rejects.toThrow(HttpException);
+        });
+
+        test("When the application does not exist, Expect to throw HttpException", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(keycloakAdminClient, "getApplication").mockResolvedValueOnce(null);
+            jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ id: userId }] });
+
+            await expect(userService.addApplicationRoles("unknown-client", new ApplicationRolesReqDto({
+                userId,
+                roles: [ChatbotAppRole.CHATBOT_MANAGER]
+            }))).rejects.toThrow(HttpException);
+        });
+
+        test("When the user does not exist, Expect to throw HttpException", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult><unknown>{ rowCount: 0, rows: [] });
+
+            await expect(userService.addApplicationRoles(clientId, new ApplicationRolesReqDto({
+                userId,
+                roles: [ChatbotAppRole.CHATBOT_MANAGER]
+            }))).rejects.toThrow(HttpException);
+        });
+
+        test("When fetching roles for a user, Expect the roles for that client", async () => {
+            const userService = new UserManagementService();
+            jest.spyOn(keycloakAdminClient, "getApplication").mockResolvedValueOnce(osConnect);
+            const querySpy = jest.spyOn(dbClient, "query")
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ id: userId }] })
+                .mockResolvedValueOnce(<QueryResult>{ rowCount: 1, rows: [{ name: ChatbotAppRole.CHATBOT_MANAGER }] });
+
+            const result = await userService.getUserApplicationRoles(clientId, userId);
+
+            expect(result).toEqual(expect.objectContaining({
+                userId,
+                clientId,
+                roles: [ChatbotAppRole.CHATBOT_MANAGER],
+            }));
+            const lookup = querySpy.mock.calls[1][0] as { text: string; values: unknown[] };
+            expect(lookup.text).toContain("user_application_role");
+            expect(lookup.values).toEqual([userId, clientId]);
+        });
+    });
+
+    describe("Search Users", () => {
+        test("When requested with search text, Expect to return users without credentials", async () => {
+            const response = <QueryResult>{
+                rowCount: 1,
+                rows: [
+                    {
+                        id: "user-1",
+                        first_name: "Ada",
+                        last_name: "Lovelace",
+                        username: "ada@example.com",
+                        application_roles: [{
+                            client_id: "tdei-chat",
+                            roles: [ChatbotAppRole.CHATBOT_MANAGER]
+                        }]
+                    }
+                ]
+            };
+            const querySpy = jest
+                .spyOn(dbClient, "query")
+                .mockResolvedValueOnce(response);
+            jest.spyOn(keycloakAdminClient, "listApplications").mockResolvedValueOnce([
+                new ApplicationDto({
+                    realm: "tdei",
+                    clientId: "tdei-chat",
+                    name: "TDEI Chat",
+                    description: "",
+                })
+            ]);
+
+            const result = await userManagementServiceInstance.searchUsers("Ada", 1, 10);
+
+            expect(result).toEqual([
+                expect.objectContaining({
+                    id: "user-1",
+                    firstName: "Ada",
+                    lastName: "Lovelace",
+                    username: "ada@example.com",
+                    applicationRoles: [{
+                        realm: "tdei",
+                        clientId: "tdei-chat",
+                        name: "TDEI Chat",
+                        roles: [ChatbotAppRole.CHATBOT_MANAGER]
+                    }]
+                })
+            ]);
+            expect(result[0]).not.toHaveProperty("phone");
+            expect(result[0]).not.toHaveProperty("apiKey");
+            expect(result[0]).not.toHaveProperty("email");
+            expect(result[0]).not.toHaveProperty("defaultRoles");
+            expect(querySpy).toHaveBeenCalledWith(expect.objectContaining({
+                values: ["Ada%", 10, 0]
+            }));
+            const queryText = (querySpy.mock.calls[0][0] as { text: string }).text;
+            expect(queryText).toContain("AS username");
+            expect(queryText).toContain("user_application_role");
+            expect(queryText).not.toContain("apiKey");
+            expect(queryText).not.toContain("default_roles");
+        });
+
+        test("When role lists are missing, Expect empty arrays", async () => {
+            const response = <QueryResult>{
+                rowCount: 1,
+                rows: [
+                    {
+                        id: "user-2",
+                        first_name: "Grace",
+                        last_name: null,
+                        username: "grace@example.com",
+                        application_roles: null
+                    }
+                ]
+            };
+            jest.spyOn(dbClient, "query").mockResolvedValueOnce(response);
+
+            const result = await userManagementServiceInstance.searchUsers("", 1, 10);
+
+            expect(result[0].lastName).toBe("");
+            expect(result[0].username).toBe("grace@example.com");
+            expect(result[0].applicationRoles).toEqual([]);
+        });
+
+        test("When page size exceeds 50, Expect the query to request at most 50 rows", async () => {
+            jest.spyOn(dbClient, "query").mockResolvedValueOnce(<QueryResult><unknown>{ rowCount: 0, rows: [] });
+
+            await userManagementServiceInstance.searchUsers("", 2, 80);
+
+            expect(dbClient.query).toHaveBeenCalledWith(expect.objectContaining({
+                values: [50, 50]
+            }));
+        });
+
+        test("When database error occured, Expect to throw Error", async () => {
+            jest.spyOn(dbClient, "query").mockRejectedValueOnce(new Error("Database error"));
+
+            await expect(userManagementServiceInstance.searchUsers("Ada", 1, 10)).rejects.toThrow("Database error");
         });
     });
 

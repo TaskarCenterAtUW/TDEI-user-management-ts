@@ -26,5 +26,11 @@ export const environment = {
     validateAccessTokenUrl: `${process.env.AUTH_HOST}/api/v1/validateAccessToken`,
     refreshUrl: `${process.env.AUTH_HOST}/api/v1/refreshToken`,
     resetCredentialsUrl: `${process.env.AUTH_HOST}/api/v1/resetCredentials`,
+    keycloak: {
+        baseUrl: process.env.KEYCLOAK_BASE_URL ?? "",
+        realm: process.env.KEYCLOAK_REALM ?? "tdei",
+        clientId: process.env.KEYCLOAK_CLIENT_ID ?? "",
+        clientSecret: process.env.KEYCLOAK_CLIENT_SECRET ?? "",
+    },
 
 }

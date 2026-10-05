@@ -892,6 +892,236 @@
                 ]
             }
         },
+        "/api/v1/applications/{clientId}/roles": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Lists roles for an application",
+                "description": "Admin-only. Lists the roles defined for one client in the tdei realm. clientId is the Keycloak client id.",
+                "operationId": "listApplicationRoles",
+                "parameters": [
+                    {
+                        "name": "clientId",
+                        "in": "path",
+                        "description": "Keycloak client id in the tdei realm.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/ApplicationRole"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "404": {
+                        "description": "Application not found."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/applications/{clientId}/users/{userId}/roles": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Gets a user's roles for an application",
+                "description": "Returns the roles assigned to one user for one Keycloak client. The caller supplies the client id. A user with no roles for that client returns an empty list. Requires an authenticated user, a service secret, or an API key.",
+                "operationId": "getUserApplicationRoles",
+                "parameters": [
+                    {
+                        "name": "clientId",
+                        "in": "path",
+                        "description": "Keycloak client id in the tdei realm.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "userId",
+                        "in": "path",
+                        "description": "User id returned by GET /api/v1/users.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Successful response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/UserClientRoles"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "userId is not a 36 character user id."
+                    },
+                    "404": {
+                        "description": "User or application not found."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
+        "/api/v1/applications/{clientId}/user-roles": {
+            "post": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Adds application roles",
+                "description": "Admin-only. Adds the listed roles for this client in the tdei realm without changing any other roles. The user is the realm user returned by GET /api/v1/users. Adding a role the user already has succeeds without change. Only roles defined for this client are accepted.",
+                "operationId": "addApplicationRoles",
+                "parameters": [
+                    {
+                        "name": "clientId",
+                        "in": "path",
+                        "description": "Keycloak client id in the tdei realm.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationRoles"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, or a role that is not defined for this application."
+                    },
+                    "404": {
+                        "description": "User or application not found."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            },
+            "delete": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Removes application roles",
+                "description": "Admin-only. Removes only the listed roles for this client in the tdei realm. Removing a role the user does not have succeeds without change.",
+                "operationId": "removeApplicationRoles",
+                "parameters": [
+                    {
+                        "name": "clientId",
+                        "in": "path",
+                        "description": "Keycloak client id in the tdei realm.",
+                        "required": true,
+                        "schema": {
+                            "type": "string"
+                        }
+                    }
+                ],
+                "requestBody": {
+                    "content": {
+                        "application/json": {
+                            "schema": {
+                                "$ref": "#/components/schemas/ApplicationRoles"
+                            }
+                        }
+                    },
+                    "required": true
+                },
+                "responses": {
+                    "200": {
+                        "description": "Successful response.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/Response"
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request, or a role that is not defined for this application."
+                    },
+                    "404": {
+                        "description": "User or application not found."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
+            }
+        },
         "/api/v1/project-group": {
             "get": {
                 "tags": [
@@ -1315,6 +1545,79 @@
                         "description": "An server error occurred."
                     }
                 }
+            }
+        },
+        "/api/v1/users": {
+            "get": {
+                "tags": [
+                    "User Management"
+                ],
+                "summary": "Searches TDEI users",
+                "description": "Admin-only search of TDEI users. Supports prefix search on first name, last name, and username. Returns username and application roles. Does not return email, phone, or API key.",
+                "operationId": "searchUsers",
+                "parameters": [
+                    {
+                        "name": "searchText",
+                        "in": "query",
+                        "description": "Prefix search against first name, last name, or username.",
+                        "required": false,
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    {
+                        "name": "page_no",
+                        "in": "query",
+                        "description": "Page number to fetch.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 1
+                        }
+                    },
+                    {
+                        "name": "page_size",
+                        "in": "query",
+                        "description": "Total records to fetch. Maximum 50.",
+                        "required": false,
+                        "schema": {
+                            "type": "integer",
+                            "default": 10
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "Returns the matching TDEI users.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "type": "array",
+                                    "items": {
+                                        "$ref": "#/components/schemas/TdeiUser"
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "400": {
+                        "description": "Invalid request."
+                    },
+                    "401": {
+                        "description": "Unauthenticated request"
+                    },
+                    "403": {
+                        "description": "Unauthorized request"
+                    },
+                    "500": {
+                        "description": "Internal server error."
+                    }
+                },
+                "security": [
+                    {
+                        "AuthorizationToken": []
+                    }
+                ]
             }
         },
         "/api/v1/users/download": {
@@ -1908,6 +2211,114 @@
                     }
                 },
                 "description": "Describes a user permissions."
+            },
+            "TdeiUser": {
+                "type": "object",
+                "properties": {
+                    "id": {
+                        "type": "string",
+                        "description": "Id uniquely represented in the TDEI system.",
+                        "default": "0"
+                    },
+                    "firstName": {
+                        "type": "string",
+                        "description": "First name of the user."
+                    },
+                    "lastName": {
+                        "type": "string",
+                        "description": "Last name of the user."
+                    },
+                    "username": {
+                        "type": "string",
+                        "description": "Login name of the user."
+                    },
+                    "applicationRoles": {
+                        "type": "array",
+                        "description": "Roles assigned to this realm user, grouped by client in the tdei realm.",
+                        "items": {
+                            "$ref": "#/components/schemas/UserApplicationRoles"
+                        }
+                    }
+                },
+                "description": "A TDEI user and the user's application roles."
+            },
+            "UserClientRoles": {
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User id returned by GET /api/v1/users."
+                    },
+                    "clientId": {
+                        "type": "string",
+                        "description": "Keycloak client id in the tdei realm."
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "Roles assigned to the user for this client.",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "ApplicationRole": {
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "type": "string",
+                        "description": "Role name unique within the application."
+                    },
+                    "description": {
+                        "type": "string",
+                        "description": "Description of the role."
+                    }
+                }
+            },
+            "UserApplicationRoles": {
+                "type": "object",
+                "properties": {
+                    "realm": {
+                        "type": "string",
+                        "description": "Keycloak realm. Always tdei. The user id is the realm user."
+                    },
+                    "clientId": {
+                        "type": "string",
+                        "description": "Keycloak client id in the tdei realm."
+                    },
+                    "name": {
+                        "type": "string",
+                        "description": "Display name of the application."
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "Roles assigned to the user for this application.",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                }
+            },
+            "ApplicationRoles": {
+                "required": [
+                    "userId",
+                    "roles"
+                ],
+                "type": "object",
+                "properties": {
+                    "userId": {
+                        "type": "string",
+                        "description": "User id returned by GET /api/v1/users."
+                    },
+                    "roles": {
+                        "type": "array",
+                        "description": "Roles defined for this application to add or remove.",
+                        "items": {
+                            "type": "string"
+                        }
+                    }
+                },
+                "description": "Application roles to add to or remove from a user."
             },
             "UserProfile": {
                 "type": "object",
