@@ -10,13 +10,17 @@ import { UserProfile } from "../model/dto/user-profile-dto";
 import HttpException from "../exceptions/http/http-base-exception";
 import { RoleDto } from "../model/dto/roles-dto";
 import { LoginDto } from "../model/dto/login-dto";
-import { DEFAULT_PROJECT_GROUP, Role } from "../constants/role-constants";
+import { DEFAULT_PROJECT_GROUP, Role, TDEI_GATEWAY_CLIENT_ID, TDEI_REALM } from "../constants/role-constants";
 import { adminRestrictedRoles } from "../constants/admin-restricted-role-constants";
 import { ProjectGroupRoleDto } from "../model/dto/project-group-role-dto";
 import { environment } from "../environment/environment";
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 import projectgroupService from "./project-group-service";
 import { ReferralCodeDto } from "../model/dto/referral-code-dto";
+import { TdeiUserDto } from "../model/dto/tdei-user-dto";
+import { ApplicationRolesReqDto } from "../model/dto/application-roles-req-dto";
+import { ApplicationDto, ApplicationRoleDto, UserApplicationRolesDto, UserClientRolesDto } from "../model/dto/application-dto";
+import keycloakAdminClient from "./keycloak-admin-client";
 import jwtDecode from "jwt-decode";
 
 
@@ -244,7 +248,7 @@ export class UserManagementService implements IUserManagement {
      */
     async getRoles(): Promise<RoleDto[]> {
 
-        const query = 'SELECT name, description FROM Roles';
+        const query = `SELECT name, description FROM roles WHERE client_id = '${TDEI_GATEWAY_CLIENT_ID}'`;
         return await dbClient.query(query)
             .then(res => {
                 let roleList = res.rows.filter(f => ![Role.TDEI_ADMIN.toString()].includes(f.name)).map(x => {
@@ -469,6 +473,135 @@ export class UserManagementService implements IUserManagement {
         return true;
     }
 
+    /**
+     * Lists the TDEI roles defined for one Keycloak client.
+     */
+    async listApplicationRoles(clientId: string): Promise<ApplicationRoleDto[]> {
+        await this.assertApplicationExists(clientId);
+        const result = await dbClient.query({
+            text: `SELECT name, description
+                   FROM roles
+                   WHERE client_id = $1
+                   ORDER BY name`,
+            values: [clientId],
+        });
+        return result.rows.map(row => new ApplicationRoleDto({
+            name: row.name,
+            description: row.description ?? "",
+        }));
+    }
+
+    /**
+     * Returns the roles assigned to one user for one Keycloak client.
+     * A user with no roles for that client returns an empty list.
+     */
+    async getUserApplicationRoles(clientId: string, userId: string): Promise<UserClientRolesDto> {
+        if (!userId || userId.length !== 36)
+            throw new HttpException(400, "userId must be the id returned by the user search");
+
+        await this.assertTdeiUserExists(userId);
+        await this.assertApplicationExists(clientId);
+        const result = await dbClient.query({
+            text: `SELECT r.name
+                   FROM user_application_role uar
+                   INNER JOIN roles r ON r.role_id = uar.role_id
+                   WHERE uar.user_id = $1
+                     AND r.client_id = $2
+                   ORDER BY r.name`,
+            values: [userId, clientId],
+        });
+        return new UserClientRolesDto({
+            userId,
+            clientId,
+            roles: result.rows.map(row => row.name),
+        });
+    }
+
+    /**
+     * Adds TDEI roles for one Keycloak client without changing the user's other roles.
+     * Adding a role the user already has leaves the assignment unchanged.
+     */
+    async addApplicationRoles(clientId: string, request: ApplicationRolesReqDto): Promise<boolean> {
+        const roles = this.normalizeRoleNames(request.roles);
+        await this.assertTdeiUserExists(request.userId);
+        await this.assertApplicationExists(clientId);
+        await this.assertApplicationRolesExist(clientId, roles);
+        await dbClient.query({
+            text: `INSERT INTO user_application_role (user_id, role_id)
+                   SELECT $1, role_id
+                   FROM roles
+                   WHERE client_id = $2
+                     AND name = ANY($3::character varying[])
+                   ON CONFLICT ON CONSTRAINT pk_user_application_role DO NOTHING`,
+            values: [request.userId, clientId, roles],
+        });
+        return true;
+    }
+
+    /**
+     * Removes only the listed TDEI roles for one Keycloak client.
+     * Removing a role the user does not have leaves the assignment unchanged.
+     */
+    async removeApplicationRoles(clientId: string, request: ApplicationRolesReqDto): Promise<boolean> {
+        const roles = this.normalizeRoleNames(request.roles);
+        await this.assertTdeiUserExists(request.userId);
+        await this.assertApplicationExists(clientId);
+        await this.assertApplicationRolesExist(clientId, roles);
+        await dbClient.query({
+            text: `DELETE FROM user_application_role uar
+                   USING roles r
+                   WHERE uar.role_id = r.role_id
+                     AND uar.user_id = $1
+                     AND r.client_id = $2
+                     AND r.name = ANY($3::character varying[])`,
+            values: [request.userId, clientId, roles],
+        });
+        return true;
+    }
+
+    private normalizeRoleNames(roles: string[]): string[] {
+        const normalized = [...new Set(roles.map(role => role.trim().toLowerCase()).filter(role => role.length > 0))];
+        if (normalized.length == 0)
+            throw new HttpException(400, "roles must contain at least one application role");
+        return normalized;
+    }
+
+    private async assertApplicationExists(clientId: string): Promise<ApplicationDto> {
+        const application = await keycloakAdminClient.getApplication(clientId);
+        if (!application)
+            throw new HttpException(404, "Application not found");
+        return application;
+    }
+
+    private async assertApplicationRolesExist(clientId: string, roles: string[]): Promise<void> {
+        const result = await dbClient.query({
+            text: `SELECT name
+                   FROM roles
+                   WHERE client_id = $1
+                     AND name = ANY($2::character varying[])`,
+            values: [clientId, roles],
+        });
+        const found = new Set(result.rows.map(row => row.name));
+        const missing = roles.filter(role => !found.has(role));
+        if (missing.length > 0)
+            throw new HttpException(400, `Unknown application role: ${missing.join(", ")}`);
+    }
+
+    private async assertTdeiUserExists(userId: string): Promise<void> {
+        const result = await dbClient.query({
+            text: `SELECT ue.id
+                   FROM keycloak.user_entity ue
+                   INNER JOIN keycloak.realm realm ON ue.realm_id = realm.id
+                   WHERE ue.id = $1
+                     AND realm.name = $2
+                     AND ue.service_account_client_link IS NULL
+                   LIMIT 1`,
+            values: [userId, TDEI_REALM],
+        });
+        if (result.rows.length == 0)
+            throw new HttpException(404, "User not found");
+    }
+
     private async removeUserFromProjectGroup(project_group_id: string, userId: string, isAdmin: boolean) {
         const projGrp = await projectgroupService.getProjectGroupById(project_group_id);
         if (projGrp.project_group_name == DEFAULT_PROJECT_GROUP && !isAdmin)
@@ -505,6 +638,93 @@ export class UserManagementService implements IUserManagement {
         });
     }
 
+
+    /**
+     * Searches TDEI users for an admin picker.
+     * The login name is returned as username. Email is not a separate field.
+     * applicationRoles are roles grouped by Keycloak client.
+     */
+    async searchUsers(searchText: string = "", pageNo: number = 1, pageSize: number = 10): Promise<TdeiUserDto[]> {
+        if (pageNo == undefined || Number.isNaN(pageNo) || pageNo < 1) pageNo = 1;
+        if (pageSize == undefined || Number.isNaN(pageSize) || pageSize < 1) pageSize = 10;
+        const take = pageSize > 50 ? 50 : pageSize;
+        const skip = (pageNo - 1) * take;
+
+        const values: any[] = [];
+        let searchClause = "";
+        const normalizedSearch = searchText?.trim() ?? "";
+        if (normalizedSearch.length > 0) {
+            values.push(`${normalizedSearch}%`);
+            searchClause = `AND (
+                ue.first_name ILIKE $1
+                OR ue.last_name ILIKE $1
+                OR ue.email ILIKE $1
+                OR ue.username ILIKE $1
+            )`;
+        }
+        values.push(take, skip);
+        const limitParam = searchClause ? "$2" : "$1";
+        const offsetParam = searchClause ? "$3" : "$2";
+
+        const query = {
+            text: `
+            SELECT
+                ue.id,
+                ue.first_name,
+                ue.last_name,
+                COALESCE(NULLIF(ue.email, ''), ue.username) AS username,
+                COALESCE(
+                    (
+                        SELECT json_agg(json_build_object(
+                            'client_id', g.client_id,
+                            'roles', g.roles
+                        ) ORDER BY g.client_id)
+                        FROM (
+                            SELECT r.client_id, ARRAY_AGG(DISTINCT r.name ORDER BY r.name) AS roles
+                            FROM public.user_application_role uar
+                            INNER JOIN public.roles r ON r.role_id = uar.role_id
+                            WHERE uar.user_id = ue.id
+                            GROUP BY r.client_id
+                        ) g
+                    ),
+                    '[]'::json
+                ) AS application_roles
+            FROM keycloak.user_entity ue
+            INNER JOIN keycloak.realm r ON ue.realm_id = r.id
+            WHERE r.name = '${TDEI_REALM}'
+              AND ue.service_account_client_link IS NULL
+              ${searchClause}
+            ORDER BY ue.first_name ASC, ue.last_name ASC
+            LIMIT ${limitParam} OFFSET ${offsetParam}`,
+            values,
+        };
+
+        const result = await dbClient.query(query);
+        const clients = await this.applicationNames(result.rows);
+        return result.rows.map(row => new TdeiUserDto({
+            id: row.id,
+            firstName: row.first_name ?? "",
+            lastName: row.last_name ?? "",
+            username: row.username ?? "",
+            applicationRoles: (row.application_roles ?? []).map((item: any) => {
+                const client = clients.get(item.client_id);
+                return new UserApplicationRolesDto({
+                    realm: client?.realm ?? TDEI_REALM,
+                    clientId: item.client_id,
+                    name: client?.name ?? item.client_id,
+                    roles: item.roles ?? [],
+                });
+            }),
+        }));
+    }
+
+    private async applicationNames(rows: { application_roles?: { client_id: string }[] }[]): Promise<Map<string, ApplicationDto>> {
+        const needsNames = rows.some(row => (row.application_roles ?? []).length > 0);
+        if (!needsNames)
+            return new Map();
+        const applications = await keycloakAdminClient.listApplications();
+        return new Map(applications.map(application => [application.clientId, application]));
+    }
 
     /**
      * Fetches all the users in the system with unique roles

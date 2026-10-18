@@ -9,6 +9,7 @@ import HttpException from "../../src/exceptions/http/http-base-exception";
 import { ProjectGroupRoleDto } from "../../src/model/dto/project-group-role-dto";
 import { Utility } from "../../src/utility/utility";
 import authorizationMiddleware, { validateAccessToken } from "../../src/middleware/authorization-middleware";
+import { ChatbotAppRole } from "../../src/constants/role-constants";
 
 
 // group test using describe
@@ -578,6 +579,100 @@ describe("User Management Controller Test", () => {
                 expect(spy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(400);
             });
+        });
+    });
+
+    describe("Application roles", () => {
+        const body = {
+            userId: "11111111-1111-1111-1111-111111111111",
+            roles: [ChatbotAppRole.CHATBOT_MANAGER]
+        };
+
+        test("When adding roles, Expect HTTP status 200", async () => {
+            const req = getMockReq({ body, params: { clientId: "tdei-chat" } });
+            const { res, next } = getMockRes();
+            const spy = jest.spyOn(userManagementService, "addApplicationRoles").mockResolvedValueOnce(true);
+
+            await userManagementController.addApplicationRoles(req, res, next);
+
+            expect(spy).toHaveBeenCalledWith("tdei-chat", expect.objectContaining(body));
+            expect(res.status).toHaveBeenCalledWith(200);
+        });
+
+        test("When removing roles, Expect HTTP status 200", async () => {
+            const req = getMockReq({ body, params: { clientId: "tdei-chat" } });
+            const { res, next } = getMockRes();
+            const spy = jest.spyOn(userManagementService, "removeApplicationRoles").mockResolvedValueOnce(true);
+
+            await userManagementController.removeApplicationRoles(req, res, next);
+
+            expect(spy).toHaveBeenCalledWith("tdei-chat", expect.objectContaining(body));
+            expect(res.status).toHaveBeenCalledWith(200);
+        });
+
+        test("When the user is not found, Expect HTTP status 404", async () => {
+            const req = getMockReq({ body, params: { clientId: "tdei-chat" } });
+            const { res, next } = getMockRes();
+            jest.spyOn(userManagementService, "addApplicationRoles")
+                .mockRejectedValueOnce(new HttpException(404, "User not found"));
+
+            await userManagementController.addApplicationRoles(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(404);
+        });
+
+        test("When fetching a user's roles, Expect HTTP status 200", async () => {
+            const userId = "11111111-1111-1111-1111-111111111111";
+            const req = getMockReq({ params: { clientId: "tdei-chat", userId } });
+            const { res, next } = getMockRes();
+            const roles = { userId, clientId: "tdei-chat", roles: [ChatbotAppRole.CHATBOT_MANAGER] };
+            const spy = jest.spyOn(userManagementService, "getUserApplicationRoles").mockResolvedValueOnce(roles as any);
+
+            await userManagementController.getUserApplicationRoles(req, res, next);
+
+            expect(spy).toHaveBeenCalledWith("tdei-chat", userId);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(roles);
+        });
+    });
+
+    describe("Search users", () => {
+        test("When requested, Expect to return the matching users", async () => {
+            const req = getMockReq({
+                query: { searchText: "Ada", page_no: "2", page_size: "5" }
+            });
+            const { res, next } = getMockRes();
+            const users = [{
+                id: "user-1",
+                firstName: "Ada",
+                lastName: "Lovelace",
+                username: "ada@example.com",
+                applicationRoles: [{
+                    clientId: "tdei-chat",
+                    name: "TDEI Chat",
+                    roles: [ChatbotAppRole.CHATBOT_MANAGER]
+                }]
+            }];
+            const spy = jest
+                .spyOn(userManagementService, "searchUsers")
+                .mockResolvedValueOnce(users as any);
+
+            await userManagementController.searchUsers(req, res, next);
+
+            expect(spy).toHaveBeenCalledWith("Ada", 2, 5);
+            expect(res.status).toHaveBeenCalledWith(200);
+            expect(res.send).toHaveBeenCalledWith(users);
+        });
+
+        test("When the query fails, Expect HTTP status 500", async () => {
+            const req = getMockReq({ query: {} });
+            const { res, next } = getMockRes();
+            jest.spyOn(userManagementService, "searchUsers")
+                .mockRejectedValueOnce(new Error("Database error"));
+
+            await userManagementController.searchUsers(req, res, next);
+
+            expect(res.status).toHaveBeenCalledWith(500);
         });
     });
 
