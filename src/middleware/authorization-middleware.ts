@@ -67,7 +67,7 @@ function authorizationMiddleware(roles: string[], validateProjectGroup?: boolean
                     url.search = params.toString();
 
 
-                    const resp: Response = await fetch(url);
+                    const resp: Response = await fetch(url.toString());
                     if (!resp.ok) {
                         throw new Error();
                     }

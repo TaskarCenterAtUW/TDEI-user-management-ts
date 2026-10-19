@@ -6,6 +6,9 @@ import { LoginDto } from "../../model/dto/login-dto";
 import { ProjectGroupRoleDto } from "../../model/dto/project-group-role-dto";
 import { ResetCredentialsDto } from "../../model/dto/reset-credentials-dto";
 import { ReferralCodeDto } from "../../model/dto/referral-code-dto";
+import { TdeiUserDto } from "../../model/dto/tdei-user-dto";
+import { ApplicationRolesReqDto } from "../../model/dto/application-roles-req-dto";
+import { ApplicationRoleDto, UserClientRolesDto } from "../../model/dto/application-dto";
 
 export interface IUserManagement {
 
@@ -93,6 +96,34 @@ export interface IUserManagement {
      * @returns 
      */
     getUserProfile(userName: string): Promise<UserProfile>;
+
+    /**
+     * Lists the roles defined for one client in the tdei realm.
+     */
+    listApplicationRoles(clientId: string): Promise<ApplicationRoleDto[]>;
+
+    /**
+     * Returns the roles assigned to one user for one Keycloak client.
+     */
+    getUserApplicationRoles(clientId: string, userId: string): Promise<UserClientRolesDto>;
+
+    /**
+     * Adds application roles for one Keycloak client without removing the user's other roles.
+     */
+    addApplicationRoles(clientId: string, request: ApplicationRolesReqDto): Promise<boolean>;
+
+    /**
+     * Removes only the listed application roles for one Keycloak client.
+     */
+    removeApplicationRoles(clientId: string, request: ApplicationRolesReqDto): Promise<boolean>;
+
+    /**
+     * Searches TDEI users and returns application roles.
+     * The login name is returned as username.
+     * @param pageNo page number
+     * @param pageSize page size
+     */
+    searchUsers(searchText: string, pageNo: number, pageSize: number): Promise<TdeiUserDto[]>;
 
     /**
      * Fetches all the users in the system with unique roles

@@ -14,6 +14,8 @@ import jwt_decode from 'jwt-decode';
 import { ResetCredentialsDto } from "../model/dto/reset-credentials-dto";
 import { ReferralCodeDto } from "../model/dto/referral-code-dto";
 import { ReferralCodeLiteDto } from "../model/dto/referral-code-light-dto";
+import { listRequestValidation } from "../middleware/list-request-validation-middleware";
+import { ApplicationRolesReqDto } from "../model/dto/application-roles-req-dto";
 
 class UserManagementController implements IController {
     public path = '';
@@ -27,6 +29,10 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/register`, validationMiddleware(RegisterUserDto), this.registerUser);
         this.router.post(`${this.path}/api/v1/permission`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.updatePermissions);
         this.router.put(`${this.path}/api/v1/permission/revoke`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(RolesReqDto), this.revokePermissions);
+        this.router.get(`${this.path}/api/v1/applications/:clientId/roles`, authorizationMiddleware([Role.TDEI_ADMIN]), this.listApplicationRoles);
+        this.router.get(`${this.path}/api/v1/applications/:clientId/users/:userId/roles`, authorizationMiddleware([], false, true), this.getUserApplicationRoles);
+        this.router.post(`${this.path}/api/v1/applications/:clientId/user-roles`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ApplicationRolesReqDto), this.addApplicationRoles);
+        this.router.delete(`${this.path}/api/v1/applications/:clientId/user-roles`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ApplicationRolesReqDto), this.removeApplicationRoles);
         this.router.get(`${this.path}/api/v1/roles`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN]), this.getRoles);
         this.router.get(`${this.path}/api/v1/project-group-roles/:userId`, authorizationMiddleware([], false, true), this.projectGroupRoles);
         this.router.post(`${this.path}/api/v1/authenticate`, validationMiddleware(LoginDto), this.login);
@@ -36,6 +42,7 @@ class UserManagementController implements IController {
         this.router.post(`${this.path}/api/v1/refresh-token`, this.refreshToken);
         this.router.get(`${this.path}/api/v1/user-profile`, authorizationMiddleware([]), this.getUserProfile);
         this.router.post(`${this.path}/api/v1/reset-credentials`, authorizationMiddleware([]), validationMiddleware(ResetCredentialsDto), this.resetCredentials);
+        this.router.get(`${this.path}/api/v1/users`, listRequestValidation, authorizationMiddleware([Role.TDEI_ADMIN]), this.searchUsers);
         this.router.get(`${this.path}/api/v1/users/download`, authorizationMiddleware([Role.TDEI_ADMIN]), this.downloadUsers);
     }
 
@@ -64,6 +71,57 @@ class UserManagementController implements IController {
             Ok(response, referralCodeLite);
         }).catch((error: any) => {
             let errorMessage = "Error fetching the referral code details";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public getUserApplicationRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        return userManagementServiceInstance.getUserApplicationRoles(request.params.clientId, request.params.userId).then((roles) => {
+            Ok(response, roles);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the user application roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public listApplicationRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        return userManagementServiceInstance.listApplicationRoles(request.params.clientId).then((roles) => {
+            Ok(response, roles);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the application roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public addApplicationRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        const rolesRequest = new ApplicationRolesReqDto(request.body);
+        return userManagementServiceInstance.addApplicationRoles(request.params.clientId, rolesRequest).then(() => {
+            Ok(response, { data: "Successful!" });
+        }).catch((error: any) => {
+            let errorMessage = "Error assigning the application roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public removeApplicationRoles = async (request: Request, response: express.Response, next: NextFunction) => {
+        const rolesRequest = new ApplicationRolesReqDto(request.body);
+        return userManagementServiceInstance.removeApplicationRoles(request.params.clientId, rolesRequest).then(() => {
+            Ok(response, { data: "Successful!" });
+        }).catch((error: any) => {
+            let errorMessage = "Error removing the application roles";
+            Utility.handleError(response, next, error, errorMessage);
+        });
+    }
+
+    public searchUsers = async (request: Request, response: express.Response, next: NextFunction) => {
+        const searchText = request.query.searchText?.toString() ?? "";
+        const pageNo = Number.parseInt(request.query.page_no?.toString() ?? "1", 10);
+        const pageSize = Number.parseInt(request.query.page_size?.toString() ?? "10", 10);
+
+        return userManagementServiceInstance.searchUsers(searchText, pageNo, pageSize).then((users) => {
+            Ok(response, users);
+        }).catch((error: any) => {
+            let errorMessage = "Error fetching the tdei users";
             Utility.handleError(response, next, error, errorMessage);
         });
     }
