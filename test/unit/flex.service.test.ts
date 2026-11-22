@@ -230,6 +230,10 @@ describe("Flex Service Test", () => {
                     polygon: JSON.stringify(service.polygon.features[0].geometry)
                 }
 
+                let countResponse = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ total: 134 }]
+                }
                 let response = <QueryResult>{
                     rowCount: 1,
                     rows: [dbResult]
@@ -245,9 +249,10 @@ describe("Flex Service Test", () => {
 
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(countResponse)
                     .mockResolvedValueOnce(response);
                 //Act
-                let list = await flexService.getService(new ServiceQueryParams({
+                let page = await flexService.getService(new ServiceQueryParams({
                     searchText: "test",
                     service_type: "flex",
                     tdei_service_id: "tdei_service_id",
@@ -259,19 +264,50 @@ describe("Flex Service Test", () => {
                 //Assert
                 expect(serviceIdCheckSpy).toHaveBeenCalled();
                 expect(getProjectGroupSpy).toHaveBeenCalled();
-                expect(updateServiceSpy).toHaveBeenCalled();
-                expect(list[0]).toMatchObject(service);
+                expect(updateServiceSpy).toHaveBeenCalledTimes(2);
+                expect(page.totalCount).toBe(134);
+                expect(page.pageNo).toBe(1);
+                expect(page.pageSize).toBe(10);
+                expect(page.items[0]).toMatchObject(service);
+
+                const countCall = updateServiceSpy.mock.calls[0][0] as { text: string };
+                const listCall = updateServiceSpy.mock.calls[1][0] as { text: string };
+                expect(countCall.text).toContain("SELECT COUNT(*)::int AS total FROM service");
+                expect(countCall.text).not.toContain("ST_AsGeoJSON");
+                expect(listCall.text).toContain("ST_AsGeoJSON(polygon) as polygon");
+                expect(listCall.text).toContain("LIMIT");
+            });
+
+            test("When page size exceeds 50, Expect the count query and a capped page", async () => {
+                const querySpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [{ total: 134 }] })
+                    .mockResolvedValueOnce(<QueryResult>{ rows: <any>[] });
+
+                const page = await flexService.getService(new ServiceQueryParams({
+                    page_no: 2,
+                    page_size: 80,
+                }));
+
+                expect(page).toEqual({
+                    items: [],
+                    totalCount: 134,
+                    pageNo: 2,
+                    pageSize: 50,
+                });
+                const listCall = querySpy.mock.calls[1][0] as { values: unknown[] };
+                expect(listCall.values.slice(0, 2)).toEqual([50, 50]);
             });
 
             test("When database exception occured, Expect to throw error", async () => {
                 //Arrange
                 const updateServiceSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
+                    .mockRejectedValue(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
                 await expect(flexService.getService(new ServiceQueryParams())).rejects.toThrow(Error);
-                expect(updateServiceSpy).toHaveBeenCalledTimes(1);
+                expect(updateServiceSpy).toHaveBeenCalledTimes(2);
             });
         });
     });

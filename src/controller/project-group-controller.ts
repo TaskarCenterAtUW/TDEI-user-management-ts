@@ -90,16 +90,44 @@ class ProjectGroupController implements IController {
     public getProjectGroup = async (request: Request, response: express.Response, next: NextFunction) => {
         const params = ProjectGroupQueryParams.from(request.query);
 
-        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1", 10);
+        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10", 10);
 
         return projectGroupService.getProjectGroups(params).then((result) => {
-            Ok(response, result);
+            response.setHeader("X-Total-Count", String(result.totalCount));
+            response.setHeader("X-Page-No", String(result.pageNo));
+            response.setHeader("X-Page-Size", String(result.pageSize));
+
+            const hasNextPage = result.pageSize > 0 && result.pageNo * result.pageSize < result.totalCount;
+            if (hasNextPage) {
+                const link = this.nextPageLink(request, result.pageNo, result.pageSize);
+                if (link) {
+                    response.setHeader("Link", link);
+                }
+            }
+
+            Ok(response, result.items);
         }).catch((error: any) => {
             const errorMessage = "Error fetching the project groups";
             Utility.handleError(response, next, error, errorMessage);
         });
 
+    }
+
+    private nextPageLink(request: Request, pageNo: number, pageSize: number): string | undefined {
+        const rawUrl = request.originalUrl || request.url;
+        if (!rawUrl) {
+            return undefined;
+        }
+
+        const url = new URL(rawUrl, "http://localhost");
+        url.searchParams.set("page_no", String(pageNo + 1));
+        url.searchParams.set("page_size", String(pageSize));
+        const link = `<${url.pathname}${url.search}>; rel="next"`;
+        if (/[\r\n]/.test(link)) {
+            return undefined;
+        }
+        return link;
     }
 
     public createProjectGroup = async (request: Request, response: express.Response, next: NextFunction) => {

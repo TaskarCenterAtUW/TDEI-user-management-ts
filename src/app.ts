@@ -64,7 +64,9 @@ class App {
         this.app.use(helmet());
         this.app.use(bodyParser.json({ limit: '10mb' }));
         this.app.use(bodyParser.text({ limit: '10mb' }));
-        this.app.use(cors());
+        this.app.use(cors({
+            exposedHeaders: ["X-Total-Count", "X-Page-No", "X-Page-Size", "Link"],
+        }));
     }
 
     private initializeControllers(controllers: IController[]) {

@@ -37,10 +37,11 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
     }
 
     /**
-     * Builds the parameterized sql query.
-     * @returns DynamicQueryObject
-     */
+    * Builds the parameterized sql query for one page of project groups.
+    * @returns DynamicQueryObject
+    */
     getQueryObject() {
+        this.sanitizePagination();
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
         queryObject.buildSelectRaw(`Select o.project_group_id, o.name, o.phone, o.address, ST_AsGeoJSON(o.polygon) as polygon, o.url, o.is_active, ue.enabled, 
         COALESCE(json_agg(json_build_object('email', ue.email, 'username', ue.username, 'first_name', 
@@ -53,7 +54,36 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
         `.replace(/\n/g, ""));
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("o.name", SqlORder.ASC);
-        //Add conditions
+        this.applyFilters(queryObject);
+        queryObject.buildGroupRaw(" group by o.project_group_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
+
+        return queryObject;
+    }
+
+    /**
+     * Counts matching project groups without the POC join the page query uses to shape each row.
+     */
+    getCountQueryObject(): DynamicQueryObject {
+        const queryObject = new DynamicQueryObject();
+        queryObject.buildSelectRaw("SELECT COUNT(*)::int AS total FROM project_group o");
+        this.applyFilters(queryObject);
+        return queryObject;
+    }
+
+    /**
+     * page_no defaults to 1. page_size defaults to 10 and is capped at 50.
+     */
+    sanitizePagination(): void {
+        const pageNo = Number(this.page_no);
+        const pageSize = Number(this.page_size);
+
+        this.page_no = Number.isFinite(pageNo) && pageNo >= 1 ? Math.trunc(pageNo) : 1;
+
+        const resolvedSize = Number.isFinite(pageSize) && pageSize >= 1 ? Math.trunc(pageSize) : 10;
+        this.page_size = resolvedSize > 50 ? 50 : resolvedSize;
+    }
+
+    private applyFilters(queryObject: DynamicQueryObject): void {
         if (this.searchText != undefined && this.searchText.length != 0) {
             queryObject.condition(` o.name ILIKE $${queryObject.paramCouter++} `, this.searchText + '%');
         }
@@ -67,13 +97,10 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
         else if (this.bbox && this.bbox.length > 0 && this.bbox.length != 4) {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
-        // //Always pull active project group
-        // queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
         if (this.show_inactive != undefined && String(this.show_inactive).toLowerCase() == 'true') {
             queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, false);
         }
         else {
-            //Always pull active project group
             queryObject.condition(` o.is_active = $${queryObject.paramCouter++} `, true);
         }
         if (this.data_viewer_allowed != undefined) {
@@ -94,10 +121,6 @@ export class ProjectGroupQueryParams extends AbstractDomainEntity {
                 );
             }
         }
-
-        queryObject.buildGroupRaw(" group by o.project_group_id, o.name, o.phone, o.address, o.polygon, o.url, o.is_active, ue.enabled ");
-
-        return queryObject;
     }
 
     toBoolean(value: any): boolean {

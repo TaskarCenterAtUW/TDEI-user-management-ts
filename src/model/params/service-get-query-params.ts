@@ -45,20 +45,47 @@ export class ServiceQueryParams extends AbstractDomainEntity {
     }
 
     /**
-     * Builds the parameterized sql query.
+     * Builds the parameterized sql query for one page of services.
      * @returns DynamicQueryObject
      */
     getQueryObject() {
+        this.sanitizePagination();
         let queryObject: DynamicQueryObject = new DynamicQueryObject();
         queryObject.buildSelect("service", ["service_id", "service_type", "name", "owner_project_group", "ST_AsGeoJSON(polygon) as polygon"]);
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("name", SqlORder.ASC);
-        //Add conditions
+        this.applyFilters(queryObject);
+        return queryObject;
+    }
+
+    /**
+     * Counts matching services without loading polygons or applying the page limit.
+     */
+    getCountQueryObject(): DynamicQueryObject {
+        const queryObject = new DynamicQueryObject();
+        queryObject.buildSelectRaw("SELECT COUNT(*)::int AS total FROM service");
+        this.applyFilters(queryObject);
+        return queryObject;
+    }
+
+    /**
+     * page_no defaults to 1. page_size defaults to 10 and is capped at 50.
+     */
+    sanitizePagination(): void {
+        const pageNo = Number(this.page_no);
+        const pageSize = Number(this.page_size);
+
+        this.page_no = Number.isFinite(pageNo) && pageNo >= 1 ? Math.trunc(pageNo) : 1;
+
+        const resolvedSize = Number.isFinite(pageSize) && pageSize >= 1 ? Math.trunc(pageSize) : 10;
+        this.page_size = resolvedSize > 50 ? 50 : resolvedSize;
+    }
+
+    private applyFilters(queryObject: DynamicQueryObject): void {
         if (this.show_inactive != undefined && String(this.show_inactive).toLowerCase() == 'true') {
             queryObject.condition(` is_active = $${queryObject.paramCouter++} `, false);
         }
         else {
-            //Always pull active project group
             queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
         }
 
@@ -81,9 +108,5 @@ export class ServiceQueryParams extends AbstractDomainEntity {
         else if (this.bbox && this.bbox.length > 0 && this.bbox.length != 4) {
             console.debug("Skipping bbox filter as bounding box constraints not satisfied.");
         }
-        //Always pull active project group
-        // queryObject.condition(` is_active = $${queryObject.paramCouter++} `, true);
-
-        return queryObject;
     }
 }

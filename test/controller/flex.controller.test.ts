@@ -137,26 +137,36 @@ describe("Flex Controller Test", () => {
                 })];
                 const getServiceSpy = jest
                     .spyOn(flexService, "getService")
-                    .mockResolvedValueOnce(list);
+                    .mockResolvedValueOnce({
+                        items: list,
+                        totalCount: 1,
+                        pageNo: 1,
+                        pageSize: 10,
+                    });
                 //Act
                 await flexServiceController.getService(req, res, next);
                 //Assert
                 expect(getServiceSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.send).toBeCalledWith(list);
+                expect(res.setHeader).toHaveBeenCalledWith("X-Total-Count", "1");
+                expect(res.setHeader).toHaveBeenCalledWith("X-Page-No", "1");
+                expect(res.setHeader).toHaveBeenCalledWith("X-Page-Size", "10");
+                expect(res.setHeader).not.toHaveBeenCalledWith("Link", expect.anything());
             });
 
             test("When requested with all filters, Expect to return flex service list", async () => {
                 //Arrange
 
                 let req = getMockReq({
+                    originalUrl: "/api/v1/service?searchText=Ada&service_type=flex&page_no=2&page_size=50",
                     query: {
                         searchText: "test",
                         tdei_service_id: "tdei_service_id",
                         tdei_project_group_id: "tdei_project_group_id",
                         bbox: <any>[23, 43, 45, 67],
-                        page_no: "1",
-                        page_size: "10"
+                        page_no: "2",
+                        page_size: "50"
                     }
                 });
                 const { res, next } = getMockRes();
@@ -166,13 +176,25 @@ describe("Flex Controller Test", () => {
                 })];
                 const getServiceSpy = jest
                     .spyOn(flexService, "getService")
-                    .mockResolvedValueOnce(list);
+                    .mockResolvedValueOnce({
+                        items: list,
+                        totalCount: 134,
+                        pageNo: 2,
+                        pageSize: 50,
+                    });
                 //Act
                 await flexServiceController.getService(req, res, next);
                 //Assert
                 expect(getServiceSpy).toHaveBeenCalledTimes(1);
                 expect(res.status).toHaveBeenCalledWith(200);
                 expect(res.send).toBeCalledWith(list);
+                expect(res.setHeader).toHaveBeenCalledWith("X-Total-Count", "134");
+                expect(res.setHeader).toHaveBeenCalledWith("X-Page-No", "2");
+                expect(res.setHeader).toHaveBeenCalledWith("X-Page-Size", "50");
+                expect(res.setHeader).toHaveBeenCalledWith(
+                    "Link",
+                    "</api/v1/service?searchText=Ada&service_type=flex&page_no=3&page_size=50>; rel=\"next\""
+                );
             });
 
             test("When database exception occurs, Expect to return HTTP status 500", async () => {

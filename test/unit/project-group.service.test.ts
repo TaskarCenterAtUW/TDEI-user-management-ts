@@ -268,6 +268,10 @@ describe("Project Group Service Test", () => {
                     }]
                 }
 
+                let countResponse = <QueryResult>{
+                    rowCount: 1,
+                    rows: [{ total: 134 }]
+                }
                 let response = <QueryResult>{
                     rowCount: 1,
                     rows: [dbResult]
@@ -278,9 +282,10 @@ describe("Project Group Service Test", () => {
 
                 const projectGroupIdCheckSpy = jest
                     .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(countResponse)
                     .mockResolvedValueOnce(response);
                 //Act
-                let list = await projectGroupService.getProjectGroups(new ProjectGroupQueryParams({
+                let page = await projectGroupService.getProjectGroups(new ProjectGroupQueryParams({
                     searchText: "test",
                     tdei_project_group_id: "tdei_project_group_id",
                     bbox: <any>[23, 43, 45, 67],
@@ -288,20 +293,55 @@ describe("Project Group Service Test", () => {
                     page_size: 10
                 }));
                 //Assert
-                expect(projectGroupIdCheckSpy).toHaveBeenCalled();
+                expect(projectGroupIdCheckSpy).toHaveBeenCalledTimes(2);
                 expect(getProjectGroupSpy).toHaveBeenCalled();
-                expect(list[0]).toMatchObject(projectgroup);
+                expect(page.totalCount).toBe(134);
+                expect(page.pageNo).toBe(1);
+                expect(page.pageSize).toBe(10);
+                expect(page.items[0]).toMatchObject(projectgroup);
+
+                const countCall = projectGroupIdCheckSpy.mock.calls[0][0] as { text: string };
+                const listCall = projectGroupIdCheckSpy.mock.calls[1][0] as { text: string };
+                expect(countCall.text).toContain("SELECT COUNT(*)::int AS total FROM project_group o");
+                expect(countCall.text).not.toMatch(/join/i);
+                expect(listCall.text).toContain("left join keycloak.user_entity");
+                expect(listCall.text).toContain("LIMIT");
+            });
+
+            test("When page size exceeds 50, Expect the count query and a capped page", async () => {
+                const querySpy = jest
+                    .spyOn(dbClient, "query")
+                    .mockResolvedValueOnce(<QueryResult>{ rows: [{ total: 134 }] })
+                    .mockResolvedValueOnce(<QueryResult>{ rows: <any>[] });
+
+                const page = await projectGroupService.getProjectGroups(new ProjectGroupQueryParams({
+                    page_no: 2,
+                    page_size: 80,
+                }));
+
+                expect(page).toEqual({
+                    items: [],
+                    totalCount: 134,
+                    pageNo: 2,
+                    pageSize: 50,
+                });
+                const listCall = querySpy.mock.calls[1][0] as { text: string, values: unknown[] };
+                expect(listCall.text).toContain("LIMIT");
+                expect(listCall.values.slice(0, 2)).toEqual([50, 50]);
+                expect(querySpy.mock.calls[0][0]).toEqual(expect.objectContaining({
+                    text: expect.stringContaining("SELECT COUNT(*)::int AS total"),
+                }));
             });
 
             test("When database exception occured, Expect to throw error", async () => {
                 //Arrange
                 const updateProjectGroupSpy = jest
                     .spyOn(dbClient, "query")
-                    .mockRejectedValueOnce(new DatabaseError("error", 1, "error"));
+                    .mockRejectedValue(new DatabaseError("error", 1, "error"));
                 //Act
                 //Assert
                 await expect(projectGroupService.getProjectGroups(new ProjectGroupQueryParams())).rejects.toThrow(Error);
-                expect(updateProjectGroupSpy).toHaveBeenCalledTimes(1);
+                expect(updateProjectGroupSpy).toHaveBeenCalledTimes(2);
             });
         });
     });
