@@ -10,6 +10,7 @@ import referralCodeService from "../service/referral-code-service";
 import { ProjectGroupQueryParams } from "../model/params/project-group-get-query-params";
 import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-query-params";
 import { Utility } from "../utility/utility";
+import { nextPageLink } from "../utility/next-page-link";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
 import { listRequestValidation } from "../middleware/list-request-validation-middleware";
 import { DatasetViewerDto, FeedbackTurnaroundTime } from "../model/dto/dataset-viewer-dto";
@@ -27,7 +28,7 @@ class ProjectGroupController implements IController {
     public intializeRoutes() {
         this.router.put(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.updateProjectGroup);
         this.router.post(`${this.path}/api/v1/project-group`, authorizationMiddleware([Role.TDEI_ADMIN]), validationMiddleware(ProjectGroupDto), this.createProjectGroup);
-        this.router.get(`${this.path}/api/v1/project-group`, listRequestValidation, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
+        this.router.get(`${this.path}/api/v1/project-group`, authorizationMiddleware([]), queryValidationMiddleware(ProjectGroupQueryParams), this.getProjectGroup);
         this.router.get(`${this.path}/api/v1/project-group/:projectGroupId/users`, authorizationMiddleware([Role.TDEI_ADMIN, Role.POC], true), this.getProjectGroupUsers);
         this.router.put(`${this.path}/api/v1/project-group/:projectGroupId/active/:status`, authorizationMiddleware([Role.TDEI_ADMIN]), this.deleteProjectGroup);
         this.router.post(`${this.path}/api/v1/project-group/:projectGroupId/dataset-viewer`, authorizationMiddleware([Role.TDEI_ADMIN, Role.POC], true), this.putDatasetViewer);
@@ -100,7 +101,7 @@ class ProjectGroupController implements IController {
 
             const hasNextPage = result.pageSize > 0 && result.pageNo * result.pageSize < result.totalCount;
             if (hasNextPage) {
-                const link = this.nextPageLink(request, result.pageNo, result.pageSize);
+                const link = nextPageLink(request, result.pageNo, result.pageSize);
                 if (link) {
                     response.setHeader("Link", link);
                 }
@@ -112,22 +113,6 @@ class ProjectGroupController implements IController {
             Utility.handleError(response, next, error, errorMessage);
         });
 
-    }
-
-    private nextPageLink(request: Request, pageNo: number, pageSize: number): string | undefined {
-        const rawUrl = request.originalUrl || request.url;
-        if (!rawUrl) {
-            return undefined;
-        }
-
-        const url = new URL(rawUrl, "http://localhost");
-        url.searchParams.set("page_no", String(pageNo + 1));
-        url.searchParams.set("page_size", String(pageSize));
-        const link = `<${url.pathname}${url.search}>; rel="next"`;
-        if (/[\r\n]/.test(link)) {
-            return undefined;
-        }
-        return link;
     }
 
     public createProjectGroup = async (request: Request, response: express.Response, next: NextFunction) => {

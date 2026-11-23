@@ -76,6 +76,30 @@ describe("FlexServiceController getService pagination headers", () => {
         expect(response.send).toHaveBeenCalledWith(items);
     });
 
+    test("omits Link when the request URL cannot be parsed", async () => {
+        const items = [new ServiceDto({ service_name: "Ada" })];
+        jest.spyOn(flexService, "getService").mockResolvedValueOnce({
+            items,
+            totalCount: 134,
+            pageNo: 2,
+            pageSize: 50,
+        });
+        const request = {
+            query: { page_no: "2", page_size: "50" },
+            originalUrl: "http://[",
+        } as unknown as Request;
+        const response = createResponse();
+        const next = createNext();
+
+        await flexServiceController.getService(request, response, next);
+
+        expect(response.setHeader).toHaveBeenCalledWith("X-Total-Count", "134");
+        expect(response.setHeader).not.toHaveBeenCalledWith("Link", expect.anything());
+        expect(response.status).toHaveBeenCalledWith(200);
+        expect(response.send).toHaveBeenCalledWith(items);
+        expect(next).not.toHaveBeenCalled();
+    });
+
     test("does not write page headers when the list fails", async () => {
         jest.spyOn(flexService, "getService").mockRejectedValueOnce(new Error("db down"));
         const handleErrorSpy = jest.spyOn(Utility, "handleError").mockImplementation(() => undefined);

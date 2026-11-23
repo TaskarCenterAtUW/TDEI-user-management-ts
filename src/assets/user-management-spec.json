@@ -578,7 +578,7 @@
                     {
                         "name": "page_size",
                         "in": "query",
-                        "description": "Records to fetch on this page. Defaults to 10 and must be from 1 to 50. The applied value is returned in X-Page-Size.",
+                        "description": "Records to fetch on this page. Defaults to 10. A missing value or a value below 1 is treated as 10. A value above 50 is capped at 50. X-Page-Size returns the size that was applied.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -613,7 +613,7 @@
                                 }
                             },
                             "X-Page-Size": {
-                                "description": "Page size applied to this response.",
+                                "description": "Page size applied to this response. Defaults to 10 and is capped at 50.",
                                 "schema": {
                                     "type": "integer"
                                 }
@@ -1213,7 +1213,7 @@
                     {
                         "name": "page_size",
                         "in": "query",
-                        "description": "Records to fetch on this page. Defaults to 10 and must be from 1 to 50. The applied value is returned in X-Page-Size.",
+                        "description": "Records to fetch on this page. Defaults to 10. A missing value or a value below 1 is treated as 10. A value above 50 is capped at 50. X-Page-Size returns the size that was applied.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1248,7 +1248,7 @@
                                 }
                             },
                             "X-Page-Size": {
-                                "description": "Page size applied to this response.",
+                                "description": "Page size applied to this response. Defaults to 10 and is capped at 50.",
                                 "schema": {
                                     "type": "integer"
                                 }

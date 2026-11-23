@@ -9,9 +9,9 @@ import flexService from "../service/flex-service";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 import { Utility } from "../utility/utility";
+import { nextPageLink } from "../utility/next-page-link";
 import { ValidationError, validate } from "class-validator";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
-import { listRequestValidation } from "../middleware/list-request-validation-middleware";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -24,7 +24,7 @@ class FlexServiceController implements IController {
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.put(`${this.path}/api/v1/service/:projectGroupId`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceUpdateDto), this.updateService);
-        this.router.get(`${this.path}/api/v1/service`, listRequestValidation, authorizationMiddleware([], true, true), queryValidationMiddleware(ServiceQueryParams), this.getService);
+        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true, true), queryValidationMiddleware(ServiceQueryParams), this.getService);
         this.router.put(`${this.path}/api/v1/service/:projectGroupId/:serviceId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteService);
     }
 
@@ -94,7 +94,7 @@ class FlexServiceController implements IController {
 
             const hasNextPage = result.pageSize > 0 && result.pageNo * result.pageSize < result.totalCount;
             if (hasNextPage) {
-                const link = this.nextPageLink(request, result.pageNo, result.pageSize);
+                const link = nextPageLink(request, result.pageNo, result.pageSize);
                 if (link) {
                     response.setHeader("Link", link);
                 }
@@ -106,22 +106,6 @@ class FlexServiceController implements IController {
             Utility.handleError(response, next, error, errorMessage);
         });
 
-    }
-
-    private nextPageLink(request: Request, pageNo: number, pageSize: number): string | undefined {
-        const rawUrl = request.originalUrl || request.url;
-        if (!rawUrl) {
-            return undefined;
-        }
-
-        const url = new URL(rawUrl, "http://localhost");
-        url.searchParams.set("page_no", String(pageNo + 1));
-        url.searchParams.set("page_size", String(pageSize));
-        const link = `<${url.pathname}${url.search}>; rel="next"`;
-        if (/[\r\n]/.test(link)) {
-            return undefined;
-        }
-        return link;
     }
 }
 

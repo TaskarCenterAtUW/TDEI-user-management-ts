@@ -369,6 +369,30 @@ describe("ProjectGroupController getProjectGroup pagination headers", () => {
         expect(response.send).toHaveBeenCalledWith(items);
     });
 
+    test("omits Link when the request URL cannot be parsed", async () => {
+        const items = [new ProjectGroupListResponse({ project_group_name: "Ada" })];
+        jest.spyOn(projectGroupService, "getProjectGroups").mockResolvedValueOnce({
+            items,
+            totalCount: 134,
+            pageNo: 2,
+            pageSize: 50,
+        });
+        const request = {
+            query: { page_no: "2", page_size: "50" },
+            originalUrl: "http://[",
+        } as unknown as Request;
+        const response = createResponse();
+        const next = createNext();
+
+        await projectGroupController.getProjectGroup(request, response, next);
+
+        expect(response.setHeader).toHaveBeenCalledWith("X-Total-Count", "134");
+        expect(response.setHeader).not.toHaveBeenCalledWith("Link", expect.anything());
+        expect(response.status).toHaveBeenCalledWith(200);
+        expect(response.send).toHaveBeenCalledWith(items);
+        expect(next).not.toHaveBeenCalled();
+    });
+
     test("does not write page headers when the list fails", async () => {
         jest.spyOn(projectGroupService, "getProjectGroups").mockRejectedValueOnce(new Error("db down"));
         const handleErrorSpy = jest.spyOn(Utility, "handleError").mockImplementation(() => undefined);
