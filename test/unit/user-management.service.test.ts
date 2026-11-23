@@ -1427,6 +1427,18 @@ describe("User Management Service Test", () => {
             expect(queryText).not.toContain("default_roles");
         });
 
+        test("When search text is a full name, Expect a prefix match on the combined name", async () => {
+            const querySpy = jest.spyOn(dbClient, "query").mockResolvedValueOnce(<QueryResult><unknown>{ rowCount: 0, rows: [] });
+
+            await userManagementServiceInstance.searchUsers(" Ada   Lovelace ", 1, 10);
+
+            expect(querySpy).toHaveBeenCalledWith(expect.objectContaining({
+                values: ["Ada Lovelace%", 10, 0]
+            }));
+            const queryText = (querySpy.mock.calls[0][0] as { text: string }).text;
+            expect(queryText).toContain("CONCAT(ue.first_name, ' ', ue.last_name) ILIKE $1");
+        });
+
         test("When role lists are missing, Expect empty arrays", async () => {
             const response = <QueryResult>{
                 rowCount: 1,

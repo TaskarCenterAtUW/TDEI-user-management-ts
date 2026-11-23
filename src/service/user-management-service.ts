@@ -652,7 +652,7 @@ export class UserManagementService implements IUserManagement {
 
         const values: any[] = [];
         let searchClause = "";
-        const normalizedSearch = searchText?.trim() ?? "";
+        const normalizedSearch = searchText?.trim().replace(/\s+/g, " ") ?? "";
         if (normalizedSearch.length > 0) {
             values.push(`${normalizedSearch}%`);
             searchClause = `AND (
@@ -660,6 +660,7 @@ export class UserManagementService implements IUserManagement {
                 OR ue.last_name ILIKE $1
                 OR ue.email ILIKE $1
                 OR ue.username ILIKE $1
+                OR CONCAT(ue.first_name, ' ', ue.last_name) ILIKE $1
             )`;
         }
         values.push(take, skip);
