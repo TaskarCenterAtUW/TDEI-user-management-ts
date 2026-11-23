@@ -504,7 +504,7 @@
                     "Service"
                 ],
                 "summary": "Gets the Services in the TDEI system ",
-                "description": "Gets the Services in the TDEI system .",
+                "description": "Gets one page of services. The body is a JSON array. X-Total-Count, X-Page-No, and X-Page-Size describe the full match set. A Link header with rel=\"next\" is present when another page exists.",
                 "operationId": "getService",
                 "parameters": [
                     {
@@ -568,7 +568,7 @@
                     {
                         "name": "page_no",
                         "in": "query",
-                        "description": "Page number to fetch",
+                        "description": "Page number to fetch. Defaults to 1. The applied value is returned in X-Page-No.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -578,7 +578,7 @@
                     {
                         "name": "page_size",
                         "in": "query",
-                        "description": "Total records to fetch.",
+                        "description": "Records to fetch on this page. Defaults to 10. A missing value or a value below 1 is treated as 10. A value above 50 is capped at 50. X-Page-Size returns the size that was applied.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -598,7 +598,34 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the list of Service.",
+                        "description": "Returns one page of services as a JSON array. Totals are in the response headers.",
+                        "headers": {
+                            "X-Total-Count": {
+                                "description": "Number of services that match the filters, across every page.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "X-Page-No": {
+                                "description": "Page number returned in this response.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "X-Page-Size": {
+                                "description": "Page size applied to this response. Defaults to 10 and is capped at 50.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "Link": {
+                                "description": "RFC 8288 link to the next page. Present only when more matching services exist.",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "</api/v1/service?page_no=3&page_size=50>; rel=\"next\""
+                                }
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {
@@ -1128,7 +1155,7 @@
                     "ProjectGroup"
                 ],
                 "summary": "Gets the project groups in the TDEI system ",
-                "description": "Gets the project groups in the TDEI system.",
+                "description": "Gets one page of project groups. The body is a JSON array. X-Total-Count, X-Page-No, and X-Page-Size describe the full match set. A Link header with rel=\"next\" is present when another page exists.",
                 "operationId": "getProjectGroup",
                 "parameters": [
                     {
@@ -1176,7 +1203,7 @@
                     {
                         "name": "page_no",
                         "in": "query",
-                        "description": "Page number to fetch",
+                        "description": "Page number to fetch. Defaults to 1. The applied value is returned in X-Page-No.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1186,7 +1213,7 @@
                     {
                         "name": "page_size",
                         "in": "query",
-                        "description": "Total records to fetch.",
+                        "description": "Records to fetch on this page. Defaults to 10. A missing value or a value below 1 is treated as 10. A value above 50 is capped at 50. X-Page-Size returns the size that was applied.",
                         "required": false,
                         "schema": {
                             "type": "string",
@@ -1206,7 +1233,34 @@
                 ],
                 "responses": {
                     "200": {
-                        "description": "Returns the list of project groups.",
+                        "description": "Returns one page of project groups as a JSON array. Totals are in the response headers.",
+                        "headers": {
+                            "X-Total-Count": {
+                                "description": "Number of project groups that match the filters, across every page.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "X-Page-No": {
+                                "description": "Page number returned in this response.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "X-Page-Size": {
+                                "description": "Page size applied to this response. Defaults to 10 and is capped at 50.",
+                                "schema": {
+                                    "type": "integer"
+                                }
+                            },
+                            "Link": {
+                                "description": "RFC 8288 link to the next page. Present only when more matching project groups exist.",
+                                "schema": {
+                                    "type": "string",
+                                    "example": "</api/v1/project-group?page_no=3&page_size=50>; rel=\"next\""
+                                }
+                            }
+                        },
                         "content": {
                             "application/json": {
                                 "schema": {

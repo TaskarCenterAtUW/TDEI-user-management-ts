@@ -1,5 +1,8 @@
 import projectGroupController from "../../../src/controller/project-group-controller";
+import projectGroupService from "../../../src/service/project-group-service";
 import referralCodeService from "../../../src/service/referral-code-service";
+import { ProjectGroupListResponse } from "../../../src/model/dto/poc-details-dto";
+import { ProjectGroupListPage } from "../../../src/service/interface/project-group-interface";
 import { ReferralCodeQueryParams } from "../../../src/model/params/referral-code-query-params";
 import { ReferralCodeDto } from "../../../src/model/dto/referral-code-dto";
 import * as httpResponses from "../../../src/model/http/http-responses";
@@ -293,5 +296,112 @@ describe("ProjectGroupController referral code endpoints", () => {
 
             expect(handleErrorSpy).toHaveBeenCalledWith(response, next, error, "Error deleting referral code.");
         });
+    });
+});
+
+describe("ProjectGroupController getProjectGroup pagination headers", () => {
+    const createResponse = (): Response => ({
+        status: jest.fn().mockReturnThis(),
+        send: jest.fn().mockReturnThis(),
+        setHeader: jest.fn().mockReturnThis(),
+    } as unknown as Response);
+
+    const createNext = (): NextFunction => jest.fn();
+
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    test("returns the page array and total headers without a next link on the last page", async () => {
+        const items = [new ProjectGroupListResponse({ project_group_name: "Ada" })];
+        const page: ProjectGroupListPage = {
+            items,
+            totalCount: 50,
+            pageNo: 1,
+            pageSize: 50,
+        };
+        const getSpy = jest.spyOn(projectGroupService, "getProjectGroups").mockResolvedValueOnce(page);
+        const request = {
+            query: { searchText: "Ada" },
+            originalUrl: "/api/v1/project-group?searchText=Ada",
+        } as unknown as Request;
+        const response = createResponse();
+
+        await projectGroupController.getProjectGroup(request, response, createNext());
+
+        expect(getSpy).toHaveBeenCalledWith(expect.objectContaining({
+            searchText: "Ada",
+            page_no: 1,
+            page_size: 10,
+        }));
+        expect(response.setHeader).toHaveBeenCalledWith("X-Total-Count", "50");
+        expect(response.setHeader).toHaveBeenCalledWith("X-Page-No", "1");
+        expect(response.setHeader).toHaveBeenCalledWith("X-Page-Size", "50");
+        expect(response.setHeader).not.toHaveBeenCalledWith("Link", expect.anything());
+        expect(response.status).toHaveBeenCalledWith(200);
+        expect(response.send).toHaveBeenCalledWith(items);
+    });
+
+    test("adds a relative next link when another page exists and keeps the other filters", async () => {
+        const items = [new ProjectGroupListResponse({ project_group_name: "Ada" })];
+        const page: ProjectGroupListPage = {
+            items,
+            totalCount: 134,
+            pageNo: 2,
+            pageSize: 50,
+        };
+        jest.spyOn(projectGroupService, "getProjectGroups").mockResolvedValueOnce(page);
+        const request = {
+            query: { searchText: "Ada", page_no: "2", page_size: "50", show_inactive: "true" },
+            originalUrl: "/api/v1/project-group?searchText=Ada&show_inactive=true&page_no=2&page_size=50",
+        } as unknown as Request;
+        const response = createResponse();
+
+        await projectGroupController.getProjectGroup(request, response, createNext());
+
+        expect(response.setHeader).toHaveBeenCalledWith("X-Total-Count", "134");
+        expect(response.setHeader).toHaveBeenCalledWith("X-Page-No", "2");
+        expect(response.setHeader).toHaveBeenCalledWith("X-Page-Size", "50");
+        expect(response.setHeader).toHaveBeenCalledWith(
+            "Link",
+            "</api/v1/project-group?searchText=Ada&show_inactive=true&page_no=3&page_size=50>; rel=\"next\""
+        );
+        expect(response.send).toHaveBeenCalledWith(items);
+    });
+
+    test("omits Link when the request URL cannot be parsed", async () => {
+        const items = [new ProjectGroupListResponse({ project_group_name: "Ada" })];
+        jest.spyOn(projectGroupService, "getProjectGroups").mockResolvedValueOnce({
+            items,
+            totalCount: 134,
+            pageNo: 2,
+            pageSize: 50,
+        });
+        const request = {
+            query: { page_no: "2", page_size: "50" },
+            originalUrl: "http://[",
+        } as unknown as Request;
+        const response = createResponse();
+        const next = createNext();
+
+        await projectGroupController.getProjectGroup(request, response, next);
+
+        expect(response.setHeader).toHaveBeenCalledWith("X-Total-Count", "134");
+        expect(response.setHeader).not.toHaveBeenCalledWith("Link", expect.anything());
+        expect(response.status).toHaveBeenCalledWith(200);
+        expect(response.send).toHaveBeenCalledWith(items);
+        expect(next).not.toHaveBeenCalled();
+    });
+
+    test("does not write page headers when the list fails", async () => {
+        jest.spyOn(projectGroupService, "getProjectGroups").mockRejectedValueOnce(new Error("db down"));
+        const handleErrorSpy = jest.spyOn(Utility, "handleError").mockImplementation(() => undefined);
+        const response = createResponse();
+
+        await projectGroupController.getProjectGroup({ query: {} } as unknown as Request, response, createNext());
+
+        expect(handleErrorSpy).toHaveBeenCalled();
+        expect(response.setHeader).not.toHaveBeenCalled();
+        expect(response.send).not.toHaveBeenCalled();
     });
 });

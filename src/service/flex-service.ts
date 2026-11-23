@@ -2,7 +2,7 @@ import dbClient from "../database/data-source";
 import UniqueKeyDbException, { ForeignKeyDbException } from "../exceptions/db/database-exceptions";
 import { ServiceDto } from "../model/dto/service-dto";
 import { DuplicateException, ForeignKeyException } from "../exceptions/http/http-exceptions";
-import { IFlexService } from "./interface/flex-service-interface";
+import { IFlexService, ServiceListPage } from "./interface/flex-service-interface";
 import { QueryConfig } from "pg";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
@@ -104,7 +104,7 @@ class FlexService implements IFlexService {
         throw new HttpException(404, "Service not found");
     }
 
-    async getService(params: ServiceQueryParams): Promise<ServiceDto[]> {
+    async getService(params: ServiceQueryParams): Promise<ServiceListPage> {
         if (params.tdei_service_id) {
             //check if the service exists
             await this.getServiceById(params.tdei_service_id);
@@ -114,43 +114,51 @@ class FlexService implements IFlexService {
             await projectgroupService.getProjectGroupById(params.tdei_project_group_id);
         }
 
-        let queryObject = params.getQueryObject();
+        params.sanitizePagination();
+        const countQueryObject = params.getCountQueryObject();
+        const listQueryObject = params.getQueryObject();
 
-        let queryObj = <QueryConfig>{
-            text: queryObject.getQuery(),
-            values: queryObject.getValues()
-        }
+        const [countResult, listResult] = await Promise.all([
+            dbClient.query(<QueryConfig>{
+                text: countQueryObject.getQuery(),
+                values: countQueryObject.getValues(),
+            }),
+            dbClient.query(<QueryConfig>{
+                text: listQueryObject.getQuery(),
+                values: listQueryObject.getValues(),
+            }),
+        ]);
 
+        const totalCount = Number(countResult.rows[0]?.total ?? 0);
         let list: ServiceDto[] = [];
-        return await dbClient.query(queryObj)
-            .then(res => {
-                res.rows.forEach(x => {
-                    let service = ServiceDto.from(x);
-                    service.service_name = x.name;
-                    service.tdei_service_id = x.service_id;
-                    service.service_type = x.service_type;
-                    service.tdei_project_group_id = x.owner_project_group;
-                    if (service.polygon) {
-                        var polygon = JSON.parse(x.polygon) as Geometry;
-                        service.polygon = {
-                            type: "FeatureCollection",
-                            features: [
-                                {
-                                    type: "Feature",
-                                    geometry: polygon,
-                                    properties: {}
-                                } as Feature
-                            ]
-                        }
-                    }
-                    list.push(service);
-                });
-                return list;
-            })
-            .catch(e => {
-                throw e;
-            });
+        listResult.rows.forEach(x => {
+            let service = ServiceDto.from(x);
+            service.service_name = x.name;
+            service.tdei_service_id = x.service_id;
+            service.service_type = x.service_type;
+            service.tdei_project_group_id = x.owner_project_group;
+            if (service.polygon) {
+                var polygon = JSON.parse(x.polygon) as Geometry;
+                service.polygon = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: polygon,
+                            properties: {}
+                        } as Feature
+                    ]
+                }
+            }
+            list.push(service);
+        });
 
+        return {
+            items: list,
+            totalCount: Number.isFinite(totalCount) ? totalCount : 0,
+            pageNo: params.page_no,
+            pageSize: params.page_size,
+        };
     }
 }
 

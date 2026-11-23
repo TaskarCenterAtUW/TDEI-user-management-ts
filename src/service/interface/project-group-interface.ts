@@ -5,12 +5,19 @@ import { ProjectGroupQueryParams } from "../../model/params/project-group-get-qu
 import { ProjectGroupUserQueryParams } from "../../model/params/project-group-user-query-params";
 import { DatasetViewerDto } from "../../model/dto/dataset-viewer-dto";
 
+export interface ProjectGroupListPage {
+    items: ProjectGroupListResponse[];
+    totalCount: number;
+    pageNo: number;
+    pageSize: number;
+}
+
 export interface IProjectGroupService {
     updateDatasetViewerConfig(projectGroupId: string, config: DatasetViewerDto): Promise<boolean>;
     getProjectGroupUsers(params: ProjectGroupUserQueryParams): Promise<ProjectGroupUserDto[]>;
     createProjectGroup(projectGroup: ProjectGroupDto): Promise<String>;
     updateProjectGroup(projectGroup: ProjectGroupDto): Promise<boolean>;
-    getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListResponse[]>;
+    getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListPage>;
     setProjectGroupStatus(projectGroupId: string, status: boolean): Promise<boolean>;
     getProjectGroupById(project_group_id: string): Promise<ProjectGroupDto>;
 }

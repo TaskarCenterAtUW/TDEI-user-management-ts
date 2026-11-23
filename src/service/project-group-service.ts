@@ -3,7 +3,7 @@ import UniqueKeyDbException from "../exceptions/db/database-exceptions";
 import { ProjectGroupDto } from "../model/dto/project-group-dto";
 import { DuplicateException } from "../exceptions/http/http-exceptions";
 import { QueryConfig } from "pg";
-import { IProjectGroupService } from "./interface/project-group-interface";
+import { IProjectGroupService, ProjectGroupListPage } from "./interface/project-group-interface";
 import { ProjectGroupQueryParams } from "../model/params/project-group-get-query-params";
 import { ProjectGroupUserQueryParams } from "../model/params/project-group-user-query-params";
 import { ProjectGroupUserDto } from "../model/dto/project-group-user-dto";
@@ -147,52 +147,63 @@ class ProjectGroupService implements IProjectGroupService {
         throw new HttpException(404, "Project Group not found");
     }
 
-    async getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListResponse[]> {
+    async getProjectGroups(params: ProjectGroupQueryParams): Promise<ProjectGroupListPage> {
         if (params.tdei_project_group_id) {
             //Check if project group exists
             await this.getProjectGroupById(params.tdei_project_group_id);
         }
 
-        let queryObject = params.getQueryObject();
-        let queryObj = <QueryConfig>{
-            text: queryObject.getQuery(),
-            values: queryObject.getValues()
-        }
-        let list: ProjectGroupListResponse[] = [];
-        return await dbClient.query(queryObj)
-            .then(res => {
-                res.rows.forEach(x => {
-                    let projectgroup = ProjectGroupListResponse.from(x);
-                    projectgroup.tdei_project_group_id = x.project_group_id;
-                    projectgroup.project_group_name = x.name;
-                    projectgroup.data_viewer_config = DatasetViewerDto.from(x.data_viewer_config);
-                    if (projectgroup.polygon) {
-                        var polygon = JSON.parse(x.polygon) as Geometry;
-                        projectgroup.polygon = {
-                            type: "FeatureCollection",
-                            features: [
-                                {
-                                    type: "Feature",
-                                    geometry: polygon,
-                                    properties: {}
-                                } as Feature
-                            ]
-                        }
-                    }
-                    projectgroup.poc = [];
-                    if (x.userdetails.length > 0) {
-                        x.userdetails.forEach((u: any) => {
-                            projectgroup.poc.push(PocDetails.from(u));
-                        });
-                    }
+        params.sanitizePagination();
+        const countQueryObject = params.getCountQueryObject();
+        const listQueryObject = params.getQueryObject();
 
-                    list.push(projectgroup);
+        const [countResult, listResult] = await Promise.all([
+            dbClient.query(<QueryConfig>{
+                text: countQueryObject.getQuery(),
+                values: countQueryObject.getValues(),
+            }),
+            dbClient.query(<QueryConfig>{
+                text: listQueryObject.getQuery(),
+                values: listQueryObject.getValues(),
+            }),
+        ]);
+
+        const totalCount = Number(countResult.rows[0]?.total ?? 0);
+        let list: ProjectGroupListResponse[] = [];
+        listResult.rows.forEach(x => {
+            let projectgroup = ProjectGroupListResponse.from(x);
+            projectgroup.tdei_project_group_id = x.project_group_id;
+            projectgroup.project_group_name = x.name;
+            projectgroup.data_viewer_config = DatasetViewerDto.from(x.data_viewer_config);
+            if (projectgroup.polygon) {
+                var polygon = JSON.parse(x.polygon) as Geometry;
+                projectgroup.polygon = {
+                    type: "FeatureCollection",
+                    features: [
+                        {
+                            type: "Feature",
+                            geometry: polygon,
+                            properties: {}
+                        } as Feature
+                    ]
+                }
+            }
+            projectgroup.poc = [];
+            if (x.userdetails.length > 0) {
+                x.userdetails.forEach((u: any) => {
+                    projectgroup.poc.push(PocDetails.from(u));
                 });
-                return list;
-            })
-            .catch(e => {
-                throw e;
-            });
+            }
+
+            list.push(projectgroup);
+        });
+
+        return {
+            items: list,
+            totalCount: Number.isFinite(totalCount) ? totalCount : 0,
+            pageNo: params.page_no,
+            pageSize: params.page_size,
+        };
     }
 
     async getProjectGroupUsers(params: ProjectGroupUserQueryParams): Promise<ProjectGroupUserDto[]> {

@@ -9,9 +9,9 @@ import flexService from "../service/flex-service";
 import { ServiceQueryParams } from "../model/params/service-get-query-params";
 import { ServiceUpdateDto } from "../model/dto/service-update-dto";
 import { Utility } from "../utility/utility";
+import { nextPageLink } from "../utility/next-page-link";
 import { ValidationError, validate } from "class-validator";
 import queryValidationMiddleware from "../middleware/query-params-validation-middleware";
-import { listRequestValidation } from "../middleware/list-request-validation-middleware";
 
 class FlexServiceController implements IController {
     public path = '';
@@ -24,7 +24,7 @@ class FlexServiceController implements IController {
     public intializeRoutes() {
         this.router.post(`${this.path}/api/v1/service`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceDto), this.createService);
         this.router.put(`${this.path}/api/v1/service/:projectGroupId`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), validationMiddleware(ServiceUpdateDto), this.updateService);
-        this.router.get(`${this.path}/api/v1/service`, listRequestValidation, authorizationMiddleware([], true, true), queryValidationMiddleware(ServiceQueryParams), this.getService);
+        this.router.get(`${this.path}/api/v1/service`, authorizationMiddleware([], true, true), queryValidationMiddleware(ServiceQueryParams), this.getService);
         this.router.put(`${this.path}/api/v1/service/:projectGroupId/:serviceId/active/:status`, authorizationMiddleware([Role.POC, Role.TDEI_ADMIN], true), this.deleteService);
     }
 
@@ -82,13 +82,25 @@ class FlexServiceController implements IController {
 
     public getService = async (request: Request, response: express.Response, next: NextFunction) => {
 
-        var params = ServiceQueryParams.from(request.query);
+        const params = ServiceQueryParams.from(request.query);
 
-        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1");
-        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10");
+        params.page_no = Number.parseInt(request.query.page_no?.toString() ?? "1", 10);
+        params.page_size = Number.parseInt(request.query.page_size?.toString() ?? "10", 10);
 
         return flexService.getService(params).then((result) => {
-            Ok(response, result);
+            response.setHeader("X-Total-Count", String(result.totalCount));
+            response.setHeader("X-Page-No", String(result.pageNo));
+            response.setHeader("X-Page-Size", String(result.pageSize));
+
+            const hasNextPage = result.pageSize > 0 && result.pageNo * result.pageSize < result.totalCount;
+            if (hasNextPage) {
+                const link = nextPageLink(request, result.pageNo, result.pageSize);
+                if (link) {
+                    response.setHeader("Link", link);
+                }
+            }
+
+            Ok(response, result.items);
         }).catch((error: any) => {
             let errorMessage = "Error fetching the gtfs flex service.";
             Utility.handleError(response, next, error, errorMessage);
