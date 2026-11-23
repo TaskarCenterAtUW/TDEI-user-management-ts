@@ -1405,7 +1405,7 @@
                     {
                         "name": "searchText",
                         "in": "query",
-                        "description": "Search by first_name, last_name or username.",
+                        "description": "Prefix search against first name, last name, username, or full name (first name followed by last name).",
                         "required": false,
                         "schema": {
                             "type": "string"
@@ -1607,13 +1607,13 @@
                     "User Management"
                 ],
                 "summary": "Searches TDEI users",
-                "description": "Admin-only search of TDEI users. Supports prefix search on first name, last name, and username. Returns username and application roles. Does not return email, phone, or API key.",
+                "description": "Admin-only search of TDEI users. Supports prefix search on first name, last name, username, and full name (first name followed by last name). Returns username and application roles. Does not return email, phone, or API key.",
                 "operationId": "searchUsers",
                 "parameters": [
                     {
                         "name": "searchText",
                         "in": "query",
-                        "description": "Prefix search against first name, last name, or username.",
+                        "description": "Prefix search against first name, last name, username, or full name (first name followed by last name).",
                         "required": false,
                         "schema": {
                             "type": "string"

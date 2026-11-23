@@ -38,9 +38,10 @@ export class ProjectGroupUserQueryParams extends AbstractDomainEntity {
         `.replace(/\n/g, ""));
         queryObject.buildPagination(this.page_no, this.page_size);
         queryObject.buildOrder("ue.first_name", SqlORder.ASC);
-        //Add conditions
-        if (this.searchText != undefined && this.searchText.length != 0) {
-            queryObject.condition(` (ue.first_name ILIKE $${queryObject.paramCouter} OR ue.last_name ILIKE $${queryObject.paramCouter} OR ue.username ILIKE $${queryObject.paramCouter++})`, this.searchText + '%');
+        // Prefix match on each name part, and on "first last" so a full name with a space matches.
+        const normalizedSearch = this.searchText?.trim().replace(/\s+/g, " ") ?? "";
+        if (normalizedSearch.length != 0) {
+            queryObject.condition(` (ue.first_name ILIKE $${queryObject.paramCouter} OR ue.last_name ILIKE $${queryObject.paramCouter} OR ue.username ILIKE $${queryObject.paramCouter} OR CONCAT(ue.first_name, ' ', ue.last_name) ILIKE $${queryObject.paramCouter++})`, normalizedSearch + '%');
         }
         if (this.tdei_project_group_id != undefined && this.tdei_project_group_id.length != 0) {
             queryObject.condition(` ur.project_group_id = $${queryObject.paramCouter++} `, this.tdei_project_group_id);
